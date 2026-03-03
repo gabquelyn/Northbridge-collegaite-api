@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/", express.static(path.join(__dirname, "public")));
 app.use(cookierParser());
 
-app.use("/auth", authRouter);
+app.use("/api/auth", authRouter);
 
 app.get(
   "/email/:template",

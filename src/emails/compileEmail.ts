@@ -19,7 +19,6 @@ export const compileEmail = (
 
     const mjmlTemplate = fs.readFileSync(filePath, "utf8");
 
-    console.log(mjmlTemplate);
     // Compile MJML to HTML
     const { html } = mjml2html(mjmlTemplate, { filePath });
 

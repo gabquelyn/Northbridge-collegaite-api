@@ -5,7 +5,7 @@ import User from "../model/user";
 import sendMail from "../utils/sendMail";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs"
+import bcrypt from "bcryptjs";
 
 export const loginController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -15,6 +15,8 @@ export const loginController = expressAsyncHandler(
     if (!foundUser)
       return res.status(400).json({ message: "User does not exist" });
 
+    if (!foundUser?.password)
+      return res.status(400).json({ message: "Continue with google to login for this email" });
     const passwordMatch = await bcrypt.compare(password, foundUser.password);
     if (!passwordMatch)
       return res.status(401).json({ message: "Unauthorized" });
@@ -48,14 +50,14 @@ export const loginController = expressAsyncHandler(
         },
       },
       String(process.env.ACCESS_TOKEN_SECRET),
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     // create the refresh token
     const refreshToken = jwt.sign(
       { email: foundUser.email },
       String(process.env.REFRESH_TOKEN_SECRET),
-      { expiresIn: "1d" }
+      { expiresIn: "1d" },
     );
 
     res.cookie("jwt", refreshToken, {
@@ -66,7 +68,7 @@ export const loginController = expressAsyncHandler(
     });
 
     return res.json({ accessToken });
-  }
+  },
 );
 
 export const registerController = expressAsyncHandler(
@@ -98,7 +100,7 @@ export const registerController = expressAsyncHandler(
     res
       .status(201)
       .json({ message: "Email sent to your account please verify" });
-  }
+  },
 );
 
 export const logoutController = expressAsyncHandler(
@@ -111,7 +113,7 @@ export const logoutController = expressAsyncHandler(
       sameSite: "none",
     });
     res.json({ message: "Cookie cleared" });
-  }
+  },
 );
 
 export const verifyController = expressAsyncHandler(
@@ -129,7 +131,7 @@ export const verifyController = expressAsyncHandler(
     await user.save();
     await existingToken.deleteOne();
     res.status(200).send({ message: "Email verified successfully!" });
-  }
+  },
 );
 
 export const forgotPasswordController = expressAsyncHandler(
@@ -152,7 +154,7 @@ export const forgotPasswordController = expressAsyncHandler(
     return res
       .status(200)
       .json({ message: "Recovery mail sent successfully!" });
-  }
+  },
 );
 
 export const restPasswordController = expressAsyncHandler(
@@ -170,5 +172,5 @@ export const restPasswordController = expressAsyncHandler(
     }
     await existingToken.deleteOne();
     return res.status(200).json({ message: "password updated successfully!" });
-  }
+  },
 );
