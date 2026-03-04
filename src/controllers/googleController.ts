@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import UserModel from "../model/user";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 export const registerWithGoogle = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { token } = req.body;
@@ -14,8 +15,12 @@ export const registerWithGoogle = expressAsyncHandler(
     });
 
     const payload = ticket.getPayload();
+    if (!payload?.email_verified) {
+      throw new Error("Google email not verified");
+    }
+
     if (payload) {
-      const { email, name, picture, email_verified, locale } = payload;
+      const { email, name, picture, email_verified } = payload;
       const existingUser = await UserModel.findOne({ email }).lean().exec();
       if (existingUser)
         return res.status(400).json({ message: "User already exists" });
@@ -27,7 +32,7 @@ export const registerWithGoogle = expressAsyncHandler(
       });
       return res.status(201).json({ message: "Account created successfully" });
     } else {
-      return res.status(501).json({ message: "Incomplete payload" });
+      throw new Error("Google ticket payload missing");
     }
   },
 );
