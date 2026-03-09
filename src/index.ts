@@ -9,6 +9,7 @@ import path from "path";
 import authRouter from "./routes/authRoutes";
 import expressAsyncHandler from "express-async-handler";
 import { compileEmail } from "./emails/compileEmail";
+import addmissionRoutes from "./routes/applicationRoutes";
 
 dotenv.config();
 connectDB();
@@ -22,6 +23,7 @@ app.use("/", express.static(path.join(__dirname, "public")));
 app.use(cookierParser());
 
 app.use("/api/auth", authRouter);
+app.use("/api/addmission", addmissionRoutes);
 
 app.get(
   "/email/:template",
@@ -31,14 +33,14 @@ app.get(
       name: "Gabriel Arebamen",
       companyName: "Northbridge Collegiate",
       dashboardUrl: "http://localhost:3000/dashboard",
-      date: new Date().getFullYear()
+      date: new Date().getFullYear(),
     };
 
     try {
       const { html } = compileEmail(template, previewData);
       res.send(html);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       res.status(500).send("Template not found or failed to compile.");
     }
   }),

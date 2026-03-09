@@ -13,15 +13,20 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    role: {
+      type: String,
+      enum: ["guardian", "admin"],
+      default: "guardian",
+    },
     provider: {
       type: String,
       enum: ["local", "google"],
       required: true,
     },
+
+    profile: {}
   },
-  {
-    timestamps: true,
-  },
+
 );
 
 export default mongoose.model("User", userSchema);

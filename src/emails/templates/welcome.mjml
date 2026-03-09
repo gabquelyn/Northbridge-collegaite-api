@@ -1,37 +1,56 @@
 <mjml>
-    <mj-body background-color="#f4f4f4">
-        <mj-include path="../partials/header.mjml" />
+  <mj-body background-color="#f4f4f4">
+    <mj-include path="../partials/header.mjml" />
 
-        <mj-section background-color="#ffffff" padding="30px 20px">
-            <mj-column>
-                <mj-text font-size="18px"> Hello {{ name }}, </mj-text>
+    <mj-section background-color="#ffffff" padding="30px 20px">
+      <mj-column>
+        <mj-text font-size="18px"> Hello {{ name }}, </mj-text>
 
-                <!-- Welcome Message -->
-                <mj-text font-size="16px" color="#555555" line-height="1.5" padding="30px 20px">
-                    Welcome to {{ companyName }} 🎉<br />
-                    Thank you for signing up! To get started, please verify your email by
-                    clicking the button below.
-                </mj-text>
+        <!-- Welcome Message -->
+        <mj-text font-size="16px" color="#555555" padding="30px 20px">
+          Welcome to {{ companyName }} 🎉<br />
+          Thank you for signing up! To get started, please verify your email by
+          clicking the button below.
+        </mj-text>
 
-                <!-- Verify Email Button -->
-                <mj-button background-color="#1e88e5" color="#ffffff" font-size="16px" font-weight="bold" border-radius="5px" href="{{verifyUrl}}" padding="15px 0" align="center">
-                    Verify Email
-                </mj-button>
+        <!-- Verify Email Button -->
+        <mj-button
+          background-color="#1e88e5"
+          color="#ffffff"
+          font-size="16px"
+          font-weight="bold"
+          border-radius="5px"
+          href="{{verifyUrl}}"
+          padding="15px 0"
+          align="center"
+        >
+          Verify Email
+        </mj-button>
 
-                <!-- Disclaimer -->
-                <mj-text font-size="12px" color="#999999" line-height="1.5" padding="15px 0 0 0" align="center">
-                    If you did not sign up for a {{ companyName }} account, you can safely
-                    ignore this email.
-                </mj-text>
-            </mj-column>
-        </mj-section>
-        <mj-section background-color="#ffffff" padding="30px 20px">
-            <mj-column>
-                <!-- Banner Image -->
-                <mj-image src="https://res.cloudinary.com/dlr0ksrxd/image/upload/v1772547342/flags_gd3gxr.png" alt="Welcome to {{companyName}}" padding="0" fluid-on-mobile="true" />
-            </mj-column>
-        </mj-section>
+        <!-- Disclaimer -->
+        <mj-text
+          font-size="12px"
+          color="#999999"
+          padding="15px 0 0 0"
+          align="center"
+        >
+          If you did not sign up for a {{ companyName }} account, you can safely
+          ignore this email.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#ffffff" padding="30px 20px">
+      <mj-column>
+        <!-- Banner Image -->
+        <mj-image
+          src="https://res.cloudinary.com/dlr0ksrxd/image/upload/v1772547342/flags_gd3gxr.png"
+          alt="Welcome to {{companyName}}"
+          padding="0"
+          fluid-on-mobile="true"
+        />
+      </mj-column>
+    </mj-section>
 
-        <mj-include path="../partials/footer.mjml" />
-    </mj-body>
+    <mj-include path="../partials/footer.mjml" />
+  </mj-body>
 </mjml>

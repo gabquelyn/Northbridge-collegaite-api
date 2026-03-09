@@ -1,49 +1,67 @@
 <mjml>
-    <mj-body background-color="#f4f4f4">
-        <mj-include path="../partials/header.mjml" />
+  <mj-body background-color="#f4f4f4">
+    <mj-include path="../partials/header.mjml" />
 
-        <mj-section background-color="#ffffff" padding="30px 20px">
-            <mj-column>
+    <mj-section background-color="#ffffff" padding="30px 20px">
+      <mj-column>
+        <!-- Greeting -->
+        <mj-text font-size="18px" color="#151e2f"> Hello {{ name }}, </mj-text>
 
-                <!-- Greeting -->
-                <mj-text font-size="18px" color="#151e2f">
-                    Hello {{ name }},
-                </mj-text>
+        <!-- Intro -->
+        <mj-text font-size="16px" color="#555555" padding="30px 20px">
+          You are about to make a payment for the program below:
+        </mj-text>
 
-                <!-- Intro -->
-                <mj-text font-size="16px" color="#555555" line-height="1.6" padding="30px 20px">
-                    You are about to make a payment for the program below:
-                </mj-text>
+        <!-- Program Details Box (Using mj-text with background) -->
+        <mj-text
+          background-color="#f8f9fb"
+          padding="15px"
+          font-size="14px"
+          color="#555555"
+        >
+          <strong>{{ programName }}</strong
+          ><br /><br />
+          Academic Year: {{ academicYear }} <br />
+          Category: {{ category }} <br />
+          Level: {{ level }} <br />
+          Student Grade: {{ grade }} <br /><br />
+          <strong>Amount: {{ currency }}{{ amount }}</strong>
+        </mj-text>
 
-                <!-- Program Details Box (Using mj-text with background) -->
-                <mj-text background-color="#f8f9fb" padding="15px" font-size="14px" line-height="1.6" color="#555555">
-                    <strong>{{ programName }}</strong><br /><br />
-                    Academic Year: {{ academicYear }} <br />
-                    Category: {{ category }} <br />
-                    Level: {{ level }} <br />
-                    Student Grade: {{ grade }} <br /><br />
-                    <strong>Amount: {{ currency }}{{ amount }}</strong>
-                </mj-text>
+        <!-- Payment Button -->
+        <mj-button
+          background-color="#1e88e5"
+          color="#ffffff"
+          font-size="16px"
+          font-weight="bold"
+          border-radius="5px"
+          href="{{ paymentUrl }}"
+          padding="25px 0 15px 0"
+          align="center"
+        >
+          Proceed to Payment
+        </mj-button>
 
-                <!-- Payment Button -->
-                <mj-button background-color="#1e88e5" color="#ffffff" font-size="16px" font-weight="bold" border-radius="5px" href="{{ paymentUrl }}" padding="25px 0 15px 0" align="center">
-                    Proceed to Payment
-                </mj-button>
+        <!-- Note -->
+        <mj-text font-size="12px" color="#999999" align="center">
+          Please ensure all program details are correct before completing your
+          payment.
+        </mj-text>
+      </mj-column>
+    </mj-section>
 
-                <!-- Note -->
-                <mj-text font-size="12px" color="#999999" line-height="1.5" align="center">
-                    Please ensure all program details are correct before completing your payment.
-                </mj-text>
+    <mj-section background-color="#ffffff" padding="30px 20px">
+      <mj-column>
+        <!-- Banner Image -->
+        <mj-image
+          src="https://res.cloudinary.com/dlr0ksrxd/image/upload/v1772550149/graduads_ff8hgi.jpg"
+          alt="Welcome to {{companyName}}"
+          padding="0"
+          fluid-on-mobile="true"
+        />
+      </mj-column>
+    </mj-section>
 
-            </mj-column>
-        </mj-section>
-
-        <mj-section background-color="#ffffff" padding="30px 20px">
-            <mj-column>
-                <!-- Banner Image -->
-                <mj-image src="https://res.cloudinary.com/dlr0ksrxd/image/upload/v1772550149/graduads_ff8hgi.jpg" alt="Welcome to {{companyName}}" padding="0" fluid-on-mobile="true" />
-            </mj-column>
-        </mj-section>
-        <mj-include path="../partials/footer.mjml" />
-    </mj-body>
+    <mj-include path="../partials/footer.mjml" />
+  </mj-body>
 </mjml>
