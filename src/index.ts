@@ -8,8 +8,11 @@ import mongoose from "mongoose";
 import path from "path";
 import authRouter from "./routes/authRoutes";
 import expressAsyncHandler from "express-async-handler";
+import admissionRoutes from "./routes/admissiomRoute";
+import verifyPayment from "./utils/verifyPayment";
+import paystackWebhookHandler from "./controllers/paystackWebhook";
+import { getMoodleUserByEmail } from "./utils/moodle";
 import { compileEmail } from "./emails/compileEmail";
-import addmissionRoutes from "./routes/applicationRoutes";
 
 dotenv.config();
 connectDB();
@@ -22,27 +25,52 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/", express.static(path.join(__dirname, "public")));
 app.use(cookierParser());
 
-app.use("/api/auth", authRouter);
-app.use("/api/addmission", addmissionRoutes);
+app.use("/auth", authRouter);
+app.use("/addmission", admissionRoutes);
+app.get("/webhook", paystackWebhookHandler);
 
 app.get(
-  "/email/:template",
+  // "/email/:template",
+  "/test",
   expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {
-    const { template } = req.params;
-    const previewData = {
-      name: "Gabriel Arebamen",
-      companyName: "Northbridge Collegiate",
-      dashboardUrl: "http://localhost:3000/dashboard",
-      date: new Date().getFullYear(),
-    };
-
+    // * email template test
     try {
-      const { html } = compileEmail(template, previewData);
+      const { html } = compileEmail("payment", {
+        date: new Date().toDateString(),
+        studentName: `John Doe`,
+        studentId: "__",
+        program: ["CAAP", "GRADE 11"].join(", "),
+        academicYear: new Date().getFullYear(),
+        paymentUrl: "",
+      });
       res.send(html);
     } catch (err) {
       console.log(err);
       res.status(500).send("Template not found or failed to compile.");
     }
+
+    // * initialize payment test
+    // const response = await initializePayment({
+    //   amount: 500 * 100,
+    //   email: "gabquelyn@gmail.com",
+    //   metadata: {
+    //     admissionId: "5",
+    //     custom_fields: [{ detail: "some detail", name: "BG", amount: 4 }].map(
+    //       (p) => ({
+    //         display_name: p.detail,
+    //         variable_name: p.name,
+    //         value: p.amount,
+    //       }),
+    //     ),
+    //   },
+    // });
+
+    // * moodle course
+    // const moodleCourses = await getMoodleCourses();
+
+    // * verify payment call
+    // const response = await getMoodleUserByEmail("kyx3jdwov1")
+    // return res.status(200).json({ response });
   }),
 );
 

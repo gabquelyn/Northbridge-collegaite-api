@@ -1,8 +1,12 @@
 import { Router } from "express";
 import VerifyJWT from "../middlewares/VerifyJwt";
-import { requestAdmission } from "../controllers/admissionControllers";
+import {
+  approveAdmissionRequest,
+  requestAdmission,
+} from "../controllers/admissionControllers";
 import multer, { memoryStorage } from "multer";
 import { body } from "express-validator";
+import OnlyAdmin from "../middlewares/onlyAdmin";
 
 const storage = memoryStorage();
 const allowedMimeTypes = [
@@ -44,7 +48,7 @@ admissionRouter.post(
   [
     body("firstName").notEmpty().escape(),
     body("lastName").notEmpty().escape(),
-    body("phoneNumber").optional().isMobilePhone("any"),
+    body("phoneNumber").isMobilePhone("any"),
     body("email").isEmail(),
     body("dob").isDate(),
     body("gender").custom((value) => ["M", "F"].includes(value)),
@@ -63,6 +67,14 @@ admissionRouter.post(
     body("country").notEmpty(),
     body("country").notEmpty(),
     body("mode").custom((value) => ["on-site", "off-site"].includes(value)),
+    body("programs")
+      .optional()
+      .custom((value) => {
+        const programs: APPLICATION_PROGRAMS[] = JSON.parse(value);
+        for (const program of programs) {
+          return ["CAAP", "GRADE11", "GRADE12", "AY12"].includes(program);
+        }
+      }),
   ],
   upload.fields([
     { name: "transcripts", maxCount: 1 },
@@ -71,5 +83,7 @@ admissionRouter.post(
   ]),
   requestAdmission,
 );
+
+admissionRouter.post("/:id", VerifyJWT, OnlyAdmin, approveAdmissionRequest);
 
 export default admissionRouter;

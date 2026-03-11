@@ -1,6 +1,6 @@
 import { Response, Request, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { CustomRequest } from "../../types";
+import { CustomRequest } from "../types/request";
 export default async function VerifyJWT(
   req: Request,
   res: Response,

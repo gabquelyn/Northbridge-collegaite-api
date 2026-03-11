@@ -4,31 +4,76 @@
 
     <mj-section background-color="#ffffff" padding="30px 20px">
       <mj-column>
-        <!-- Greeting -->
-        <mj-text font-size="18px" color="#151e2f"> Hello {{ name }}, </mj-text>
-
-        <!-- Intro -->
-        <mj-text font-size="16px" color="#555555" padding="30px 20px">
-          You are about to make a payment for the program below:
+        <!-- Title -->
+        <mj-text
+          font-size="22px"
+          font-weight="bold"
+          color="#151e2f"
+          align="center"
+        >
+          Welcome & Admission Letter
         </mj-text>
 
-        <!-- Program Details Box (Using mj-text with background) -->
+        <!-- Date -->
+        <mj-text font-size="14px" color="#555555">
+          <strong>Date:</strong> {{ date }}
+        </mj-text>
+
+        <!-- Student Info -->
+        <!-- <mj-text font-size="14px" color="#555555">
+          <strong>Student Name:</strong> {{ studentName }} <br />
+          <strong>Student ID:</strong> {{ studentId }}
+        </mj-text> -->
+
+        <!-- Greeting -->
+        <mj-text font-size="16px" color="#555555" padding-top="10px">
+          Dear {{ studentName }} and Family,
+        </mj-text>
+
+        <!-- Letter Content -->
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          On behalf of the entire
+          <strong>Northbridge Collegiate</strong> community, it is my pleasure
+          to formally welcome you to Northbridge Collegiate.
+        </mj-text>
+
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          Following a review of your admissions documentation, we are pleased to
+          confirm your admission to Northbridge Collegiate for the
+          <strong>{{ academicYear }}</strong> academic session.
+        </mj-text>
+
+        <!-- Admission Details Box -->
         <mj-text
           background-color="#f8f9fb"
-          padding="15px"
-          font-size="14px"
-          color="#555555"
+          padding="18px"
+          font-size="15px"
+          color="#333333"
         >
-          <strong>{{ programName }}</strong
-          ><br /><br />
-          Academic Year: {{ academicYear }} <br />
-          Category: {{ category }} <br />
-          Level: {{ level }} <br />
-          Student Grade: {{ grade }} <br /><br />
-          <strong>Amount: {{ currency }}{{ amount }}</strong>
+          <strong>Program:</strong> {{ program }} <br /><br />
+          <strong>Campus:</strong> Northbridge Collegiate - Lagos <br /><br />
         </mj-text>
 
-        <!-- Payment Button -->
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          Your admission reflects our confidence in your ability to succeed
+          within the Northbridge academic community. We look forward to
+          supporting you as you prepare for the next stage of your educational
+          journey.
+        </mj-text>
+
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          Please note that final enrollment is confirmed upon completion of the
+          following:
+        </mj-text>
+
+        <!-- Requirements -->
+        <mj-text font-size="15px" color="#555555" line-height="27px">
+          • Payment of applicable tuition and enrollment fees <br />
+          • Completion of any remaining admissions documentation required by the
+          Registrar
+        </mj-text>
+
+        <!-- Payment CTA -->
         <mj-button
           background-color="#1e88e5"
           color="#ffffff"
@@ -36,29 +81,79 @@
           font-weight="bold"
           border-radius="5px"
           href="{{ paymentUrl }}"
-          padding="25px 0 15px 0"
+          padding="25px 0"
           align="center"
         >
-          Proceed to Payment
+          Complete Enrollment Payment
         </mj-button>
 
-        <!-- Note -->
+        <!-- Small note -->
         <mj-text font-size="12px" color="#999999" align="center">
-          Please ensure all program details are correct before completing your
-          payment.
+          Click the button above to complete your enrollment payment securely.
+        </mj-text>
+
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          Additional information regarding orientation, course selection, and
+          the academic calendar will be shared with you prior to the start of
+          the school year.
+        </mj-text>
+
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          We are delighted to welcome you to Northbridge Collegiate and look
+          forward to the contributions you will make to our community.
+        </mj-text>
+
+        <!-- Closing -->
+        <mj-text font-size="15px" color="#555555" padding-top="20px">
+          Warm regards,<br /><br />
+          <strong>Admissions Team</strong><br />
+          Northbridge Collegiate
         </mj-text>
       </mj-column>
     </mj-section>
 
+    <!-- Banner Image -->
     <mj-section background-color="#ffffff" padding="30px 20px">
       <mj-column>
-        <!-- Banner Image -->
         <mj-image
           src="https://res.cloudinary.com/dlr0ksrxd/image/upload/v1772550149/graduads_ff8hgi.jpg"
-          alt="Welcome to {{companyName}}"
+          alt="Welcome to Northbridge Collegiate"
           padding="0"
           fluid-on-mobile="true"
         />
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer Info -->
+    <mj-section background-color="#ffffff" padding="10px 20px">
+      <mj-column width="50%">
+        <mj-text font-size="13px" color="#777777" align="left" padding="0">
+          <strong>Northbridge Collegiate</strong><br />
+          Northbridge.ca
+        </mj-text>
+      </mj-column>
+
+      <mj-column width="50%">
+        <mj-text font-size="13px" color="#777777" align="right" padding="0">
+          +234-704-700-2406 | +1-416-644-1114
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="10px 20px 20px 20px">
+      <mj-column>
+        <mj-text
+          font-size="12px"
+          color="#999999"
+          align="center"
+          line-height="22px"
+        >
+          Northbridge Collegiate is a private secondary school authorized by the
+          Ontario Ministry of Education and operated under BSID 886341. The
+          school follows Ontario curriculum requirements for secondary education
+          and maintains academic records in accordance with Ontario Ministry of
+          Education guidelines.
+        </mj-text>
       </mj-column>
     </mj-section>
 

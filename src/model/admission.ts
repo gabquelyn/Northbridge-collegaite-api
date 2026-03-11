@@ -1,0 +1,46 @@
+import mongoose from "mongoose";
+import { IAdmission } from "../types/admission";
+const admissionSchema = new mongoose.Schema<IAdmission>({
+  application: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Application",
+  },
+
+  //   for on-site students
+  programs: [
+    {
+      type: String,
+      required: true,
+      enum: ["CAAP", "GRADE11", "GRADE12", "AY12"],
+    },
+  ],
+
+  mode: {
+    type: String,
+    required: true,
+    enum: ["on-site", "off-site"],
+  },
+
+  //   for off-site students
+  courses: [
+    {
+      courseId: {
+        type: Number,
+        required: true,
+      },
+    },
+  ],
+
+  granted: {
+    type: Boolean,
+    default: false,
+  },
+  
+  paid: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+export default mongoose.model<IAdmission>("Admission", admissionSchema);

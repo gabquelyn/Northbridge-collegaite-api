@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 const paymentSchema = new mongoose.Schema({
-  application: {
+  admission: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: "Application",
+    ref: "Admission",
   },
-  referenceId: {
+  reference: {
     required: true,
     type: String,
   },
@@ -13,10 +13,13 @@ const paymentSchema = new mongoose.Schema({
     required: true,
     type: Number,
   },
-  completed: {
+  status: {
     required: true,
-    default: false,
-    type: Boolean,
+    type: String,
+  },
+  currency: {
+    required: true,
+    type: String,
   },
 });
 

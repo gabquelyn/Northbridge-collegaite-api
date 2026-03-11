@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
-const applicationSchema = new mongoose.Schema({
+import { IApplication } from "../types/application";
+const applicationSchema = new mongoose.Schema<IApplication>({
   guardian: {
-    required: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+    required: true,
   },
   profile: {
     firstName: {
@@ -15,7 +16,10 @@ const applicationSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
-    phoneNumber: String,
+    phoneNumber: {
+      type: String,
+      required: true,
+    },
     email: {
       required: true,
       type: String,
@@ -104,34 +108,6 @@ const applicationSchema = new mongoose.Schema({
     govId: [{ url: String, public_id: String, filename: String }],
     others: [{ url: String, public_id: String, filename: String }],
   },
-  mode: {
-    type: String,
-    required: true,
-    enum: ["on-site", "off-site"],
-    default: "on-site",
-  },
-
-  approved: {
-    type: Boolean,
-    default: false,
-  },
-
-  //   for on-site students
-  program: [
-    {
-      type: String,
-      required: true,
-      enum: ["CAAP", "GRADE11", "GRADE12", "AY12"],
-    },
-  ],
-
-  //   for off-site students
-  courses: [
-    {
-      type: String,
-      required: true,
-    },
-  ],
 });
 
-export default mongoose.model("Application", applicationSchema);
+export default mongoose.model<IApplication>("Application", applicationSchema);
