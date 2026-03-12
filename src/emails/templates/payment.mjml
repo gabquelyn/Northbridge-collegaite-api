@@ -14,10 +14,7 @@
           Welcome & Admission Letter
         </mj-text>
 
-        <!-- Date -->
-        <mj-text font-size="14px" color="#555555">
-          <strong>Date:</strong> {{ date }}
-        </mj-text>
+
 
         <!-- Student Info -->
         <!-- <mj-text font-size="14px" color="#555555">
@@ -104,7 +101,7 @@
         </mj-text>
 
         <!-- Closing -->
-        <mj-text font-size="15px" color="#555555" padding-top="20px">
+        <mj-text font-size="15px" color="#555555" padding-top="20px" line-height="20px">
           Warm regards,<br /><br />
           <strong>Admissions Team</strong><br />
           Northbridge Collegiate
@@ -125,37 +122,40 @@
     </mj-section>
 
     <!-- Footer Info -->
-    <mj-section background-color="#ffffff" padding="10px 20px">
-      <mj-column width="50%">
-        <mj-text font-size="13px" color="#777777" align="left" padding="0">
-          <strong>Northbridge Collegiate</strong><br />
-          Northbridge.ca
-        </mj-text>
-      </mj-column>
+<mj-section background-color="#ffffff" padding="10px 20px">
+  <mj-column>
 
-      <mj-column width="50%">
-        <mj-text font-size="13px" color="#777777" align="right" padding="0">
-          +234-704-700-2406 | +1-416-644-1114
-        </mj-text>
-      </mj-column>
-    </mj-section>
+      <mj-text font-size="13px" color="#777777" align="right" padding="0">
+      <strong href = "northbridgec.ca">Northbridge Collegiate</strong><br />
+    </mj-text>
 
-    <mj-section background-color="#ffffff" padding="10px 20px 20px 20px">
-      <mj-column>
-        <mj-text
-          font-size="12px"
-          color="#999999"
-          align="center"
-          line-height="22px"
-        >
-          Northbridge Collegiate is a private secondary school authorized by the
-          Ontario Ministry of Education and operated under BSID 886341. The
-          school follows Ontario curriculum requirements for secondary education
-          and maintains academic records in accordance with Ontario Ministry of
-          Education guidelines.
-        </mj-text>
-      </mj-column>
-    </mj-section>
+    <mj-text font-size="13px" color="#777777" align="right" padding="5px 0 0 0">
+      +234-704-700-2406 | +1-416-644-1114
+    </mj-text>
+    <mj-text font-size="13px" color="#777777" align="right" padding="5px 0 0 0">
+       Date: {{ date }}
+    </mj-text>
+
+    <mj-text
+      font-size="12px"
+      color="#999999"
+      align="justify"
+      line-height="22px"
+      padding="10px 0 0 0"
+    >
+      Northbridge Collegiate is a private secondary school authorized by the
+      Ontario Ministry of Education and operated under BSID 886341. The school
+      follows Ontario curriculum requirements for secondary education and
+      maintains academic records in accordance with Ontario Ministry of
+      Education guidelines.
+      </br>
+
+    </mj-text>
+  
+
+  </mj-column>
+</mj-section>
+</mj-section>
 
     <mj-include path="../partials/footer.mjml" />
   </mj-body>

@@ -1,8 +1,13 @@
 import { Request, Response } from "express";
 import expressAsyncHandler from "express-async-handler";
 import crypto from "crypto";
-import Admission from "../model/admission";
+import Application from "../model/application";
 import Payment from "../model/payment";
+import { createMoodleUser, getMoodleUserByEmail } from "../utils/moodle";
+import Profile from "../model/profile";
+import generatePassword from "../utils/generateRandomPassword";
+import sendMail from "../utils/sendMail";
+import { compileEmail } from "../emails/compileEmail";
 
 interface PayStackEvent {
   event: string;
@@ -13,7 +18,7 @@ interface PayStackEvent {
     currency: string;
     status: "success" | string;
     metadata: {
-      admissionId: string;
+      applicationId: string;
     };
   };
 }
@@ -33,24 +38,59 @@ const paystackWebhookHandler = expressAsyncHandler(
       if (response.event == "charge.success") {
         //   * Mark admission as paid upon completion
 
-        const admissionId = response.data.metadata.admissionId;
-        await Admission.findByIdAndUpdate(admissionId, {
+        const applicationId = response.data.metadata.applicationId;
+        const application = await Application.findByIdAndUpdate(applicationId, {
           paid: true,
         })
           .lean()
           .exec();
 
-        // * Create a payment reference for the admission
-        await Payment.create({
-          admission: admissionId,
-          reference: response.data.reference,
-          currency: response.data.currency,
-          amount: response.data.amount,
-          status: response.data.status,
-        });
+        const profile = await Profile.findById(application?.profile)
+          .lean()
+          .exec();
 
-        // TODO: if it is on-site, send admission letter, create moodle user and assign
-        
+        // ! MOODLE FOR ONSITE USERS
+        if (application?.mode == "on-site" && profile) {
+          // * Create a payment reference for the admission;
+          const { email, firstName, lastName } = profile.bio;
+          await Payment.create({
+            application: applicationId,
+            reference: response.data.reference,
+            currency: response.data.currency,
+            amount: response.data.amount,
+            status: response.data.status,
+          });
+
+          //  * Check moodle details and create
+          const moodleUser = await getMoodleUserByEmail(email);
+          const password = generatePassword(6);
+
+          if (moodleUser.length === 0) {
+            // * create a new moodle account using the application profile email
+            await createMoodleUser({
+              username: email,
+              password,
+              firstName,
+              lastName,
+              email,
+            });
+
+            const { html } = compileEmail("moodle", {
+              studentEmail: email,
+              studentPassword: password,
+              companyName: "NBC",
+            });
+
+            // * send moodle details to user (CAAP)
+            await sendMail({
+              to: `${email}`,
+              html,
+              subject: "Study Account Credentials",
+            });
+          }
+
+          // TODO: if it is on-site create moodle user, send them the details, and assign courses
+        }
       }
     }
 

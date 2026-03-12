@@ -1,8 +1,9 @@
 import { Router } from "express";
 import VerifyJWT from "../middlewares/VerifyJwt";
 import {
-  approveAdmissionRequest,
-  requestAdmission,
+  getApplications,
+  approveApplicationRequest,
+  requestApplication,
 } from "../controllers/admissionControllers";
 import multer, { memoryStorage } from "multer";
 import { body } from "express-validator";
@@ -40,9 +41,9 @@ const upload = multer({
   },
 });
 
-const admissionRouter = Router();
+const applicationRouter = Router();
 
-admissionRouter.post(
+applicationRouter.post(
   "/",
   VerifyJWT,
   [
@@ -81,9 +82,10 @@ admissionRouter.post(
     { name: "govId", maxCount: 1 },
     { name: "others", maxCount: 3 },
   ]),
-  requestAdmission,
+  requestApplication,
 );
 
-admissionRouter.post("/:id", VerifyJWT, OnlyAdmin, approveAdmissionRequest);
+applicationRouter.post("/:id", VerifyJWT, OnlyAdmin, approveApplicationRequest);
+applicationRouter.get("/", VerifyJWT, getApplications);
 
-export default admissionRouter;
+export default applicationRouter;

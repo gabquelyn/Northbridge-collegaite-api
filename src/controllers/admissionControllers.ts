@@ -4,8 +4,8 @@ import uploadToCloudinary from "../utils/upload";
 import userModel from "../model/user";
 import { validationResult } from "express-validator";
 import { CustomRequest } from "../types/request";
+import Profile from "../model/profile";
 import Application from "../model/application";
-import Admission from "../model/admission";
 import initializePayment from "../utils/initializePayment";
 import { compileEmail } from "../emails/compileEmail";
 import sendMail from "../utils/sendMail";
@@ -17,7 +17,7 @@ import {
 import { prices } from "../utils/prices";
 import generatePassword from "../utils/generateRandomPassword";
 
-export const requestAdmission = expressAsyncHandler(
+export const requestApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const uploadedFiles: Record<
       string,
@@ -137,8 +137,8 @@ export const requestAdmission = expressAsyncHandler(
       }
     }
 
-    //* save neccesary application data
-    const newApplication = await Application.create({
+    //* save neccesary profile data
+    const newProfile = await Profile.create({
       guardian: (req as CustomRequest).id,
       profile: {
         firstName,
@@ -174,8 +174,9 @@ export const requestAdmission = expressAsyncHandler(
     });
 
     //* create a pending admission request
-    const admission = await Admission.create({
-      application: newApplication._id,
+    const application = await Application.create({
+      profile: newProfile._id,
+      applicant: (req as CustomRequest).id,
       programs: programsArray,
       courses: selectedCourseIds,
       mode,
@@ -188,7 +189,7 @@ export const requestAdmission = expressAsyncHandler(
         amount: selectedCourseIds.length * 1015 * 100,
         email: guardian.email,
         metadata: {
-          admissionId: admission._id,
+          applicationId: application._id,
         },
       });
 
@@ -200,61 +201,74 @@ export const requestAdmission = expressAsyncHandler(
   },
 );
 
-export const approveAdmissionRequest = expressAsyncHandler(
+export const approveApplicationRequest = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { id } = req.params;
-    const admission = await Admission.findById(id).lean().exec();
-    const application = await Application.findById(admission?.application)
+    const application = await Application.findById(id).exec();
+    const profile = await Profile.findById(application?.applicant)
       .lean()
       .exec();
-    const guardian = await userModel
-      .findById(application?.guardian)
-      .lean()
-      .exec();
-    if (!admission || !application || !guardian)
+    const guardian = await userModel.findById(profile?.guardian).lean().exec();
+    if (!application || !profile || !guardian)
       return res
         .status(404)
         .json({ message: "Important admission details not found" });
 
-    if (admission.granted && admission.paid)
+    const { email, firstName, lastName } = profile.bio;
+
+    if (application.granted && application.paid)
       return res
         .status(400)
         .json({ message: "Admission already granted and payment completed" });
 
     // ! ACTIONS FOR MATURED STUDENTS (BUYING OF UNIT COURSES)
-    if (admission.mode == "off-site") {
-      if (!admission.paid)
+    if (application.mode == "off-site") {
+      if (!application.paid)
         return res
           .status(400)
           .json({ message: "Payment for courses not completed yet" });
 
       //   create a moodle account for the user and send admission letter if not exist
-      const applicantEmail = application.profile.email;
-      const moodleUser = await getMoodleUserByEmail(applicantEmail);
-
+      const moodleUser = await getMoodleUserByEmail(email);
+      const password = generatePassword(6);
       // if applicant does not have an account with NBC
+
       if (moodleUser.length === 0) {
-        // * create a new moodle account using the application profile email
+        // * create a new moodle account using the profile profile email
         await createMoodleUser({
-          username: applicantEmail,
-          password: generatePassword(6),
-          firstname: application.profile.firstName,
-          lastName: application.profile.lastName,
-          email: applicantEmail,
+          username: email,
+          password,
+          firstName,
+          lastName,
+          email,
+        });
+
+        const { html } = compileEmail("moodle", {
+          studentEmail: email,
+          studentPassword: password,
+          companyName: "NBC",
+        });
+
+        // * send moodle details to off-site users
+        await sendMail({
+          to: `${email}, ${guardian.email}`,
+          html,
+          subject: "Study Account Credentials",
         });
       }
 
-      // TODO: add them to the respective courses without creating another account
+      // TODO: add them to the respective courses using the applicantEmail as username
       // TODO: request form Arif the ids, of just pull them and update them
     }
 
     // TODO: Prices conversion to Naira
 
-    if (admission.mode == "on-site") {
+    // ! ONSITE STUDENTS GET ADMISSION LETTER AND ARE MEANT TO PAY
+    if (application.mode == "on-site") {
       //* calculate all the prices for the selected program
 
       let totalPrice = 0;
-      for (const program of admission.programs) {
+      for (const program of application.programs) {
         for (const price of prices) {
           if (program === price.name) {
             totalPrice += price.amount;
@@ -266,7 +280,7 @@ export const approveAdmissionRequest = expressAsyncHandler(
         amount: (totalPrice + 1335) * 100,
         email: guardian.email,
         metadata: {
-          admissionId: admission._id,
+          applicationId: application._id,
           custom_fields: [
             ...prices.map((p) => ({
               display_name: p.detail,
@@ -274,7 +288,7 @@ export const approveAdmissionRequest = expressAsyncHandler(
               value: p.amount,
             })),
             {
-              display_name: "Application & Enrolment Fee",
+              display_name: "Profile & Enrolment Fee",
               variable_name: "AEF",
               value: 1335 * 100,
             },
@@ -285,8 +299,8 @@ export const approveAdmissionRequest = expressAsyncHandler(
       if (response.status && response.data?.authorization_url) {
         const { html } = compileEmail("payment", {
           date: new Date().getDate(),
-          studentName: `${application.profile.firstName} ${application.profile.lastName}`,
-          program: admission.programs.join(", "),
+          studentName: `${firstName} ${lastName}`,
+          program: application.programs.join(", "),
           academicYear: new Date().getFullYear(),
           paymentUrl: response.data.authorization_url,
         });
@@ -299,11 +313,31 @@ export const approveAdmissionRequest = expressAsyncHandler(
       }
     }
 
+    application.granted = true;
+    await application.save();
     return res.status(200).json({
       message:
-        admission.mode == "off-site"
+        application.mode == "off-site"
           ? "Admission granted and payment link sent"
           : "Course purchase approved and user added to moodle",
     });
+  },
+);
+
+export const getApplications = expressAsyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const user = await userModel
+      .findById((req as CustomRequest).id)
+      .lean()
+      .exec();
+
+    const application = await Application.find(
+      user?.role == "admin" ? {} : { applicant: (req as CustomRequest).id },
+    )
+      .populate("profile")
+      .lean()
+      .exec();
+
+    return res.status(200).json({ data: application });
   },
 );

@@ -35,7 +35,7 @@ app.get(
   expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {
     // * email template test
     try {
-      const { html } = compileEmail("payment", {
+      const { html } = compileEmail("moodle", {
         date: new Date().toDateString(),
         studentName: `John Doe`,
         studentId: "__",

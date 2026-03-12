@@ -1,0 +1,74 @@
+<mjml>
+  <mj-body background-color="#f4f4f4">
+    <mj-include path="../partials/header.mjml" />
+
+    <mj-section
+      background-color="#ffffff"
+      padding="20px 20px"
+      border-radius="5px"
+    >
+      <mj-column>
+        <!-- Heading -->
+        <mj-text
+          font-size="18px"
+          color="#151e2f"
+          font-weight="bold"
+          padding-bottom="10px"
+        >
+          Your Study Account
+        </mj-text>
+
+        <!-- Intro -->
+        <mj-text
+          font-size="15px"
+          color="#555555"
+          line-height="22px"
+          padding-bottom="15px"
+        >
+          A study account has been created for you to access your courses. Use
+          the credentials below to log in:
+        </mj-text>
+
+        <!-- Credentials Box -->
+        <mj-text
+          background-color="#f8f9fb"
+          padding="15px"
+          font-size="15px"
+          color="#333333"
+          line-height="22px"
+        >
+          <strong>Email / Username:</strong> {{ studentEmail }} <br />
+          <strong>Password:</strong> {{ studentPassword }}
+        </mj-text>
+
+        <!-- Login Button -->
+        <mj-button
+          background-color="#1e88e5"
+          color="#ffffff"
+          font-size="16px"
+          font-weight="bold"
+          border-radius="5px"
+          href="{{ moodleLoginUrl }}"
+          padding="25px 0 0 0"
+          align="center"
+        >
+          Log In to Study
+        </mj-button>
+
+        <!-- Security Note -->
+        <mj-text
+          font-size="12px"
+          color="#999999"
+          align="center"
+          padding-top="10px"
+        >
+          For security, please change your password after logging in for the
+          first time.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+
+    <mj-include path="../partials/footer.mjml" />
+  </mj-body>
+</mjml>

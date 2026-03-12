@@ -8,13 +8,13 @@ const MOODLE_TOKEN = process.env.MOODLE_TOKEN;
 export const createMoodleUser = async ({
   username,
   password,
-  firstname,
+  firstName,
   lastName,
   email,
 }: {
   username: string;
   password: string;
-  firstname: string;
+  firstName: string;
   lastName: string;
   email: string;
 }) => {
@@ -26,7 +26,7 @@ export const createMoodleUser = async ({
 
   params.append("users[0][username]", username);
   params.append("users[0][password]", password);
-  params.append("users[0][firstname]", firstname);
+  params.append("users[0][firstname]", firstName);
   params.append("users[0][lastname]", lastName);
   params.append("users[0][email]", email);
 

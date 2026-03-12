@@ -1,112 +1,51 @@
 import mongoose from "mongoose";
 import { IApplication } from "../types/application";
 const applicationSchema = new mongoose.Schema<IApplication>({
-  guardian: {
+  applicant: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
     required: true,
+    ref: "User",
   },
+
   profile: {
-    firstName: {
-      type: String,
-      required: true,
-    },
-    middleName: String,
-    lastName: {
-      type: String,
-      required: true,
-    },
-    phoneNumber: {
-      type: String,
-      required: true,
-    },
-    email: {
-      required: true,
-      type: String,
-    },
-    dob: {
-      required: true,
-      type: Date,
-    },
-    gender: {
-      required: true,
-      type: String,
-      enum: ["M", "F"],
-    },
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Profile",
   },
 
-  address: {
-    street: {
-      required: true,
+  //   for on-site students
+  programs: [
+    {
       type: String,
-    },
-    city: {
       required: true,
-      type: String,
+      enum: ["CAAP", "GRADE11", "GRADE12", "AY12"],
     },
-    unit: {
-      required: true,
-      type: String,
-    },
-    state: String,
+  ],
+
+  mode: {
+    type: String,
+    required: true,
+    enum: ["on-site", "off-site"],
   },
 
-  academics: {
-    currentSchool: {
-      required: true,
-      type: String,
+  //   for off-site students
+  courses: [
+    {
+      courseId: {
+        type: Number,
+        required: true,
+      },
     },
-    homeSchool: {
-      required: true,
-      type: String,
-    },
+  ],
 
-    secondaryEntry: {
-      required: true,
-      type: Date,
-    },
-
-    secondaryCompletion: {
-      required: true,
-      type: Date,
-    },
-
-    pathway: {
-      required: true,
-      type: String,
-    },
-
-    completedSecondaryDiploma: {
-      required: true,
-      type: Boolean,
-      default: false,
-    },
+  granted: {
+    type: Boolean,
+    default: false,
   },
 
-  citizenship: {
-    language: { required: true, type: String },
-    country: { required: true, type: String },
-    canadian: {
-      required: true,
-      type: Boolean,
-      default: false,
-    },
-    canadianVisa: {
-      required: true,
-      type: Boolean,
-      default: false,
-    },
-    intendToApply: {
-      required: true,
-      type: Boolean,
-      default: false,
-    },
-  },
-
-  documents: {
-    transcripts: [{ url: String, public_id: String, filename: String }],
-    govId: [{ url: String, public_id: String, filename: String }],
-    others: [{ url: String, public_id: String, filename: String }],
+  paid: {
+    type: Boolean,
+    default: false,
   },
 });
 

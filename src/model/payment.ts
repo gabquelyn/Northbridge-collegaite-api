@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 const paymentSchema = new mongoose.Schema({
-  admission: {
+  application: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: "Admission",
+    ref: "Application",
   },
   reference: {
     required: true,
