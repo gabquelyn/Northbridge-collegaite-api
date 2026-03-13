@@ -13,7 +13,7 @@ const applicationSchema = new mongoose.Schema<IApplication>({
     ref: "Profile",
   },
 
-  //   for on-site students
+  //   for on-site students 
   programs: [
     {
       type: String,
@@ -44,6 +44,10 @@ const applicationSchema = new mongoose.Schema<IApplication>({
   },
 
   paid: {
+    type: Boolean,
+    default: false,
+  },
+  completed: {
     type: Boolean,
     default: false,
   },

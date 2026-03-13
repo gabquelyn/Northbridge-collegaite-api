@@ -16,8 +16,9 @@ import {
 } from "../utils/moodle";
 import { prices } from "../utils/prices";
 import generatePassword from "../utils/generateRandomPassword";
-import Payment from "../model/payment";
 import { cache } from "../middlewares/cache";
+import User from "../model/user";
+import invoice from "../model/invoice";
 
 export const requestApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -61,7 +62,7 @@ export const requestApplication = expressAsyncHandler(
       canadianVisa,
       intendToApply,
       courses,
-    } = req.body;
+    }: { [key: string]: string; mode: "on-site" | "off-site" } = req.body;
 
     //* parse the programs and booleans
     const programsArray = JSON.parse(programs || "[]");
@@ -71,15 +72,18 @@ export const requestApplication = expressAsyncHandler(
       .findById((req as CustomRequest).id)
       .lean()
       .exec();
+
     if (!guardian?.profile)
       return res.status(400).json({ message: "Profile not completed yet" });
 
+    // * ONSITE STUDENTS
     if (mode === "on-site") {
       if (programsArray.length < 1) {
         return res.status(400).json({
           message: `${mode} students are expected to pick at least a program`,
         });
       }
+      // Checking previous applications--ongoing or completed
 
       //! non-canadian student must take CAAP alongside other programs
       if (!canadianStudent && !programsArray.includes("CAAP"))
@@ -102,20 +106,22 @@ export const requestApplication = expressAsyncHandler(
     // TODO: ask Arif for the id's of courses and programs
 
     const selectedCourseIds: number[] = JSON.parse(courses || "[]");
-    const moodleCourses = await getMoodleCourses();
-    const moodleCourseIds = moodleCourses.map((obj) => obj.id);
 
-    if (mode === "off-site" && selectedCourseIds.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "Select at least a course for online programs" });
-    }
-
-    for (const id of selectedCourseIds) {
-      if (!moodleCourseIds.includes(id))
+    // * OFFSITE STUDENTS
+    if (mode === "off-site") {
+      const moodleCourses = await getMoodleCourses();
+      const moodleCourseIds = moodleCourses.map((obj) => obj.id);
+      if (selectedCourseIds.length === 0)
         return res
           .status(400)
-          .json({ message: "Selected course doesn't exist in moodle" });
+          .json({ message: "Select at least a course for online programs" });
+
+      for (const id of selectedCourseIds) {
+        if (!moodleCourseIds.includes(id))
+          return res
+            .status(400)
+            .json({ message: "Selected course doesn't exist in moodle" });
+      }
     }
 
     //* handles file uploads to cloudinary for (transcripts, govId, and supporting documents)
@@ -179,8 +185,8 @@ export const requestApplication = expressAsyncHandler(
     const application = await Application.create({
       profile: newProfile._id,
       applicant: (req as CustomRequest).id,
-      programs: programsArray,
-      courses: selectedCourseIds,
+      programs: mode == "on-site" ? programsArray : [],
+      courses: mode == "off-site" ? selectedCourseIds : [],
       mode,
     });
 
@@ -193,10 +199,15 @@ export const requestApplication = expressAsyncHandler(
         metadata: {
           applicationId: application._id,
         },
+        application: application._id,
+        user: (req as CustomRequest).id,
       });
 
       if (response.status) {
-        res.status(201).json({ paymentUrl: response.data?.authorization_url });
+        return res.status(201).json({
+          paymentUrl: response.data?.authorization_url,
+          accessCode: response.data?.access_code,
+        });
       }
     }
     return res.status(201).json({ message: "Admission request submitted" });
@@ -225,6 +236,7 @@ export const approveApplicationRequest = expressAsyncHandler(
 
     // ! ACTIONS FOR MATURED STUDENTS (BUYING OF UNIT COURSES)
     if (application.mode == "off-site") {
+      // TODO: Increase payment check by relying on Paystack
       if (!application.paid)
         return res
           .status(400)
@@ -296,6 +308,8 @@ export const approveApplicationRequest = expressAsyncHandler(
             },
           ],
         },
+        application: application._id,
+        user: (req as CustomRequest).id,
       });
 
       if (response.status && response.data?.authorization_url) {
@@ -355,7 +369,113 @@ export const getOnlineCourses = expressAsyncHandler(
 
 export const getPayments = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const data = await Payment.find({}).populate("application").lean().exec();
+    const data = await invoice
+      .find({})
+      .populate("application")
+      .populate("user")
+      .lean()
+      .exec();
     return res.status(200).json({ data });
+  },
+);
+
+export const enrol = expressAsyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const userId = (req as CustomRequest).id;
+    const { profile } = req.params;
+    const { programs, courses } = req.body;
+    const error = validationResult(req);
+    if (!error.isEmpty()) return res.status(400).json({ error: error.array() });
+    const selectedProfile = await Profile.findById(profile).lean().exec();
+    const user = await User.findById(userId).lean().exec();
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!selectedProfile)
+      return res.status(404).json({ message: "Admission profile not found" });
+    const hasPrograms = programs.length > 0;
+    const hasCourses = courses.length > 0;
+
+    if (!hasPrograms && !hasCourses) {
+      return res.status(400).json({ message: "Select a course or program" });
+    }
+
+    if (hasPrograms && hasCourses) {
+      return res.status(400).json({
+        message: "Can't enrol for a course and a program simultaneously",
+      });
+    }
+
+    const query: { applicant: string; profile: string; paid?: boolean } = {
+      applicant: userId,
+      profile: profile,
+    };
+
+    if (hasCourses) {
+      query.paid = true;
+    }
+
+    const prevApplications = await Application.find(query).lean().exec();
+
+    // * check if the admission requested already on the course or program
+    // Paid for courses and applied for programs
+    for (const application of prevApplications) {
+      if (hasCourses) {
+        for (const course of courses) {
+          if (application.courses.includes(course))
+            return res
+              .status(400)
+              .json({ message: `Course ,${course}, already paid for` });
+        }
+      }
+
+      if (hasPrograms) {
+        for (const program of programs) {
+          if (application.programs.includes(program))
+            return res
+              .status(400)
+              .json({ message: `Program ,${program}, already applied for` });
+        }
+      }
+    }
+
+    // create a new application for program or courses
+    const application = await Application.create({
+      applicant: (req as CustomRequest).id,
+      profile,
+      programs,
+      courses,
+      mode: hasCourses ? "off-site" : "on-site",
+    });
+
+    if (hasCourses) {
+      // check moodle courses
+      const moodleCourses = await getMoodleCourses();
+      const moodleCourseIds = moodleCourses.map((obj) => obj.id);
+      for (const course of courses)
+        if (!moodleCourseIds.includes(course))
+          return res
+            .status(400)
+            .json({ message: "Selected course doesn't exist in moodle" });
+
+      // * send details to make payments
+      const totalPrice = courses.length * 1015;
+      const response = await initializePayment({
+        amount: totalPrice * 100,
+        email: user.email,
+        metadata: {
+          applicationId: application._id,
+        },
+        application: application._id,
+        user: (req as CustomRequest).id,
+      });
+
+      return res.status(201).json({
+        paymentUrl: response.data?.authorization_url,
+        accessCode: response.data?.access_code,
+      });
+    }
+
+    return res
+      .status(201)
+      .json({ message: `Application for ${programs.join(",")} submitted` });
   },
 );

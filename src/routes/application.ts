@@ -6,6 +6,7 @@ import {
   requestApplication,
   getOnlineCourses,
   getPayments,
+  enrol,
 } from "../controllers/admissionControllers";
 import multer, { memoryStorage } from "multer";
 import { body } from "express-validator";
@@ -92,5 +93,22 @@ applicationRouter.post("/:id", VerifyJWT, OnlyAdmin, approveApplicationRequest);
 applicationRouter.get("/", VerifyJWT, getApplications);
 applicationRouter.get("/courses", cacheMiddleware, getOnlineCourses);
 applicationRouter.get("/payments", VerifyJWT, OnlyAdmin, getPayments);
+applicationRouter.post(
+  "/enrol/:profile",
+  [
+    body("programs")
+      .optional()
+      .isArray()
+      .custom((value) => {
+        for (const program of value) {
+          return ["CAAP", "GRADE11", "GRADE12", "AY12"].includes(program);
+        }
+      })
+      .withMessage("Invalid course program selected"),
+    body("courses").optional().isArray().withMessage("Missing required fields"),
+  ],
+  VerifyJWT,
+  enrol,
+);
 
 export default applicationRouter;

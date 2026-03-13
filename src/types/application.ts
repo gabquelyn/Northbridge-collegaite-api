@@ -11,4 +11,5 @@ export interface IApplication extends mongoose.Document {
 
   granted: boolean;
   paid: boolean;
+  completed: boolean;
 }

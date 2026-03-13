@@ -1,9 +1,12 @@
 import axios from "axios";
+import invoice from "../model/invoice";
 
 export default async function initializePayment({
   amount,
   email,
   metadata,
+  application,
+  user,
 }: {
   amount: number;
   email: string;
@@ -15,12 +18,15 @@ export default async function initializePayment({
       value: number;
     }[];
   };
+  application: string;
+  user: string;
 }): Promise<{
   status: boolean;
   message: string;
   data: {
     authorization_url?: string;
     reference?: string;
+    access_code: string;
   };
 }> {
   const url = `${process.env.PAYSTACK_URI}/transaction/initialize`;
@@ -52,6 +58,14 @@ export default async function initializePayment({
         },
       },
     );
+
+    // create an invoice details for the application
+    await invoice.create({
+      application,
+      user,
+      code: response.data?.access_code,
+      reference: response.data?.reference,
+    });
 
     return response.data;
   } catch (error) {

@@ -2,12 +2,12 @@ import { Request, Response } from "express";
 import expressAsyncHandler from "express-async-handler";
 import crypto from "crypto";
 import Application from "../model/application";
-import Payment from "../model/payment";
 import { createMoodleUser, getMoodleUserByEmail } from "../utils/moodle";
 import Profile from "../model/profile";
 import generatePassword from "../utils/generateRandomPassword";
 import sendMail from "../utils/sendMail";
 import { compileEmail } from "../emails/compileEmail";
+import invoice from "../model/invoice";
 
 interface PayStackEvent {
   event: string;
@@ -39,6 +39,15 @@ const paystackWebhookHandler = expressAsyncHandler(
         //   * Mark admission as paid upon completion
 
         const applicationId = response.data.metadata.applicationId;
+        await invoice.findOneAndUpdate(
+          { reference: response.data.reference },
+          {
+            currency: response.data.currency,
+            amount: response.data.amount,
+             status: response.data.status,
+          },
+        );
+
         const application = await Application.findByIdAndUpdate(applicationId, {
           paid: true,
         })
@@ -53,14 +62,6 @@ const paystackWebhookHandler = expressAsyncHandler(
         if (application?.mode == "on-site" && profile) {
           // * Create a payment reference for the admission;
           const { email, firstName, lastName } = profile.bio;
-          await Payment.create({
-            application: applicationId,
-            reference: response.data.reference,
-            currency: response.data.currency,
-            amount: response.data.amount,
-            status: response.data.status,
-          });
-
           //  * Check moodle details and create
           const moodleUser = await getMoodleUserByEmail(email);
           const password = generatePassword(6);
