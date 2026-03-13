@@ -10,6 +10,7 @@ import {
 import multer, { memoryStorage } from "multer";
 import { body } from "express-validator";
 import OnlyAdmin from "../middlewares/onlyAdmin";
+import cacheMiddleware from "../middlewares/cache";
 
 const storage = memoryStorage();
 const allowedMimeTypes = [
@@ -89,7 +90,7 @@ applicationRouter.post(
 
 applicationRouter.post("/:id", VerifyJWT, OnlyAdmin, approveApplicationRequest);
 applicationRouter.get("/", VerifyJWT, getApplications);
-applicationRouter.get("/courses", getOnlineCourses);
+applicationRouter.get("/courses", cacheMiddleware, getOnlineCourses);
 applicationRouter.get("/payments", VerifyJWT, OnlyAdmin, getPayments);
 
 export default applicationRouter;

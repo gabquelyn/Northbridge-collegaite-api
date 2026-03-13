@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import uploadToCloudinary from "../utils/upload";
 import userModel from "../model/user";
 import { validationResult } from "express-validator";
-import { CustomRequest } from "../types/request";
+import { CustomRequest, RequestWithCahcedKey } from "../types/request";
 import Profile from "../model/profile";
 import Application from "../model/application";
 import initializePayment from "../utils/initializePayment";
@@ -17,6 +17,7 @@ import {
 import { prices } from "../utils/prices";
 import generatePassword from "../utils/generateRandomPassword";
 import Payment from "../model/payment";
+import { cache } from "../middlewares/cache";
 
 export const requestApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -346,15 +347,15 @@ export const getApplications = expressAsyncHandler(
 export const getOnlineCourses = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const data = await getMoodleCourses();
+    // * Set cache for course to reduce Moodle server calls
+    cache.set((req as RequestWithCahcedKey).cachedKey, data);
     return res.status(200).json({ data });
   },
 );
 
 export const getPayments = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const data = await Payment.find({}).lean().exec();
+    const data = await Payment.find({}).populate("application").lean().exec();
     return res.status(200).json({ data });
   },
 );
-
-

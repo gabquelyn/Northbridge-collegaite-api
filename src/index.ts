@@ -13,12 +13,21 @@ import verifyPayment from "./utils/verifyPayment";
 import paystackWebhookHandler from "./controllers/paystackWebhook";
 import { getMoodleCourses, getMoodleUserByEmail } from "./utils/moodle";
 import { compileEmail } from "./emails/compileEmail";
+import { rateLimit } from "express-rate-limit";
+
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max requests per IP
+  message: "Too many requests from this IP",
+});
 
 dotenv.config();
 connectDB();
 const app: Express = express();
 const port = process.env.PORT || 8080;
- 
+
+app.use(limiter);
 app.use(logger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -69,7 +78,7 @@ app.get(
     // const moodleCourses = await getMoodleCourses();
 
     // * verify payment call
-    const response = await getMoodleUserByEmail("admin")
+    const response = await getMoodleUserByEmail("admin");
     return res.status(200).json({ response });
   }),
 );
@@ -77,7 +86,7 @@ app.get(
 app.use(errorHandler);
 
 mongoose.connection.on("open", () => {
-  console.log("Connected to DB");
+  console.log("Connected to DB"); 
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });
