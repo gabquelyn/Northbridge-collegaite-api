@@ -16,6 +16,7 @@ import {
 } from "../utils/moodle";
 import { prices } from "../utils/prices";
 import generatePassword from "../utils/generateRandomPassword";
+import Payment from "../model/payment";
 
 export const requestApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -341,3 +342,19 @@ export const getApplications = expressAsyncHandler(
     return res.status(200).json({ data: application });
   },
 );
+
+export const getOnlineCourses = expressAsyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const data = await getMoodleCourses();
+    return res.status(200).json({ data });
+  },
+);
+
+export const getPayments = expressAsyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const data = await Payment.find({}).lean().exec();
+    return res.status(200).json({ data });
+  },
+);
+
+

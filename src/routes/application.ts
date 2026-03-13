@@ -4,6 +4,8 @@ import {
   getApplications,
   approveApplicationRequest,
   requestApplication,
+  getOnlineCourses,
+  getPayments,
 } from "../controllers/admissionControllers";
 import multer, { memoryStorage } from "multer";
 import { body } from "express-validator";
@@ -87,5 +89,7 @@ applicationRouter.post(
 
 applicationRouter.post("/:id", VerifyJWT, OnlyAdmin, approveApplicationRequest);
 applicationRouter.get("/", VerifyJWT, getApplications);
+applicationRouter.get("/courses", getOnlineCourses);
+applicationRouter.get("/payments", VerifyJWT, OnlyAdmin, getPayments);
 
 export default applicationRouter;

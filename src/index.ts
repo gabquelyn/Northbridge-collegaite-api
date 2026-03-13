@@ -6,19 +6,19 @@ import dotenv from "dotenv";
 import connectDB from "./utils/connectDB";
 import mongoose from "mongoose";
 import path from "path";
-import authRouter from "./routes/authRoutes";
+import authRouter from "./routes/auth";
 import expressAsyncHandler from "express-async-handler";
-import admissionRoutes from "./routes/admissiomRoute";
+import applicationRouter from "./routes/application";
 import verifyPayment from "./utils/verifyPayment";
 import paystackWebhookHandler from "./controllers/paystackWebhook";
-import { getMoodleUserByEmail } from "./utils/moodle";
+import { getMoodleCourses, getMoodleUserByEmail } from "./utils/moodle";
 import { compileEmail } from "./emails/compileEmail";
 
 dotenv.config();
 connectDB();
 const app: Express = express();
 const port = process.env.PORT || 8080;
-
+ 
 app.use(logger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -26,7 +26,7 @@ app.use("/", express.static(path.join(__dirname, "public")));
 app.use(cookierParser());
 
 app.use("/auth", authRouter);
-app.use("/addmission", admissionRoutes);
+app.use("/application", applicationRouter);
 app.get("/webhook", paystackWebhookHandler);
 
 app.get(
@@ -34,20 +34,20 @@ app.get(
   "/test",
   expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {
     // * email template test
-    try {
-      const { html } = compileEmail("moodle", {
-        date: new Date().toDateString(),
-        studentName: `John Doe`,
-        studentId: "__",
-        program: ["CAAP", "GRADE 11"].join(", "),
-        academicYear: new Date().getFullYear(),
-        paymentUrl: "",
-      });
-      res.send(html);
-    } catch (err) {
-      console.log(err);
-      res.status(500).send("Template not found or failed to compile.");
-    }
+    // try {
+    //   const { html } = compileEmail("moodle", {
+    //     date: new Date().toDateString(),
+    //     studentName: `John Doe`,
+    //     studentId: "__",
+    //     program: ["CAAP", "GRADE 11"].join(", "),
+    //     academicYear: new Date().getFullYear(),
+    //     paymentUrl: "",
+    //   });
+    //   res.send(html);
+    // } catch (err) {
+    //   console.log(err);
+    //   res.status(500).send("Template not found or failed to compile.");
+    // }
 
     // * initialize payment test
     // const response = await initializePayment({
@@ -69,8 +69,8 @@ app.get(
     // const moodleCourses = await getMoodleCourses();
 
     // * verify payment call
-    // const response = await getMoodleUserByEmail("kyx3jdwov1")
-    // return res.status(200).json({ response });
+    const response = await getMoodleUserByEmail("admin")
+    return res.status(200).json({ response });
   }),
 );
 
