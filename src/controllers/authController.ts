@@ -6,6 +6,8 @@ import sendMail from "../utils/sendMail";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { compileEmail } from "../emails/compileEmail";
+import { validationResult } from "express-validator";
 
 export const loginController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -16,7 +18,9 @@ export const loginController = expressAsyncHandler(
       return res.status(400).json({ message: "User does not exist" });
 
     if (!foundUser?.password)
-      return res.status(400).json({ message: "Continue with google to login for this email" });
+      return res
+        .status(400)
+        .json({ message: "Continue with google to login for this email" });
     const passwordMatch = await bcrypt.compare(password, foundUser.password);
     if (!passwordMatch)
       return res.status(401).json({ message: "Unauthorized" });
@@ -34,7 +38,12 @@ export const loginController = expressAsyncHandler(
 
         const url = `${process.env.BASE_URL}/auth/${foundUser._id}/verify/${verificationToken.token}`;
 
-        await sendMail(foundUser.email, "Verify email", url);
+        // send the verification url via email
+        const { html } = compileEmail("welcome", {
+          companyName: "Northbridge Collegiate",
+          verifyUrl: url,
+        });
+        await sendMail({ to: email, subject: "Verify Email Address", html });
       }
 
       return res
@@ -55,12 +64,12 @@ export const loginController = expressAsyncHandler(
 
     // create the refresh token
     const refreshToken = jwt.sign(
-      { email: foundUser.email },
+      { email: foundUser.email, userId: foundUser._id },
       String(process.env.REFRESH_TOKEN_SECRET),
       { expiresIn: "1d" },
     );
 
-    res.cookie("jwt", refreshToken, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
@@ -74,6 +83,9 @@ export const loginController = expressAsyncHandler(
 export const registerController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { email, password } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ error: errors.array() });
 
     const existing = await User.findOne({ email }).lean().exec();
     if (existing)
@@ -83,6 +95,7 @@ export const registerController = expressAsyncHandler(
     const newUser = await User.create({
       email,
       password: hashedPassword,
+      provider: "local",
     });
 
     if (!newUser)
@@ -96,8 +109,12 @@ export const registerController = expressAsyncHandler(
 
     const url = `${process.env.FRONTEND_URL}/auth/${newUser._id}/verify/${verificationToken.token}`;
     // send the verification url via email
-    await sendMail(newUser.email, "Verify email", url);
-    res
+    const { html } = compileEmail("welcome", {
+      companyName: "Northbridge Collegiate",
+      verifyUrl: url,
+    });
+    await sendMail({ to: email, subject: "Verify Email Address", html });
+    return res
       .status(201)
       .json({ message: "Email sent to your account please verify" });
   },
@@ -106,8 +123,8 @@ export const registerController = expressAsyncHandler(
 export const logoutController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const cookies = req.cookies;
-    if (!cookies?.jwt) return res.sendStatus(204); //no content;
-    res.clearCookie("jwt", {
+    if (!cookies?.refreshToken) return res.sendStatus(204); //no content;
+    res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: true,
       sameSite: "none",
@@ -150,7 +167,15 @@ export const forgotPasswordController = expressAsyncHandler(
     const url = `${process.env.FRONTEND_URL}/auth/reset/${otp.token}`;
 
     // send the verification url via email
-    await sendMail(user.email, "Reset Password", url);
+    const { html } = compileEmail("forget", {
+      companyName: "Northbridge Collegiate",
+      name: user.profile?.firstName || "",
+      resetUrl: url,
+      expiryTime: "15 minutes",
+    });
+
+    await sendMail({ to: email, subject: "Reset Password", html });
+    // send the verification url via email
     return res
       .status(200)
       .json({ message: "Recovery mail sent successfully!" });
@@ -172,5 +197,35 @@ export const restPasswordController = expressAsyncHandler(
     }
     await existingToken.deleteOne();
     return res.status(200).json({ message: "password updated successfully!" });
+  },
+);
+
+export const refreshController = expressAsyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const { refreshToken } = req.cookies;
+    if (!refreshToken) return res.status(403).json({ message: "Forbidden" });
+
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET!,
+      (error: any, decode: any) => {
+        if (error) {
+          console.log(error);
+          return res.status(403).json({ message: "Forbidden" });
+        }
+        const accessToken = jwt.sign(
+          {
+            UserInfo: {
+              email: decode.email,
+              userId: decode.userId,
+            },
+          },
+          String(process.env.ACCESS_TOKEN_SECRET),
+          { expiresIn: "1h" },
+        );
+
+        return res.json({ accessToken });
+      },
+    );
   },
 );

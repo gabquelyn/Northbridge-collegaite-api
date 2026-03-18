@@ -17,6 +17,6 @@ const tokenSchema = new Schema<IToken>({
   },
 });
 
-tokenSchema.index({ createdAt: 1 }, { expireAfterSeconds: 3600 });
+tokenSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 15 });
 
 export default model<IToken>("Token", tokenSchema);

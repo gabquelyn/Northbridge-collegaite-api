@@ -4,10 +4,10 @@
 
     <mj-section background-color="#ffffff" padding="30px 20px">
       <mj-column>
-        <mj-text font-size="18px"> Hello {{ name }}, </mj-text>
+        <!-- <mj-text font-size="18px"> Hello {{ name }}, </mj-text> -->
 
         <!-- Welcome Message -->
-        <mj-text font-size="16px" color="#555555" padding="30px 20px">
+        <mj-text font-size="16px"  line-height="25px" color="#555555" padding="30px 20px">
           Welcome to {{ companyName }} 🎉<br />
           Thank you for signing up! To get started, please verify your email by
           clicking the button below.

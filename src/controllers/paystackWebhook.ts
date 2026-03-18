@@ -44,7 +44,7 @@ const paystackWebhookHandler = expressAsyncHandler(
           {
             currency: response.data.currency,
             amount: response.data.amount,
-             status: response.data.status,
+            status: response.data.status,
           },
         );
 
@@ -63,18 +63,22 @@ const paystackWebhookHandler = expressAsyncHandler(
           // * Create a payment reference for the admission;
           const { email, firstName, lastName } = profile.bio;
           //  * Check moodle details and create
-          const moodleUser = await getMoodleUserByEmail(email);
+          const moodleUser: { id: number }[] =
+            await getMoodleUserByEmail(email);
           const password = generatePassword(6);
 
+          let userId;
           if (moodleUser.length === 0) {
             // * create a new moodle account using the application profile email
-            await createMoodleUser({
+            const id  = await createMoodleUser({
               username: email,
               password,
               firstName,
               lastName,
               email,
             });
+
+            userId = id
 
             const { html } = compileEmail("moodle", {
               studentEmail: email,
@@ -88,6 +92,8 @@ const paystackWebhookHandler = expressAsyncHandler(
               html,
               subject: "Study Account Credentials",
             });
+          } else {
+            userId = moodleUser[0].id
           }
 
           // TODO: if it is on-site create moodle user, send them the details, and assign courses

@@ -23,6 +23,9 @@ const allowedMimeTypes = [
   "application/vnd.ms-powerpoint",
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
   "text/plain",
+  "image/jpeg",
+  "image/png",
+  "image/jpg",
 ];
 
 const fileFilter = (
@@ -50,6 +53,11 @@ const applicationRouter = Router();
 applicationRouter.post(
   "/",
   VerifyJWT,
+  upload.fields([
+    { name: "transcripts", maxCount: 1 },
+    { name: "govId", maxCount: 1 },
+    { name: "others", maxCount: 3 },
+  ]),
   [
     body("firstName").notEmpty().escape(),
     body("lastName").notEmpty().escape(),
@@ -67,9 +75,9 @@ applicationRouter.post(
     body("pathway").notEmpty().escape(),
     body("completedSecondaryDiploma").isBoolean(),
     body("canadianVisa").isBoolean(),
+    body("canadian").isBoolean(),
     body("intendToApply").isBoolean(),
     body("language").notEmpty(),
-    body("country").notEmpty(),
     body("country").notEmpty(),
     body("mode").custom((value) => ["on-site", "off-site"].includes(value)),
     body("programs")
@@ -81,15 +89,11 @@ applicationRouter.post(
         }
       }),
   ],
-  upload.fields([
-    { name: "transcripts", maxCount: 1 },
-    { name: "govId", maxCount: 1 },
-    { name: "others", maxCount: 3 },
-  ]),
+
   requestApplication,
 );
 
-applicationRouter.post("/:id", VerifyJWT, OnlyAdmin, approveApplicationRequest);
+applicationRouter.post("/approve/:id", VerifyJWT, OnlyAdmin, approveApplicationRequest);
 applicationRouter.get("/", VerifyJWT, getApplications);
 applicationRouter.get("/courses", cacheMiddleware, getOnlineCourses);
 applicationRouter.get("/payments", VerifyJWT, OnlyAdmin, getPayments);

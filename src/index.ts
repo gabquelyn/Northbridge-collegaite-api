@@ -78,7 +78,7 @@ app.get(
     // const moodleCourses = await getMoodleCourses();
 
     // * verify payment call
-    const response = await getMoodleUserByEmail("admin");
+    const response = await getMoodleUserByEmail("gabquelyn@gmail.com");
     return res.status(200).json({ response });
   }),
 );

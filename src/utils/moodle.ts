@@ -17,7 +17,7 @@ export const createMoodleUser = async ({
   firstName: string;
   lastName: string;
   email: string;
-}) => {
+}): Promise<number> => {
   const params = new URLSearchParams();
 
   params.append("wstoken", MOODLE_TOKEN || "");
@@ -34,8 +34,11 @@ export const createMoodleUser = async ({
     `${MOODLE_URL}/webservice/rest/server.php`,
     params,
   );
+  console.log(response.data)
+  const createdUserId = response.data[0].id;
+  console.log("Created user ID:", createdUserId);
 
-  console.log(response.data);
+  return createdUserId;
 };
 
 export const getMoodleUserByEmail = async (email: string) => {
@@ -81,4 +84,31 @@ export async function getMoodleCourses(): Promise<{ id: number }[]> {
     );
     throw error;
   }
+}
+
+export async function enrolStudentInCourses(
+  userid: number,
+  courseIds: number[],
+  roleid: number = 5,
+) {
+  if (courseIds.length === 0) return [];
+  const params = new URLSearchParams();
+
+  params.append("wstoken", process.env.MOODLE_TOKEN as string);
+  params.append("wsfunction", "enrol_manual_enrol_users");
+  params.append("moodlewsrestformat", "json");
+
+  // Prepare enrolments for all courses
+  courseIds.forEach((courseId, index) => {
+    params.append(`enrolments[${index}][roleid]`, roleid.toString());
+    params.append(`enrolments[${index}][userid]`, userid.toString());
+    params.append(`enrolments[${index}][courseid]`, courseId.toString());
+  });
+
+  const response = await axios.post(
+    `${process.env.MOODLE_URL}/webservice/rest/server.php`,
+    params,
+  );
+
+  return response.data;
 }

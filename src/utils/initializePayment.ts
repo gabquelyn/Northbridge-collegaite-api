@@ -7,6 +7,7 @@ export default async function initializePayment({
   metadata,
   application,
   user,
+  currency = "NGN",
 }: {
   amount: number;
   email: string;
@@ -20,6 +21,7 @@ export default async function initializePayment({
   };
   application: string;
   user: string;
+  currency?: string;
 }): Promise<{
   status: boolean;
   message: string;
@@ -35,7 +37,7 @@ export default async function initializePayment({
       url,
       {
         email,
-        amount,
+        amount: amount * 100,
         // currency: "USD",
         channels: [
           "card",
@@ -59,15 +61,18 @@ export default async function initializePayment({
       },
     );
 
+    const data = response.data;
     // create an invoice details for the application
     await invoice.create({
       application,
       user,
-      code: response.data?.access_code,
-      reference: response.data?.reference,
+      code: data?.data.access_code,
+      reference: data?.data.reference,
+      currency,
+      amount,
     });
 
-    return response.data;
+    return data;
   } catch (error) {
     console.log(error);
     throw new Error("Failed to initialize payment");

@@ -13,7 +13,7 @@ const applicationSchema = new mongoose.Schema<IApplication>({
     ref: "Profile",
   },
 
-  //   for on-site students 
+  //   for on-site students
   programs: [
     {
       type: String,
@@ -31,10 +31,8 @@ const applicationSchema = new mongoose.Schema<IApplication>({
   //   for off-site students
   courses: [
     {
-      courseId: {
-        type: Number,
-        required: true,
-      },
+      type: Number,
+      required: true,
     },
   ],
 

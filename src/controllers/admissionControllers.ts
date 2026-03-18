@@ -11,6 +11,7 @@ import { compileEmail } from "../emails/compileEmail";
 import sendMail from "../utils/sendMail";
 import {
   createMoodleUser,
+  enrolStudentInCourses,
   getMoodleCourses,
   getMoodleUserByEmail,
 } from "../utils/moodle";
@@ -33,8 +34,13 @@ export const requestApplication = expressAsyncHandler(
       return res
         .status(400)
         .json({ message: "Invalid data received", error: result.array() });
-    if (!req.files)
-      return res.status(400).json({ message: "Missing required files" });
+
+    const fileFields = req.files as {
+      [fieldname: string]: Express.Multer.File[];
+    };
+
+    if (!fileFields?.transcripts || !fileFields?.govId)
+      return res.status(400).json({ message: "Missing transcript and govId" });
 
     const {
       mode,
@@ -66,15 +72,17 @@ export const requestApplication = expressAsyncHandler(
 
     //* parse the programs and booleans
     const programsArray = JSON.parse(programs || "[]");
-    const canadianStudent = Boolean(canadian);
+    const canadianStudent = canadian === "true" || canadian === "True";
 
     const guardian = await userModel
       .findById((req as CustomRequest).id)
       .lean()
       .exec();
 
-    if (!guardian?.profile)
-      return res.status(400).json({ message: "Profile not completed yet" });
+    if (!guardian)
+      return res
+        .status(400)
+        .json({ message: "Guardian/User account does not exist" });
 
     // * ONSITE STUDENTS
     if (mode === "on-site") {
@@ -99,6 +107,16 @@ export const requestApplication = expressAsyncHandler(
         return res
           .status(400)
           .json({ message: "Ay 12 must be accompanied with Grade 12" });
+      }
+
+      //! Grade 11 must be done before Grade 12
+      if (
+        programsArray.includes("GRADE12") &&
+        !programsArray.includes("GRADE11")
+      ) {
+        return res
+          .status(400)
+          .json({ message: "Grade 11 must be done before Grade 12" });
       }
     }
 
@@ -148,7 +166,7 @@ export const requestApplication = expressAsyncHandler(
     //* save neccesary profile data
     const newProfile = await Profile.create({
       guardian: (req as CustomRequest).id,
-      profile: {
+      bio: {
         firstName,
         lastName,
         middleName,
@@ -194,7 +212,7 @@ export const requestApplication = expressAsyncHandler(
 
     if (mode === "off-site") {
       const response = await initializePayment({
-        amount: selectedCourseIds.length * 1015 * 100,
+        amount: selectedCourseIds.length * 1045000,
         email: guardian.email,
         metadata: {
           applicationId: application._id,
@@ -218,16 +236,21 @@ export const approveApplicationRequest = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { id } = req.params;
     const application = await Application.findById(id).exec();
-    const profile = await Profile.findById(application?.applicant)
+    const profile = await Profile.findById(application?.profile).lean().exec();
+    const guardian = await userModel
+      .findById(application?.applicant)
       .lean()
       .exec();
-    const guardian = await userModel.findById(profile?.guardian).lean().exec();
     if (!application || !profile || !guardian)
       return res
         .status(404)
         .json({ message: "Important admission details not found" });
 
     const { email, firstName, lastName } = profile.bio;
+
+    if (application.granted) {
+      return res.status(400).json({ message: "Application already granted" });
+    }
 
     if (application.granted && application.paid)
       return res
@@ -243,19 +266,22 @@ export const approveApplicationRequest = expressAsyncHandler(
           .json({ message: "Payment for courses not completed yet" });
 
       //   create a moodle account for the user and send admission letter if not exist
-      const moodleUser = await getMoodleUserByEmail(email);
-      const password = generatePassword(6);
+      const moodleUser: { id: number }[] = await getMoodleUserByEmail(email);
+
+      const password = generatePassword();
       // if applicant does not have an account with NBC
+      let userId;
 
       if (moodleUser.length === 0) {
         // * create a new moodle account using the profile profile email
-        await createMoodleUser({
+        const userid = await createMoodleUser({
           username: email,
           password,
           firstName,
           lastName,
           email,
         });
+        userId = userid;
 
         const { html } = compileEmail("moodle", {
           studentEmail: email,
@@ -269,13 +295,12 @@ export const approveApplicationRequest = expressAsyncHandler(
           html,
           subject: "Study Account Credentials",
         });
+      } else {
+        userId = moodleUser[0].id;
       }
 
-      // TODO: add them to the respective courses using the applicantEmail as username
-      // TODO: request form Arif the ids, of just pull them and update them
+      await enrolStudentInCourses(userId, application.courses);
     }
-
-    // TODO: Prices conversion to Naira
 
     // ! ONSITE STUDENTS GET ADMISSION LETTER AND ARE MEANT TO PAY
     if (application.mode == "on-site") {
@@ -291,7 +316,7 @@ export const approveApplicationRequest = expressAsyncHandler(
       }
 
       const response = await initializePayment({
-        amount: (totalPrice + 1335) * 100,
+        amount: totalPrice + 1335,
         email: guardian.email,
         metadata: {
           applicationId: application._id,
@@ -333,7 +358,7 @@ export const approveApplicationRequest = expressAsyncHandler(
     await application.save();
     return res.status(200).json({
       message:
-        application.mode == "off-site"
+        application.mode == "on-site"
           ? "Admission granted and payment link sent"
           : "Course purchase approved and user added to moodle",
     });
@@ -372,7 +397,7 @@ export const getPayments = expressAsyncHandler(
     const data = await invoice
       .find({})
       .populate("application")
-      .populate("user")
+      .populate("user", "-password")
       .lean()
       .exec();
     return res.status(200).json({ data });
@@ -437,6 +462,71 @@ export const enrol = expressAsyncHandler(
       }
     }
 
+    // for course purchase
+    if (hasCourses) {
+      const moodleCourses = await getMoodleCourses();
+      const moodleCourseIds = moodleCourses.map((obj) => obj.id);
+      for (const course of courses)
+        if (!moodleCourseIds.includes(course))
+          return res
+            .status(400)
+            .json({ message: "Selected course doesn't exist in moodle" });
+    }
+
+    // for non-canadian student: check CAAP is included or taken previously
+    if (hasPrograms) {
+      const activeCAAP = await Application.findOne({
+        ...query,
+        paid: true,
+        programs: "CAAP",
+      })
+
+        .lean()
+        .exec();
+      if (
+        !selectedProfile.citizenship.canadian &&
+        !programs.includes("CAAP") &&
+        !activeCAAP
+      )
+        return res
+          .status(400)
+          .json({ message: "Non-canadian students are mandated to take CAAP" });
+
+      const activeGrade12 = await Application.findOne({
+        ...query,
+        paid: true,
+        programs: "GRADE12",
+      });
+
+      // can't take AY12 without grade 12
+      if (
+        programs.include("AY12") &&
+        !programs.include("GRADE12") &&
+        !activeGrade12
+      ) {
+        return res
+          .status(400)
+          .json({ message: "Grade 12 program must accompany AY12" });
+      }
+
+      // can't take Grade 12 without grade 11
+
+      const activeGrade11 = await Application.findOne({
+        ...query,
+        paid: true,
+        programs: "GRADE11",
+      });
+      if (
+        programs.include("GRADE12") &&
+        !programs.include("GRADE11") &&
+        !activeGrade11
+      ) {
+        return res
+          .status(400)
+          .json({ message: "Grade 11 program must be done before grade 12" });
+      }
+    }
+
     // create a new application for program or courses
     const application = await Application.create({
       applicant: (req as CustomRequest).id,
@@ -447,19 +537,10 @@ export const enrol = expressAsyncHandler(
     });
 
     if (hasCourses) {
-      // check moodle courses
-      const moodleCourses = await getMoodleCourses();
-      const moodleCourseIds = moodleCourses.map((obj) => obj.id);
-      for (const course of courses)
-        if (!moodleCourseIds.includes(course))
-          return res
-            .status(400)
-            .json({ message: "Selected course doesn't exist in moodle" });
-
       // * send details to make payments
-      const totalPrice = courses.length * 1015;
+      const totalPrice = courses.length * 1045000;
       const response = await initializePayment({
-        amount: totalPrice * 100,
+        amount: totalPrice,
         email: user.email,
         metadata: {
           applicationId: application._id,

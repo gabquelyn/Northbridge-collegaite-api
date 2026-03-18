@@ -5,9 +5,7 @@ export interface IApplication extends mongoose.Document {
 
   programs: ["CAAP" | "GRADE11" | "GRADE12" | "AY12"];
   mode: "on-site" | "off-site";
-  courses: {
-    courseId: number;
-  }[];
+  courses: number[];
 
   granted: boolean;
   paid: boolean;
