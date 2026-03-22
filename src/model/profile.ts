@@ -67,10 +67,7 @@ const profileSchema = new mongoose.Schema<IProfile>({
       type: Date,
     },
 
-    secondaryCompletion: {
-      required: true,
-      type: Date,
-    },
+    secondaryCompletion: String,
 
     pathway: {
       required: true,
@@ -82,11 +79,12 @@ const profileSchema = new mongoose.Schema<IProfile>({
       type: Boolean,
       default: false,
     },
+    qualification: String
   },
 
   citizenship: {
     language: { required: true, type: String },
-    country: { required: true, type: String },
+    birthCountry: { required: true, type: String },
     canadian: {
       required: true,
       type: Boolean,

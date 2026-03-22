@@ -6,7 +6,5 @@ export interface IUser extends mongoose.Document {
   role: "user" | "admin";
   provider: "local" | "google";
 
-  profile: {
-    firstName: string;
-  };
+  name: string;
 }

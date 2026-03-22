@@ -34,7 +34,7 @@ export const createMoodleUser = async ({
     `${MOODLE_URL}/webservice/rest/server.php`,
     params,
   );
-  console.log(response.data)
+  console.log(response.data);
   const createdUserId = response.data[0].id;
   console.log("Created user ID:", createdUserId);
 
@@ -68,15 +68,27 @@ export async function getMoodleCourses(): Promise<{ id: number }[]> {
     const params = new URLSearchParams();
 
     params.append("wstoken", MOODLE_TOKEN as string);
-    params.append("wsfunction", "core_course_get_courses");
+    params.append("wsfunction", "core_course_get_courses_by_field");
     params.append("moodlewsrestformat", "json");
+    params.append("field", ""); // empty = all courses
 
     const response = await axios.post(
       `${MOODLE_URL}/webservice/rest/server.php`,
       params,
     );
 
-    return response.data;
+    const courses = response.data.courses || [];
+    return courses.map((course: any) => ({
+      id: course.id,
+      fullname: course.fullname,
+      summary: course.summary,
+      shortname: course.shortname,
+      category: course.categoryid,
+      // 👇 Extract image safely
+      image: course.overviewfiles?.[0]?.fileurl
+        ? `${course.overviewfiles[0].fileurl.replace("/webservice", "")}?token=${MOODLE_TOKEN}`
+        : null,
+    }));
   } catch (error: any) {
     console.error(
       "Failed to retrieve Moodle courses:",
@@ -111,4 +123,27 @@ export async function enrolStudentInCourses(
   );
 
   return response.data;
+}
+
+export async function getMoodleCategories() {
+  try {
+    const params = new URLSearchParams();
+
+    params.append("wstoken", MOODLE_TOKEN as string);
+    params.append("wsfunction", "core_course_get_categories");
+    params.append("moodlewsrestformat", "json");
+
+    const response = await axios.post(
+      `${MOODLE_URL}/webservice/rest/server.php`,
+      params
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "Failed to retrieve Moodle categories:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
 }

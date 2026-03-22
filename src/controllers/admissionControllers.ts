@@ -1,6 +1,6 @@
 import expressAsyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import uploadToCloudinary from "../utils/upload";
+import uploadToCloudinary, { deleteUploadedFiles } from "../utils/upload";
 import userModel from "../model/user";
 import { validationResult } from "express-validator";
 import { CustomRequest, RequestWithCahcedKey } from "../types/request";
@@ -12,6 +12,7 @@ import sendMail from "../utils/sendMail";
 import {
   createMoodleUser,
   enrolStudentInCourses,
+  getMoodleCategories,
   getMoodleCourses,
   getMoodleUserByEmail,
 } from "../utils/moodle";
@@ -20,13 +21,11 @@ import generatePassword from "../utils/generateRandomPassword";
 import { cache } from "../middlewares/cache";
 import User from "../model/user";
 import invoice from "../model/invoice";
-
+import { getCachedMoodleCourses } from "../utils/getMoodleCached";
+import mongoose from "mongoose";
+import Plimit from "p-limit";
 export const requestApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const uploadedFiles: Record<
-      string,
-      { url: string; public_id: string; filename: string }[]
-    > = {};
     const result = validationResult(req);
 
     // * validation of required fields and documents
@@ -39,8 +38,13 @@ export const requestApplication = expressAsyncHandler(
       [fieldname: string]: Express.Multer.File[];
     };
 
-    if (!fileFields?.transcripts || !fileFields?.govId)
-      return res.status(400).json({ message: "Missing transcript and govId" });
+    const requiredFiles = ["transcripts", "govId", "passport"];
+
+    for (const field of requiredFiles) {
+      if (!fileFields?.[field]) {
+        return res.status(400).json({ message: `Missing ${field}` });
+      }
+    }
 
     const {
       mode,
@@ -66,54 +70,69 @@ export const requestApplication = expressAsyncHandler(
       language,
       country,
       canadianVisa,
+      birthCountry,
       intendToApply,
       courses,
+      qualification,
     }: { [key: string]: string; mode: "on-site" | "off-site" } = req.body;
 
-    //* parse the programs and booleans
-    const programsArray = JSON.parse(programs || "[]");
-    const canadianStudent = canadian === "true" || canadian === "True";
+    const canadianStudent = String(canadian).toLowerCase() === "true";
+    const userId = (req as CustomRequest).id;
+    const guardianPromise = userModel.findById(userId).lean().exec();
 
-    const guardian = await userModel
-      .findById((req as CustomRequest).id)
-      .lean()
-      .exec();
+    const moodleCoursesPromise =
+      mode === "off-site" ? getCachedMoodleCourses() : [];
+    const [guardian, moodleCourses] = await Promise.all([
+      guardianPromise,
+      moodleCoursesPromise,
+    ]);
 
     if (!guardian)
       return res
         .status(400)
         .json({ message: "Guardian/User account does not exist" });
 
-    // * ONSITE STUDENTS
+    let programsArray: string[] = [];
+
     if (mode === "on-site") {
+      //* parse the programs and booleans
+
+      try {
+        programsArray = JSON.parse(programs || "[]");
+      } catch {
+        return res.status(400).json({ message: "Invalid programs format" });
+      }
+
+      const VALID_PROGRAMS = new Set(["CAAP", "AY12", "GRADE11", "GRADE12"]);
+      const programsSet = new Set(programsArray);
+
+      for (const p of programsArray) {
+        if (!VALID_PROGRAMS.has(p)) {
+          return res.status(400).json({ message: "Invalid program selected" });
+        }
+      }
+
       if (programsArray.length < 1) {
         return res.status(400).json({
           message: `${mode} students are expected to pick at least a program`,
         });
       }
-      // Checking previous applications--ongoing or completed
 
       //! non-canadian student must take CAAP alongside other programs
-      if (!canadianStudent && !programsArray.includes("CAAP"))
+      if (!canadianStudent && !programsSet.has("CAAP"))
         return res
           .status(400)
           .json({ message: "Non-canadian students are mandated to take CAAP" });
 
       //! AY12 must accompany Grade 12
-      if (
-        programsArray.includes("AY12") &&
-        !programsArray.includes("GRADE12")
-      ) {
+      if (programsSet.has("AY12") && !programsSet.has("GRADE12")) {
         return res
           .status(400)
           .json({ message: "Ay 12 must be accompanied with Grade 12" });
       }
 
       //! Grade 11 must be done before Grade 12
-      if (
-        programsArray.includes("GRADE12") &&
-        !programsArray.includes("GRADE11")
-      ) {
+      if (programsSet.has("GRADE12") && !programsSet.has("GRADE11")) {
         return res
           .status(400)
           .json({ message: "Grade 11 must be done before Grade 12" });
@@ -123,19 +142,23 @@ export const requestApplication = expressAsyncHandler(
     //* checking for programs on moodle
     // TODO: ask Arif for the id's of courses and programs
 
-    const selectedCourseIds: number[] = JSON.parse(courses || "[]");
+    let selectedCourseIds: number[] = [];
 
     // * OFFSITE STUDENTS
     if (mode === "off-site") {
-      const moodleCourses = await getMoodleCourses();
-      const moodleCourseIds = moodleCourses.map((obj) => obj.id);
+      try {
+        selectedCourseIds = JSON.parse(courses || "[]");
+      } catch {
+        return res.status(400).json({ message: "Invalid courses format" });
+      }
       if (selectedCourseIds.length === 0)
         return res
           .status(400)
           .json({ message: "Select at least a course for online programs" });
 
+      const moodleCourseIds = new Set(moodleCourses.map((obj) => obj.id));
       for (const id of selectedCourseIds) {
-        if (!moodleCourseIds.includes(id))
+        if (!moodleCourseIds.has(id))
           return res
             .status(400)
             .json({ message: "Selected course doesn't exist in moodle" });
@@ -145,68 +168,112 @@ export const requestApplication = expressAsyncHandler(
     //* handles file uploads to cloudinary for (transcripts, govId, and supporting documents)
     // TODO: ask Arif about using cloudinary for compliance
 
-    for (const field in req.files) {
-      uploadedFiles[field] = [];
-      for (const file of (
-        req.files as { [fieldname: string]: Express.Multer.File[] }
-      )[field]) {
-        const result = await uploadToCloudinary(
-          file.buffer,
-          "student-documents",
-        );
+    const limit = Plimit(5);
+    const uploadPromises: Promise<UploadResult>[] = [];
 
-        uploadedFiles[field].push({
-          url: result.secure_url,
-          public_id: result.public_id,
-          filename: result.original_filename,
-        });
+    for (const field in fileFields) {
+      for (const file of fileFields[field]) {
+        uploadPromises.push(
+          limit(async () => {
+            const result = await uploadToCloudinary(
+              file.buffer,
+              "student-documents",
+            );
+
+            return {
+              field,
+              file: {
+                url: result.secure_url,
+                public_id: result.public_id,
+                filename: result.original_filename,
+              },
+            };
+          }),
+        );
       }
     }
 
-    //* save neccesary profile data
-    const newProfile = await Profile.create({
-      guardian: (req as CustomRequest).id,
-      bio: {
-        firstName,
-        lastName,
-        middleName,
-        phoneNumber,
-        email,
-        dob,
-        gender,
+    const results = await Promise.all(uploadPromises);
+    const uploadedFiles = results.reduce(
+      (acc, { field, file }) => {
+        if (!acc[field]) acc[field] = [];
+        acc[field].push(file);
+        return acc;
       },
-      address: {
-        street,
-        city,
-        unit,
-        state,
-      },
-      academics: {
-        currentSchool,
-        homeSchool,
-        secondaryEntry,
-        secondaryCompletion,
-        pathway,
-        completedSecondaryDiploma,
-      },
-      citizenship: {
-        canadian,
-        language,
-        country,
-        canadianVisa,
-        intendToApply,
-      },
-      documents: uploadedFiles,
-    });
+      {} as Record<
+        string,
+        { url: string; public_id: string; filename: string }[]
+      >,
+    );
 
-    //* create a pending admission request
-    const application = await Application.create({
-      profile: newProfile._id,
-      applicant: (req as CustomRequest).id,
-      programs: mode == "on-site" ? programsArray : [],
-      courses: mode == "off-site" ? selectedCourseIds : [],
-      mode,
-    });
+    // ! using session for both transactions to work
+
+    let applicationId;
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      //* save neccesary profile data
+      const newProfile = await Profile.create(
+        [{
+          guardian: userId,
+          bio: {
+            firstName,
+            lastName,
+            middleName,
+            phoneNumber,
+            email,
+            dob,
+            gender,
+          },
+          address: {
+            street,
+            city,
+            unit,
+            state,
+            country,
+          },
+          academics: {
+            currentSchool,
+            homeSchool,
+            secondaryEntry,
+            // secondaryCompletion,
+            pathway,
+            completedSecondaryDiploma,
+            qualification,
+          },
+          citizenship: {
+            canadian,
+            language,
+            birthCountry,
+            canadianVisa,
+            intendToApply,
+          },
+          documents: uploadedFiles,
+        }],
+        { session },
+      );
+
+      //* create a pending admission request
+      const application = await Application.create(
+       [ {
+          profile: newProfile[0]._id,
+          applicant: userId,
+          programs: mode == "on-site" ? programsArray : [],
+          courses: mode == "off-site" ? selectedCourseIds : [],
+          mode,
+        }],
+        { session },
+      );
+      applicationId = application[0]._id;
+      await session.commitTransaction();
+    } catch (err) {
+      session.abortTransaction();
+      // clean up on db transaction fails
+      await deleteUploadedFiles(uploadedFiles);
+      throw err;
+    } finally {
+      session.endSession();
+    }
 
     //* send checkoutlink for off-site users
 
@@ -215,10 +282,10 @@ export const requestApplication = expressAsyncHandler(
         amount: selectedCourseIds.length * 1045000,
         email: guardian.email,
         metadata: {
-          applicationId: application._id,
+          applicationId: applicationId,
         },
-        application: application._id,
-        user: (req as CustomRequest).id,
+        application: applicationId,
+        user: userId,
       });
 
       if (response.status) {
@@ -388,6 +455,13 @@ export const getOnlineCourses = expressAsyncHandler(
     const data = await getMoodleCourses();
     // * Set cache for course to reduce Moodle server calls
     cache.set((req as RequestWithCahcedKey).cachedKey, data);
+    return res.status(200).json({ data });
+  },
+);
+
+export const getCoursesCategories = expressAsyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const data = await getCachedMoodleCourses();
     return res.status(200).json({ data });
   },
 );

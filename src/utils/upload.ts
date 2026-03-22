@@ -28,3 +28,25 @@ const uploadToCloudinary = (
 };
 
 export default uploadToCloudinary
+
+
+export async function deleteUploadedFiles(
+  uploadedFiles: Record<string, UploadedFile[]>
+): Promise<void> {
+  const publicIds = Object.values(uploadedFiles)
+    .flat()
+    .map((file) => file.public_id)
+    .filter(Boolean);
+
+  if (publicIds.length === 0) return;
+
+  // Delete in parallel
+  await Promise.all(
+    publicIds.map((publicId) =>
+      cloudinary.uploader.destroy(publicId).catch((err) => {
+        // optional: log error but don't fail entire cleanup
+        console.error(`Failed to delete ${publicId}`, err);
+      })
+    )
+  );
+}

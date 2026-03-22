@@ -7,6 +7,7 @@ import {
   getOnlineCourses,
   getPayments,
   enrol,
+  getCoursesCategories,
 } from "../controllers/admissionControllers";
 import multer, { memoryStorage } from "multer";
 import { body } from "express-validator";
@@ -57,6 +58,7 @@ applicationRouter.post(
     { name: "transcripts", maxCount: 1 },
     { name: "govId", maxCount: 1 },
     { name: "others", maxCount: 3 },
+    { name: "passport", maxCount: 1},
   ]),
   [
     body("firstName").notEmpty().escape(),
@@ -71,7 +73,7 @@ applicationRouter.post(
     body("currentSchool").notEmpty().escape(),
     body("homeSchool").notEmpty().escape(),
     body("secondaryEntry").isDate().escape(),
-    body("secondaryCompletion").isDate().escape(),
+    // body("secondaryCompletion").isDate().escape(),
     body("pathway").notEmpty().escape(),
     body("completedSecondaryDiploma").isBoolean(),
     body("canadianVisa").isBoolean(),
@@ -79,6 +81,7 @@ applicationRouter.post(
     body("intendToApply").isBoolean(),
     body("language").notEmpty(),
     body("country").notEmpty(),
+    body("birthCountry").notEmpty(),
     body("mode").custom((value) => ["on-site", "off-site"].includes(value)),
     body("programs")
       .optional()
@@ -93,9 +96,19 @@ applicationRouter.post(
   requestApplication,
 );
 
-applicationRouter.post("/approve/:id", VerifyJWT, OnlyAdmin, approveApplicationRequest);
+applicationRouter.post(
+  "/approve/:id",
+  VerifyJWT,
+  OnlyAdmin,
+  approveApplicationRequest,
+);
 applicationRouter.get("/", VerifyJWT, getApplications);
-applicationRouter.get("/courses", cacheMiddleware, getOnlineCourses);
+applicationRouter.get("/courses", getOnlineCourses);
+applicationRouter.get(
+  "/courses/categories",
+  cacheMiddleware,
+  getCoursesCategories,
+);
 applicationRouter.get("/payments", VerifyJWT, OnlyAdmin, getPayments);
 applicationRouter.post(
   "/enrol/:profile",

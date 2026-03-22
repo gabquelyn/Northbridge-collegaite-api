@@ -20,13 +20,14 @@ export interface IProfile extends mongoose.Document {
     currentSchool: string;
     homeSchool: string;
     secondaryEntry: string;
-    secondaryCompletion: string;
+    qualification?: string;
+
     pathway: string;
     completedSecondaryDiploma: boolean;
   };
   citizenship: {
     language: string;
-    country: string;
+    birthCountry: string;
     canadian: boolean;
     canadianVisa: boolean;
     intendToApply: boolean;

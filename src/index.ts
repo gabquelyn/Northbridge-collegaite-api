@@ -9,12 +9,13 @@ import path from "path";
 import authRouter from "./routes/auth";
 import expressAsyncHandler from "express-async-handler";
 import applicationRouter from "./routes/application";
+import cors from "cors";
 import verifyPayment from "./utils/verifyPayment";
 import paystackWebhookHandler from "./controllers/paystackWebhook";
 import { getMoodleCourses, getMoodleUserByEmail } from "./utils/moodle";
 import { compileEmail } from "./emails/compileEmail";
 import { rateLimit } from "express-rate-limit";
-
+import { getCachedMoodleCourses } from "./utils/getMoodleCached";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -29,6 +30,13 @@ const port = process.env.PORT || 8080;
 
 app.use(limiter);
 app.use(logger);
+app.use(
+  cors({
+    origin: ["http://localhost:3000"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/", express.static(path.join(__dirname, "public")));
@@ -75,18 +83,18 @@ app.get(
     // });
 
     // * moodle course
-    // const moodleCourses = await getMoodleCourses();
+    const moodleCourses = await getCachedMoodleCourses();
 
     // * verify payment call
-    const response = await getMoodleUserByEmail("gabquelyn@gmail.com");
-    return res.status(200).json({ response });
+    // const response = await getMoodleUserByEmail("gabquelyn@gmail.com");
+    return res.status(200).json({ moodleCourses });
   }),
 );
 
 app.use(errorHandler);
 
 mongoose.connection.on("open", () => {
-  console.log("Connected to DB"); 
+  console.log("Connected to DB");
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });

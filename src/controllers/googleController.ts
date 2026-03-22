@@ -29,6 +29,7 @@ export const registerWithGoogle = expressAsyncHandler(
         verified: email_verified,
         provider: "google",
         password: null,
+        name
       });
       return res.status(201).json({ message: "Account created successfully" });
     } else {
@@ -40,17 +41,19 @@ export const registerWithGoogle = expressAsyncHandler(
 export const loginWithGoogle = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { token } = req.body;
+
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-
+    
+    console.log(ticket)
     const payload = ticket.getPayload();
     const foundUser = await UserModel.findOne({ email: payload?.email })
       .lean()
       .exec();
-
-    if (!foundUser || foundUser.provider !== "google")
+    console.log("here");
+    if (!foundUser)
       return res.status(404).json({ message: "User account not found" });
 
     const accessToken = jwt.sign(
@@ -77,7 +80,7 @@ export const loginWithGoogle = expressAsyncHandler(
       sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
-    return res.json({ accessToken });
+    console.log("returned");
+    return res.status(200).json({ accessToken });
   },
 );

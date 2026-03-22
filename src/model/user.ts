@@ -24,9 +24,7 @@ const userSchema = new mongoose.Schema<IUser>({
     required: true,
   },
 
-  profile: {
-    firstName: String,
-  },
+  name: String
 });
 
 export default mongoose.model<IUser>("User", userSchema);

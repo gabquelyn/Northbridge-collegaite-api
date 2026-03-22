@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { compileEmail } from "../emails/compileEmail";
 import { validationResult } from "express-validator";
+import { CustomRequest } from "../types/request";
 
 export const loginController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -23,7 +24,7 @@ export const loginController = expressAsyncHandler(
         .json({ message: "Continue with google to login for this email" });
     const passwordMatch = await bcrypt.compare(password, foundUser.password);
     if (!passwordMatch)
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(403).json({ message: "Incorrect email or password" });
 
     if (!foundUser.verified) {
       const existingToken = await Token.findOne({
@@ -82,20 +83,23 @@ export const loginController = expressAsyncHandler(
 
 export const registerController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const { email, password } = req.body;
+    const { email, password, name } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
 
     const existing = await User.findOne({ email }).lean().exec();
     if (existing)
-      return res.status(409).json({ message: "Email already in use" });
+      return res
+        .status(409)
+        .json({ message: "User Exist, try logging in instead" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       email,
       password: hashedPassword,
       provider: "local",
+      name,
     });
 
     if (!newUser)
@@ -107,7 +111,7 @@ export const registerController = expressAsyncHandler(
       token: crypto.randomBytes(32).toString("hex"),
     });
 
-    const url = `${process.env.FRONTEND_URL}/auth/${newUser._id}/verify/${verificationToken.token}`;
+    const url = `${process.env.FRONTEND_URL}/verify-email/?id=${newUser._id}&token=${verificationToken.token}`;
     // send the verification url via email
     const { html } = compileEmail("welcome", {
       companyName: "Northbridge Collegiate",
@@ -164,12 +168,12 @@ export const forgotPasswordController = expressAsyncHandler(
       userId: user._id,
     });
 
-    const url = `${process.env.FRONTEND_URL}/auth/reset/${otp.token}`;
+    const url = `${process.env.FRONTEND_URL}/reset?otp=${otp.token}`;
 
     // send the verification url via email
     const { html } = compileEmail("forget", {
       companyName: "Northbridge Collegiate",
-      name: user.profile?.firstName || "",
+      name: user.name || "",
       resetUrl: url,
       expiryTime: "15 minutes",
     });
@@ -182,7 +186,7 @@ export const forgotPasswordController = expressAsyncHandler(
   },
 );
 
-export const restPasswordController = expressAsyncHandler(
+export const resetPasswordController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { token } = req.params;
     const { password } = req.body;
