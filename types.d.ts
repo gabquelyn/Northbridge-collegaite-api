@@ -7,5 +7,14 @@ type UploadedFile = {
 };
 type UploadResult = {
   field: string;
-  file: UploadedFile
+  file: UploadedFile;
 };
+
+type FileFields = {
+  [fieldname: string]: Express.Multer.File[];
+};
+
+type FipeUploadPaths = Record<string, string[]>
+
+
+

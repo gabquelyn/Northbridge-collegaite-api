@@ -16,10 +16,12 @@ export default async function VerifyJWT(
     token,
     process.env.ACCESS_TOKEN_SECRET!,
     (error: any, decode: any) => {
+
       if (error) {
         console.log(error);
         return res.status(403).json({ message: "Forbidden" });
       }
+
       (req as CustomRequest).email = decode.UserInfo.email;
       (req as CustomRequest).id = decode.UserInfo.userId;
       next();

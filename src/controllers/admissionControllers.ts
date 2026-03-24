@@ -1,6 +1,6 @@
 import expressAsyncHandler from "express-async-handler";
-import { Request, Response } from "express";
-import uploadToCloudinary, { deleteUploadedFiles } from "../utils/upload";
+import { application, Request, Response } from "express";
+import uploadToCloudinary, { deleteUploadedFiles } from "../config/upload";
 import userModel from "../model/user";
 import { validationResult } from "express-validator";
 import { CustomRequest, RequestWithCahcedKey } from "../types/request";
@@ -16,14 +16,14 @@ import {
   getMoodleCourses,
   getMoodleUserByEmail,
 } from "../utils/moodle";
-import { prices } from "../utils/prices";
+import { prices } from "../config/prices";
 import generatePassword from "../utils/generateRandomPassword";
-import { cache } from "../middlewares/cache";
 import User from "../model/user";
 import invoice from "../model/invoice";
 import { getCachedMoodleCourses } from "../utils/getMoodleCached";
 import mongoose from "mongoose";
-import Plimit from "p-limit";
+import { fileUploadQueue } from "../services/queue";
+
 export const requestApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const result = validationResult(req);
@@ -38,7 +38,7 @@ export const requestApplication = expressAsyncHandler(
       [fieldname: string]: Express.Multer.File[];
     };
 
-    const requiredFiles = ["transcripts", "govId", "passport"];
+    const requiredFiles = ["passport", "transcripts", "govId"];
 
     for (const field of requiredFiles) {
       if (!fileFields?.[field]) {
@@ -63,8 +63,6 @@ export const requestApplication = expressAsyncHandler(
       state,
       currentSchool,
       homeSchool,
-      secondaryEntry,
-      secondaryCompletion,
       pathway,
       completedSecondaryDiploma,
       language,
@@ -74,17 +72,27 @@ export const requestApplication = expressAsyncHandler(
       intendToApply,
       courses,
       qualification,
+      secondaryEntry,
     }: { [key: string]: string; mode: "on-site" | "off-site" } = req.body;
 
     const canadianStudent = String(canadian).toLowerCase() === "true";
     const userId = (req as CustomRequest).id;
     const guardianPromise = userModel.findById(userId).lean().exec();
 
+    const prevOffSiteAppplication = Application.findOne({
+      applicant: userId,
+      mode: "off-site",
+    })
+      .lean()
+      .exec();
+
     const moodleCoursesPromise =
       mode === "off-site" ? getCachedMoodleCourses() : [];
-    const [guardian, moodleCourses] = await Promise.all([
+
+    const [guardian, moodleCourses, prev] = await Promise.all([
       guardianPromise,
       moodleCoursesPromise,
+      prevOffSiteAppplication,
     ]);
 
     if (!guardian)
@@ -94,6 +102,7 @@ export const requestApplication = expressAsyncHandler(
 
     let programsArray: string[] = [];
 
+    // onsite checks
     if (mode === "on-site") {
       //* parse the programs and booleans
 
@@ -139,13 +148,15 @@ export const requestApplication = expressAsyncHandler(
       }
     }
 
-    //* checking for programs on moodle
-    // TODO: ask Arif for the id's of courses and programs
-
     let selectedCourseIds: number[] = [];
 
     // * OFFSITE STUDENTS
     if (mode === "off-site") {
+      if (prev)
+        return res.status(400).json({
+          message: "Admission profile exists already, purchase courses",
+        });
+
       try {
         selectedCourseIds = JSON.parse(courses || "[]");
       } catch {
@@ -165,136 +176,113 @@ export const requestApplication = expressAsyncHandler(
       }
     }
 
-    //* handles file uploads to cloudinary for (transcripts, govId, and supporting documents)
-    // TODO: ask Arif about using cloudinary for compliance
-
-    const limit = Plimit(5);
-    const uploadPromises: Promise<UploadResult>[] = [];
-
-    for (const field in fileFields) {
-      for (const file of fileFields[field]) {
-        uploadPromises.push(
-          limit(async () => {
-            const result = await uploadToCloudinary(
-              file.buffer,
-              "student-documents",
-            );
-
-            return {
-              field,
-              file: {
-                url: result.secure_url,
-                public_id: result.public_id,
-                filename: result.original_filename,
-              },
-            };
-          }),
-        );
-      }
-    }
-
-    const results = await Promise.all(uploadPromises);
-    const uploadedFiles = results.reduce(
-      (acc, { field, file }) => {
-        if (!acc[field]) acc[field] = [];
-        acc[field].push(file);
+    const files = Object.keys(fileFields).reduce(
+      (acc, key) => {
+        acc[key] = fileFields[key].map((f) => f.path);
         return acc;
       },
-      {} as Record<
-        string,
-        { url: string; public_id: string; filename: string }[]
-      >,
+      {} as Record<string, string[]>,
     );
 
-    // ! using session for both transactions to work
-
-    let applicationId;
+    // Using transactions to monitor db
     const session = await mongoose.startSession();
     session.startTransaction();
+
     try {
-      //* save neccesary profile data
-      const newProfile = await Profile.create(
-        [{
-          guardian: userId,
-          bio: {
-            firstName,
-            lastName,
-            middleName,
-            phoneNumber,
-            email,
-            dob,
-            gender,
+      const profile = await Profile.create(
+        [
+          {
+            guardian: userId,
+            bio: {
+              firstName,
+              lastName,
+              middleName,
+              phoneNumber,
+              email,
+              dob,
+              gender,
+            },
+            address: {
+              street,
+              city,
+              unit,
+              state,
+              country,
+            },
+            academics: {
+              currentSchool,
+              homeSchool,
+              pathway,
+              completedSecondaryDiploma,
+              qualification,
+              secondaryEntry,
+            },
+            citizenship: {
+              canadian,
+              language,
+              birthCountry,
+              canadianVisa,
+              intendToApply,
+            },
           },
-          address: {
-            street,
-            city,
-            unit,
-            state,
-            country,
-          },
-          academics: {
-            currentSchool,
-            homeSchool,
-            secondaryEntry,
-            // secondaryCompletion,
-            pathway,
-            completedSecondaryDiploma,
-            qualification,
-          },
-          citizenship: {
-            canadian,
-            language,
-            birthCountry,
-            canadianVisa,
-            intendToApply,
-          },
-          documents: uploadedFiles,
-        }],
+        ],
         { session },
       );
 
-      //* create a pending admission request
       const application = await Application.create(
-       [ {
-          profile: newProfile[0]._id,
-          applicant: userId,
-          programs: mode == "on-site" ? programsArray : [],
-          courses: mode == "off-site" ? selectedCourseIds : [],
-          mode,
-        }],
+        [
+          {
+            profile: profile[0]._id,
+            programs: mode === "on-site" ? programsArray : [],
+            courses: mode === "off-site" ? selectedCourseIds : [],
+            mode,
+            applicant: userId,
+          },
+        ],
         { session },
       );
-      applicationId = application[0]._id;
       await session.commitTransaction();
+
+      await fileUploadQueue.add(
+        "upload-files",
+        {
+          files,
+          profileId: profile[0]._id,
+        },
+        {
+          // attempts: 3,
+          backoff: {
+            type: "exponential",
+            delay: 2000,
+          },
+        },
+      );
+
+      if (mode === "off-site") {
+        const response = await initializePayment({
+          amount: selectedCourseIds.length * 1045000,
+          email: guardian.email,
+          metadata: {
+            applicationId: application[0]._id,
+          },
+          application: application[0]._id,
+          user: userId,
+        });
+
+        if (response.status) {
+          return res.status(201).json({
+            paymentUrl: response.data?.authorization_url,
+            accessCode: response.data?.access_code,
+          });
+        }
+      }
     } catch (err) {
-      session.abortTransaction();
-      // clean up on db transaction fails
-      await deleteUploadedFiles(uploadedFiles);
+      await session.abortTransaction();
       throw err;
     } finally {
       session.endSession();
     }
 
-    //* send checkoutlink for off-site users
-
-    if (mode === "off-site") {
-      const response = await initializePayment({
-        amount: selectedCourseIds.length * 1045000,
-        email: guardian.email,
-        metadata: {
-          applicationId: applicationId,
-        },
-        application: applicationId,
-        user: userId,
-      });
-
-      if (response.status) {
-        return res.status(201).json({
-          paymentUrl: response.data?.authorization_url,
-          accessCode: response.data?.access_code,
-        });
-      }
-    }
     return res.status(201).json({ message: "Admission request submitted" });
   },
 );
@@ -446,22 +434,20 @@ export const getApplications = expressAsyncHandler(
       .lean()
       .exec();
 
-    return res.status(200).json({ data: application });
+    return res.status(200).json({ data: { user, application } });
   },
 );
 
 export const getOnlineCourses = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const data = await getMoodleCourses();
-    // * Set cache for course to reduce Moodle server calls
-    cache.set((req as RequestWithCahcedKey).cachedKey, data);
+    const data = await getCachedMoodleCourses();
     return res.status(200).json({ data });
   },
 );
 
 export const getCoursesCategories = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const data = await getCachedMoodleCourses();
+    const data = await getMoodleCategories();
     return res.status(200).json({ data });
   },
 );

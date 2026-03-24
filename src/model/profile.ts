@@ -105,6 +105,7 @@ const profileSchema = new mongoose.Schema<IProfile>({
   documents: {
     transcripts: [{ url: String, public_id: String, filename: String }],
     govId: [{ url: String, public_id: String, filename: String }],
+    passport: [{ url: String, public_id: String, filename: String }],
     others: [{ url: String, public_id: String, filename: String }],
   },
 });

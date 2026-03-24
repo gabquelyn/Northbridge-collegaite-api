@@ -29,7 +29,7 @@ export const registerWithGoogle = expressAsyncHandler(
         verified: email_verified,
         provider: "google",
         password: null,
-        name
+        name,
       });
       return res.status(201).json({ message: "Account created successfully" });
     } else {
@@ -46,13 +46,12 @@ export const loginWithGoogle = expressAsyncHandler(
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    
-    console.log(ticket)
+
     const payload = ticket.getPayload();
     const foundUser = await UserModel.findOne({ email: payload?.email })
       .lean()
       .exec();
-    console.log("here");
+
     if (!foundUser)
       return res.status(404).json({ message: "User account not found" });
 
@@ -66,21 +65,20 @@ export const loginWithGoogle = expressAsyncHandler(
       String(process.env.ACCESS_TOKEN_SECRET),
       { expiresIn: "1h" },
     );
-
     // create the refresh token
     const refreshToken = jwt.sign(
-      { email: foundUser.email },
+      { email: foundUser.email, userId: foundUser._id },
       String(process.env.REFRESH_TOKEN_SECRET),
       { expiresIn: "1d" },
     );
 
-    res.cookie("jwt", refreshToken, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    console.log("returned");
+
     return res.status(200).json({ accessToken });
   },
 );

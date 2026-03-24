@@ -1,0 +1,67 @@
+
+services:
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      args:
+        NODE_ENV: development
+    container_name: api
+    command: npm run dev:server
+    volumes:
+      - .:/app:delegated
+      - /app/node_modules
+      - uploads_data:/app/uploads
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  worker:
+    build:
+      context: .
+      args:
+        NODE_ENV: development
+    container_name: worker
+    command: npm run dev:worker
+    volumes:
+      - .:/app:delegated
+      - /app/node_modules
+      - uploads_data:/app/uploads
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  events:
+    build:
+      context: .
+      args:
+        NODE_ENV: development
+    container_name: events
+    command: npm run dev:events
+    volumes:
+      - .:/app:delegated
+      - /app/node_modules
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+
+volumes:
+  uploads_data:

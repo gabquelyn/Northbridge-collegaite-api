@@ -1,33 +1,53 @@
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 import streamifier from "streamifier";
-
+import fs from "fs";
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadToCloudinary = (
-  buffer: Express.Multer.File["buffer"],
-  folder: string,
-): Promise<UploadApiResponse> => {
+// const uploadToCloudinary = (
+//   buffer: Express.Multer.File["buffer"],
+//   folder: string,
+// ): Promise<UploadApiResponse> => {
+//   return new Promise((resolve, reject) => {
+//     const stream = cloudinary.uploader.upload_stream(
+//       {
+//         folder,
+//         resource_type: "raw",
+//       },
+//       (error, result) => {
+//         if (error) reject(error);
+//         else if (result) resolve(result);
+//       },
+//     );
+
+//     streamifier.createReadStream(buffer).pipe(stream);
+//   });
+// };
+
+export function uploadFileStream(
+  filePath: string,
+  folder: string
+): Promise<any> {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder,
-        resource_type: "raw",
+        resource_type: "auto", // ✅ important
       },
       (error, result) => {
-        if (error) reject(error);
-        else if (result) resolve(result);
-      },
+        if (error) return reject(error);
+        resolve(result);
+      }
     );
 
-    streamifier.createReadStream(buffer).pipe(stream);
+    fs.createReadStream(filePath).pipe(stream);
   });
-};
+}
 
-export default uploadToCloudinary
+export default uploadFileStream
 
 
 export async function deleteUploadedFiles(

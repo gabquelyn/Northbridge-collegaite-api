@@ -1,0 +1,54 @@
+
+services:
+  redis:
+    image: redis:7
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      args:
+        NODE_ENV: production
+    command: npm run start
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      args:
+        NODE_ENV: production
+    command: node dist/worker.js
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  events:
+    build:
+      context: .
+      args:
+        NODE_ENV: production
+    command: node dist/events.js
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    restart: unless-stopped
+
+volumes:
+  redis_data:

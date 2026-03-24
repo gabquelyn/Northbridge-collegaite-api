@@ -1,5 +1,5 @@
 import pLimit from "p-limit";
-import uploadToCloudinary from "./upload";
+import uploadToCloudinary from "../config/upload";
 
 type UploadedFile = {
   url: string;

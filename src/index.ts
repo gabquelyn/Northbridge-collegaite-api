@@ -3,7 +3,7 @@ import logger, { logEvents } from "./middlewares/logger";
 import cookierParser from "cookie-parser";
 import errorHandler from "./middlewares/errorHandler";
 import dotenv from "dotenv";
-import connectDB from "./utils/connectDB";
+import connectDB from "./config/connectDB";
 import mongoose from "mongoose";
 import path from "path";
 import authRouter from "./routes/auth";

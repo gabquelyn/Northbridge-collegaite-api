@@ -13,41 +13,42 @@ import multer, { memoryStorage } from "multer";
 import { body } from "express-validator";
 import OnlyAdmin from "../middlewares/onlyAdmin";
 import cacheMiddleware from "../middlewares/cache";
+import { upload } from "../config/multer";
 
-const storage = memoryStorage();
-const allowedMimeTypes = [
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.ms-excel",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "application/vnd.ms-powerpoint",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "text/plain",
-  "image/jpeg",
-  "image/png",
-  "image/jpg",
-];
+// const storage = memoryStorage();
+// const allowedMimeTypes = [
+//   "application/pdf",
+//   "application/msword",
+//   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+//   "application/vnd.ms-excel",
+//   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+//   "application/vnd.ms-powerpoint",
+//   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+//   "text/plain",
+//   "image/jpeg",
+//   "image/png",
+//   "image/jpg",
+// ];
 
-const fileFilter = (
-  req: any,
-  file: Express.Multer.File,
-  cb: multer.FileFilterCallback,
-) => {
-  if (allowedMimeTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
+// const fileFilter = (
+//   req: any,
+//   file: Express.Multer.File,
+//   cb: multer.FileFilterCallback,
+// ) => {
+//   if (allowedMimeTypes.includes(file.mimetype)) {
+//     cb(null, true);
+//   } else {
+//     cb(null, false);
+//   }
+// };
 
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
-  },
-});
+// const upload = multer({
+//   storage,
+//   fileFilter,
+//   limits: {
+//     fileSize: 5 * 1024 * 1024, // 5MB
+//   },
+// });
 
 const applicationRouter = Router();
 
@@ -56,9 +57,9 @@ applicationRouter.post(
   VerifyJWT,
   upload.fields([
     { name: "transcripts", maxCount: 1 },
+    { name: "passport", maxCount: 1},
     { name: "govId", maxCount: 1 },
     { name: "others", maxCount: 3 },
-    { name: "passport", maxCount: 1},
   ]),
   [
     body("firstName").notEmpty().escape(),
@@ -92,7 +93,6 @@ applicationRouter.post(
         }
       }),
   ],
-
   requestApplication,
 );
 
@@ -103,7 +103,7 @@ applicationRouter.post(
   approveApplicationRequest,
 );
 applicationRouter.get("/", VerifyJWT, getApplications);
-applicationRouter.get("/courses", getOnlineCourses);
+applicationRouter.get("/courses", VerifyJWT, getOnlineCourses);
 applicationRouter.get(
   "/courses/categories",
   cacheMiddleware,

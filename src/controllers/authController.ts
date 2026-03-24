@@ -8,7 +8,6 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { compileEmail } from "../emails/compileEmail";
 import { validationResult } from "express-validator";
-import { CustomRequest } from "../types/request";
 
 export const loginController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
