@@ -1,54 +1,22 @@
 import { Router } from "express";
 import VerifyJWT from "../middlewares/VerifyJwt";
-import {
-  getApplications,
-  approveApplicationRequest,
-  requestApplication,
-  getOnlineCourses,
-  getPayments,
-  enrol,
-  getCoursesCategories,
-} from "../controllers/admissionControllers";
-import multer, { memoryStorage } from "multer";
+// import multer, { memoryStorage } from "multer";
 import { body } from "express-validator";
 import OnlyAdmin from "../middlewares/onlyAdmin";
 import cacheMiddleware from "../middlewares/cache";
 import { upload } from "../config/multer";
-
-// const storage = memoryStorage();
-// const allowedMimeTypes = [
-//   "application/pdf",
-//   "application/msword",
-//   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-//   "application/vnd.ms-excel",
-//   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-//   "application/vnd.ms-powerpoint",
-//   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-//   "text/plain",
-//   "image/jpeg",
-//   "image/png",
-//   "image/jpg",
-// ];
-
-// const fileFilter = (
-//   req: any,
-//   file: Express.Multer.File,
-//   cb: multer.FileFilterCallback,
-// ) => {
-//   if (allowedMimeTypes.includes(file.mimetype)) {
-//     cb(null, true);
-//   } else {
-//     cb(null, false);
-//   }
-// };
-
-// const upload = multer({
-//   storage,
-//   fileFilter,
-//   limits: {
-//     fileSize: 5 * 1024 * 1024, // 5MB
-//   },
-// });
+import requestApplication from "../controllers/application/apply";
+import approveApplicationRequest from "../controllers/application/approve";
+import {
+  getApplication,
+  getApplications,
+} from "../controllers/application/get";
+import editApplication from "../controllers/application/edit";
+import enrol from "../controllers/application/enrol";
+import {
+  getCoursesCategories,
+  getOnlineCourses,
+} from "../controllers/application/courses";
 
 const applicationRouter = Router();
 
@@ -57,7 +25,7 @@ applicationRouter.post(
   VerifyJWT,
   upload.fields([
     { name: "transcripts", maxCount: 1 },
-    { name: "passport", maxCount: 1},
+    { name: "passport", maxCount: 1 },
     { name: "govId", maxCount: 1 },
     { name: "others", maxCount: 3 },
   ]),
@@ -102,6 +70,53 @@ applicationRouter.post(
   OnlyAdmin,
   approveApplicationRequest,
 );
+
+applicationRouter.get("/:id", VerifyJWT, getApplication);
+
+applicationRouter.patch(
+  "/:id",
+  VerifyJWT,
+  upload.fields([
+    { name: "transcripts", maxCount: 1 },
+    { name: "passport", maxCount: 1 },
+    { name: "govId", maxCount: 1 },
+    { name: "others", maxCount: 3 },
+  ]),
+  [
+    body("firstName").notEmpty().escape(),
+    body("lastName").notEmpty().escape(),
+    body("phoneNumber").isMobilePhone("any"),
+    body("email").isEmail(),
+    body("dob").isDate(),
+    body("gender").custom((value) => ["M", "F"].includes(value)),
+    body("street").notEmpty().escape(),
+    body("city").notEmpty().escape(),
+    body("unit").notEmpty().escape(),
+    body("currentSchool").notEmpty().escape(),
+    body("homeSchool").notEmpty().escape(),
+    body("secondaryEntry").isDate().escape(),
+    // body("secondaryCompletion").isDate().escape(),
+    body("pathway").notEmpty().escape(),
+    body("completedSecondaryDiploma").isBoolean(),
+    body("canadianVisa").isBoolean(),
+    body("canadian").isBoolean(),
+    body("intendToApply").isBoolean(),
+    body("language").notEmpty(),
+    body("country").notEmpty(),
+    body("birthCountry").notEmpty(),
+    body("mode").custom((value) => ["on-site", "off-site"].includes(value)),
+    body("programs")
+      .optional()
+      .custom((value) => {
+        const programs: APPLICATION_PROGRAMS[] = JSON.parse(value);
+        for (const program of programs) {
+          return ["CAAP", "GRADE11", "GRADE12", "AY12"].includes(program);
+        }
+      }),
+  ],
+  editApplication,
+);
+
 applicationRouter.get("/", VerifyJWT, getApplications);
 applicationRouter.get("/courses", VerifyJWT, getOnlineCourses);
 applicationRouter.get(
@@ -109,7 +124,7 @@ applicationRouter.get(
   cacheMiddleware,
   getCoursesCategories,
 );
-applicationRouter.get("/payments", VerifyJWT, OnlyAdmin, getPayments);
+
 applicationRouter.post(
   "/enrol/:profile",
   [

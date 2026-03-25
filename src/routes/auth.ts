@@ -1,18 +1,17 @@
 import { Router } from "express";
-import {
-  verifyController,
-  loginController,
-  logoutController,
-  registerController,
-  refreshController,
-  forgotPasswordController,
-  resetPasswordController,
-} from "../controllers/authController";
-import {
-  registerWithGoogle,
-  loginWithGoogle,
-} from "../controllers/googleController";
 import { body } from "express-validator";
+import loginController from "../controllers/auth/login";
+import verifyController from "../controllers/auth/verify";
+import logoutController from "../controllers/auth/logout";
+import refreshController from "../controllers/auth/refresh";
+import resetPasswordController from "../controllers/auth/reset";
+import forgotPasswordController from "../controllers/auth/forgot";
+import registerController from "../controllers/auth/register";
+import {
+  loginWithGoogle,
+  registerWithGoogle,
+} from "../controllers/auth/google";
+
 const authRouter = Router();
 authRouter.route("/").post(loginController);
 authRouter.route("/verify/:userId/:token").post(verifyController);

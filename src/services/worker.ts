@@ -21,11 +21,20 @@ async function myWorker() {
           const { profileId, files } = job.data;
 
           const uploadedFiles = await uploadFilesFromPaths(files);
-          await Profile.findByIdAndUpdate(profileId, {
-            documents: uploadedFiles,
-          })
-            .lean()
-            .exec();
+
+          const update: {
+            [index: string]: DocumentFile[];
+          } = {};
+
+          for (const key in uploadedFiles) {
+            update[`documents.${key}`] = uploadedFiles[key];
+          }
+
+          await Profile.findByIdAndUpdate(
+            profileId,
+            { $set: update },
+            { new: true },
+          );
         }
         if (job.name === "send-email") {
           const { to, html, subject } = job.data;

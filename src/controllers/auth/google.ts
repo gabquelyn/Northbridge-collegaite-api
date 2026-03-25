@@ -2,7 +2,7 @@ import expressAsyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
-import UserModel from "../model/user";
+import UserModel from "../../model/user";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 

@@ -14,7 +14,10 @@ type FileFields = {
   [fieldname: string]: Express.Multer.File[];
 };
 
-type FipeUploadPaths = Record<string, string[]>
+type FipeUploadPaths = Record<string, string[]>;
 
-
-
+type DocumentFile = {
+  url: string;
+  public_id: string;
+  filename: string;
+};

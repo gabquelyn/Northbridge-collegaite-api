@@ -47,3 +47,7 @@
 20260323	14:50:59	3456aa60-797f-4c24-b8d9-3749280e41f8	The key argument has to be of type `string` or `number`. Found: `undefined`	GET	/application/courses	http://localhost:3000
 20260323	14:51:01	86cdc03a-1d8d-4959-87d7-1b0128e56a17	The key argument has to be of type `string` or `number`. Found: `undefined`	GET	/application/courses	http://localhost:3000
 20260324	14:26:17	1764dcde-90f5-472c-bb9d-a2a6d12c45e3	Failed to retrieve verification certificates: request to https://www.googleapis.com/oauth2/v1/certs failed, reason: Client network socket disconnected before secure TLS connection was established	POST	/auth/google/register	http://localhost:3000
+20260325	02:03:26	dd033b69-b667-4fba-aa05-4a3c11c5a084	Cast to ObjectId failed for value "courses" (type string) at path "_id" for model "Application"	GET	/application/courses	http://localhost:3000
+20260325	02:03:28	734c8f32-c339-4c0b-8474-85c475d4052e	Cast to ObjectId failed for value "courses" (type string) at path "_id" for model "Application"	GET	/application/courses	http://localhost:3000
+20260325	02:34:54	d9be5faa-2de4-4643-af37-f313d931c10f	Cast to ObjectId failed for value "courses" (type string) at path "_id" for model "Application"	GET	/application/courses	http://localhost:3000
+20260325	02:34:56	efc6da16-970a-44a3-8938-9a7586353119	Cast to ObjectId failed for value "courses" (type string) at path "_id" for model "Application"	GET	/application/courses	http://localhost:3000

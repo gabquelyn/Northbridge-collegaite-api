@@ -49,7 +49,12 @@ const profileSchema = new mongoose.Schema<IProfile>({
       required: true,
       type: String,
     },
+    country: {
+      required: true,
+      type: String,
+    },
     state: String,
+
   },
 
   academics: {

@@ -4,7 +4,7 @@ import uploadFileStream from "../config/upload";
 
 export async function uploadFilesFromPaths(files: FipeUploadPaths) {
   const limit = pLimit(5); // ✅ reduced
-  const results: any = {};
+  const results: { [index: string]: DocumentFile[] } = {};
   const tasks: Promise<void>[] = [];
 
   for (const field in files) {
@@ -14,10 +14,7 @@ export async function uploadFilesFromPaths(files: FipeUploadPaths) {
           let result;
 
           try {
-            result = await uploadFileStream(
-              filePath,
-              "student-documents"
-            );
+            result = await uploadFileStream(filePath, "student-documents");
 
             if (!results[field]) results[field] = [];
 
@@ -26,12 +23,11 @@ export async function uploadFilesFromPaths(files: FipeUploadPaths) {
               public_id: result.public_id,
               filename: result.original_filename,
             });
-
           } finally {
             // 🧹 ALWAYS delete temp file
             await fs.unlink(filePath).catch(() => {});
           }
-        })
+        }),
       );
     }
   }
