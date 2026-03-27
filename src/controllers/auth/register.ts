@@ -11,7 +11,7 @@ import { emailQueue } from "../../services/queue";
 
 const registerController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const { email, password, name } = req.body;
+    const { email, password, name, mode } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array() });
@@ -39,7 +39,7 @@ const registerController = expressAsyncHandler(
       token: crypto.randomBytes(32).toString("hex"),
     });
 
-    const url = `${process.env.FRONTEND_URL}/verify-email/?id=${newUser._id}&token=${verificationToken.token}`;
+    const url = `${process.env.FRONTEND_URL}/verify-email/?id=${newUser._id}&token=${verificationToken.token}&mode=${mode}`;
     // send the verification url via email
     const { html } = compileEmail("welcome", {
       companyName: "Northbridge Collegiate",

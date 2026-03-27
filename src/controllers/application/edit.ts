@@ -82,8 +82,8 @@ const editApplication = expressAsyncHandler(
         .json({ message: "Not permitted to edit application" });
 
     if (
-      prevApplication.paid &&
-      prevApplication.granted &&
+      ((prevApplication.paid && prevApplication.mode == "on-site") ||
+        (prevApplication.granted && prevApplication.mode == "off-site")) &&
       user?.role !== "admin"
     )
       return res.status(400).json({
@@ -103,7 +103,7 @@ const editApplication = expressAsyncHandler(
       //* parse the programs and booleans
 
       try {
-        programsArray = JSON.parse(programs || "[]");
+        programsArray = JSON.parse(programs);
       } catch {
         return res.status(400).json({ message: "Invalid programs format" });
       }
@@ -148,7 +148,8 @@ const editApplication = expressAsyncHandler(
 
     if (mode === "off-site") {
       try {
-        selectedCourseIds = JSON.parse(courses || "[]");
+        selectedCourseIds = JSON.parse(courses);
+        console.log(selectedCourseIds);
       } catch {
         return res.status(400).json({ message: "Invalid courses format" });
       }
@@ -159,10 +160,12 @@ const editApplication = expressAsyncHandler(
 
       const moodleCourseIds = new Set(moodleCourses.map((obj) => obj.id));
       for (const id of selectedCourseIds) {
-        if (!moodleCourseIds.has(id))
+        if (!moodleCourseIds.has(id)) {
+          console.log(id, "br", moodleCourseIds);
           return res
             .status(400)
             .json({ message: "Selected course doesn't exist in moodle" });
+        }
       }
     }
 
@@ -248,7 +251,6 @@ const editApplication = expressAsyncHandler(
           metadata: {
             applicationId: prevApplication._id,
           },
-
         });
 
         if (response.status) {

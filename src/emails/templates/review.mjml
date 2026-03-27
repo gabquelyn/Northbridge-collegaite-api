@@ -1,0 +1,91 @@
+<mjml>
+  <mj-body background-color="#f4f4f4">
+    <mj-include path="../partials/header.mjml" />
+
+    <mj-section
+      background-color="#ffffff"
+      padding="20px 20px"
+      border-radius="5px"
+    >
+      <mj-column>
+        <!-- Heading -->
+        <mj-text
+          font-size="18px"
+          color="#151e2f"
+          font-weight="bold"
+          padding-bottom="10px"
+        >
+          Update on Your Application
+        </mj-text>
+
+        <!-- Greeting -->
+        <mj-text
+          font-size="15px"
+          color="#555555"
+          line-height="22px"
+          padding-bottom="10px"
+        >
+          Hello {{ applicantName }},
+        </mj-text>
+
+        <!-- Intro -->
+        <mj-text
+          font-size="15px"
+          color="#555555"
+          line-height="22px"
+          padding-bottom="15px"
+        >
+          Your application has been reviewed. Please see the message from our admissions team below:
+        </mj-text>
+
+        <!-- Review Message Box -->
+        <mj-text
+          background-color="#f8f9fb"
+          padding="15px"
+          font-size="15px"
+          color="#333333"
+          line-height="22px"
+        >
+          {{ reviewMessage }}
+        </mj-text>
+
+        <!-- Optional Details -->
+        <mj-text
+          font-size="14px"
+          color="#555555"
+          line-height="20px"
+          padding-top="15px"
+        >
+          <strong>Application ID:</strong> {{ applicationId }} <br />
+          <!-- <strong>Program:</strong> {{ programName }} -->
+        </mj-text>
+
+        <!-- CTA -->
+        <mj-button
+          background-color="#1e88e5"
+          color="#ffffff"
+          font-size="16px"
+          font-weight="bold"
+          border-radius="5px"
+          href="{{ applicationPortalUrl }}"
+          padding="25px 0 0 0"
+          align="center"
+        >
+          View Full Application
+        </mj-button>
+
+        <!-- Footer Note -->
+        <mj-text
+          font-size="12px"
+          color="#999999"
+          align="center"
+          padding-top="15px"
+        >
+          If you have any questions regarding this update, please contact support.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-include path="../partials/footer.mjml" />
+  </mj-body>
+</mjml>

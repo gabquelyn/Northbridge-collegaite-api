@@ -80,3 +80,9 @@
 20260327	12:11:47	da8ce999-952d-450d-b022-ba5d8167c864	getaddrinfo ENOTFOUND study.northbridgec.ca	GET	/application/apply/courses	http://localhost:3000
 20260327	12:12:13	ad27f526-9c92-41e1-8874-b59a9d5d437f	getaddrinfo ENOTFOUND ac-wc1gipf-shard-00-00.ju1epyg.mongodb.net	GET	/application/courses/my	http://localhost:3000
 20260327	12:12:59	8e0e2f6c-3381-4baf-b354-0a41df03c1c9	getaddrinfo ENOTFOUND ac-wc1gipf-shard-00-00.ju1epyg.mongodb.net	GET	/application/courses/my	http://localhost:3000
+20260327	19:58:51	22e775be-cb00-4716-87fc-97960ffd5243	getaddrinfo EAI_AGAIN study.northbridgec.ca	GET	/application/apply/courses	http://localhost:3000
+20260327	20:26:31	5fbb5e9a-5e7c-4827-b8ba-5a3f2eb9a5b8	getaddrinfo ENOTFOUND study.northbridgec.ca	GET	/application/apply/courses	http://localhost:3000
+20260327	20:26:37	d028063c-64be-4c7f-911a-1333a43d03ce	getaddrinfo ENOTFOUND study.northbridgec.ca	GET	/application/apply/courses	http://localhost:3000
+20260327	20:27:30	51fb071a-36ba-408d-b32e-d92f7b2bfd2d	getaddrinfo EAI_AGAIN study.northbridgec.ca	GET	/application/apply/courses	http://localhost:3000
+20260327	20:37:49	ff152ea4-5a83-4c08-b599-c245b13b2d50	getaddrinfo ENOTFOUND study.northbridgec.ca	GET	/application/apply/courses	http://localhost:3000
+20260327	20:37:50	b5d20a92-6b0d-4e2f-85f9-d0b681840485	getaddrinfo ENOTFOUND study.northbridgec.ca	GET	/application/apply/courses	http://localhost:3000

@@ -1,19 +1,17 @@
 import expressAsyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import userModel from "../../model/user";
-import { CustomRequest } from "../../types/request";
 import Profile from "../../model/profile";
 import Application from "../../model/application";
 import initializePayment from "../../utils/initializePayment";
 import { compileEmail } from "../../emails/compileEmail";
-import sendMail from "../../utils/sendMail";
 import {
-  createMoodleUser,
   enrolStudentInCourses,
-  getMoodleUserByEmail,
 } from "../../utils/moodle";
 import { prices, APPLICATION_FEE } from "../../config/prices";
-import generatePassword from "../../utils/generateRandomPassword";
+import moodleCredentials from "../../utils/moodleCredentials";
+import { emailQueue } from "../../services/queue";
+import {v4 as uuid} from "uuid";
 
 const approveApplicationRequest = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -48,40 +46,7 @@ const approveApplicationRequest = expressAsyncHandler(
           .status(400)
           .json({ message: "Payment for courses not completed yet" });
 
-      //   create a moodle account for the user and send admission letter if not exist
-      const moodleUser: { id: number }[] = await getMoodleUserByEmail(email);
-
-      const password = generatePassword();
-      // if applicant does not have an account with NBC
-      let userId;
-
-      if (moodleUser.length === 0) {
-        // * create a new moodle account using the profile profile email
-        const userid = await createMoodleUser({
-          username: email,
-          password,
-          firstName,
-          lastName,
-          email,
-        });
-        userId = userid;
-
-        const { html } = compileEmail("moodle", {
-          studentEmail: email,
-          studentPassword: password,
-          companyName: "NBC",
-        });
-
-        // * send moodle details to off-site users
-        await sendMail({
-          to: `${email}, ${guardian.email}`,
-          html,
-          subject: "Study Account Credentials",
-        });
-      } else {
-        userId = moodleUser[0].id;
-      }
-
+      const userId = await moodleCredentials({ email, firstName, lastName });
       await enrolStudentInCourses(userId, application.courses);
     }
 
@@ -115,9 +80,7 @@ const approveApplicationRequest = expressAsyncHandler(
               value: APPLICATION_FEE * 100,
             },
           ],
-          
         },
-
       });
 
       if (response.status && response.data?.authorization_url) {
@@ -129,11 +92,15 @@ const approveApplicationRequest = expressAsyncHandler(
           paymentUrl: response.data.authorization_url,
         });
 
-        await sendMail({
-          to: guardian.email,
-          subject: "Complete Payment For Programs",
-          html,
-        });
+        await emailQueue.add(
+          "deliver",
+          {
+            to: guardian.email,
+            html,
+            subject: "Complete Payment For Programs",
+          },
+          { jobId: uuid() },
+        );
       }
     }
 
@@ -148,4 +115,4 @@ const approveApplicationRequest = expressAsyncHandler(
   },
 );
 
-export default approveApplicationRequest
+export default approveApplicationRequest;

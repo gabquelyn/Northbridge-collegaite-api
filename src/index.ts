@@ -21,6 +21,10 @@ import { compileEmail } from "./emails/compileEmail";
 import { rateLimit } from "express-rate-limit";
 import { getCachedMoodleCourses } from "./utils/getMoodleCached";
 import { emailQueue } from "./services/queue";
+import VerifyJWT from "./middlewares/VerifyJwt";
+import user from "./model/user";
+import { CustomRequest } from "./types/request";
+import profileRouter from "./routes/profile";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -50,88 +54,36 @@ app.use(cookierParser());
 app.use("/auth", authRouter);
 app.use("/application", applicationRouter);
 app.get("/webhook", paystackWebhookHandler);
-
+app.use("/profile", profileRouter);
 app.get(
   // "/email/:template",
   "/test",
   expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {
-    // * email template test
-    try {
-      const consultation = {
-        question: "What is the treatment plan?",
-        reply: "You should follow the prescribed medication for 2 weeks.",
-        doctor: "Dr. Smith",
-        date: "2026-03-27",
-      };
+    const consultation = {
+      question: "What is the treatment plan?",
+      reply: "You should follow the prescribed medication for 2 weeks.",
+      doctor: "Dr. Smith",
+      date: "2026-03-27",
+    };
 
-      // Convert object to HTML string
-      const consultationHtml = Object.entries(consultation)
-        .map(
-          ([key, value]) => `
-      <mj-text
-        background-color="#f8f9fb"
-        padding="15px"
-        font-size="15px"
-        color="#333333"
-        line-height="22px"
-        border-radius="5px"
-        padding-bottom="10px"
-      >
-        <strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${value}
-      </mj-text>
-    `,
-        )
-        .join("\n");
-      const { html } = compileEmail("consultation",  {consultationHtml} );
-      // await emailQueue.add("deliver", {
-      //   to: "gabquelyn@gmail.com",
-      //   html,
-      //   subject: "Moodle Details",
-      // });
-      return res.send(html)
-    } catch (err) {
-      console.log(err);
-      res.status(500).send("Template not found or failed to compile.");
-    }
+    const { html } = compileEmail("review", {
+      applicantName: "emm",
+      reviewMessage: "erereruiereiurb ruibebr reiuber buirebbr ",
+      applicationId: "rerheer",
+      programName: "CAAP",
+      applicationPortalUrl: `${process.env.FRONTEND_URL}/dashboard/application/rekreer`,
+    });
 
-    // * initialize payment test
-    // const response = await initializePayment({
-    //   amount: 500 * 100,
-    //   email: "gabquelyn@gmail.com",
-    //   metadata: {
-    //     admissionId: "5",
-    //     custom_fields: [{ detail: "some detail", name: "BG", amount: 4 }].map(
-    //       (p) => ({
-    //         display_name: p.detail,
-    //         variable_name: p.name,
-    //         value: p.amount,
-    //       }),
-    //     ),
-    //   },
-    // });
-
-    // const { html } = compileEmail("moodle", {
-    //   date: new Date().toDateString(),
-    //   studentName: `John Doe`,
-    //   studentId: "__",
-    //   program: ["CAAP", "GRADE 11"].join(", "),
-    //   academicYear: new Date().getFullYear(),
-    //   paymentUrl: "",
-    // });
-
-    // await emailQueue.add("deliver", {
-    //   to: "gabquelyn@gmail.com",
-    //   html,
-    //   subject: "Moodle Details",
-    // });
-
-    // * moodle course
-    // const moodleCourses = await getCachedMoodleCourses();
-    // const categories = await getCoursesByCategory(2);
-
-    // * verify payment call
-    // const response = await getMoodleUserByEmail("gabquelyn@gmail.com");
-    // return res.status(200).json({ categories });
+    await emailQueue.add(
+      "deliver",
+      {
+        to: "gabquelyn@gmail.com",
+        html,
+        subject: "Application Review message",
+      },
+      // { jobId: uuid() },
+    );
+    return res.status(200).json({ message: "email sent" });
   }),
 );
 

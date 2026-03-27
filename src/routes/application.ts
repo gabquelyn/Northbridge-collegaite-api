@@ -19,8 +19,8 @@ import {
   getOnlineCourses,
 } from "../controllers/application/courses";
 import enrolCourses from "../controllers/application/enrolcourses";
-import application from "../model/application";
 import getApplicationReceipt from "../controllers/application/receipt";
+import reviewApplication from "../controllers/application/review";
 
 const applicationRouter = Router();
 
@@ -155,5 +155,14 @@ applicationRouter.get(
   OnlyAdmin,
   getApplicationReceipt,
 );
+
+applicationRouter.post(
+  "/review/:id",
+  VerifyJWT,
+  OnlyAdmin,
+  reviewApplication,
+);
+
+
 
 export default applicationRouter;

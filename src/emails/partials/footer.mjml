@@ -35,7 +35,7 @@
       />
       <mj-social-element
         name="linkedin"
-        href="{{ linkedinUrl }}"
+        href="https://www.linkedin.com/company/northbridge-collegiate/"
       ></mj-social-element>
     </mj-social>
 
