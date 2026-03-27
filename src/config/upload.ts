@@ -1,5 +1,6 @@
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 import streamifier from "streamifier";
+import path from "path";
 import fs from "fs";
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -32,10 +33,12 @@ export function uploadFileStream(
   folder: string
 ): Promise<any> {
   return new Promise((resolve, reject) => {
+    const ext = path.extname(filePath)
     const stream = cloudinary.uploader.upload_stream(
       {
         folder,
-        resource_type: "auto", // ✅ important
+        resource_type: "auto", 
+        public_id: `${Date.now()}${ext}`,
       },
       (error, result) => {
         if (error) return reject(error);

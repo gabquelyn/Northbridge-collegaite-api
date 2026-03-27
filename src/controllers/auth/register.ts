@@ -2,11 +2,12 @@ import { Response, Request } from "express";
 import expressAsyncHandler from "express-async-handler";
 import Token from "../../model/token";
 import User from "../../model/user";
-import sendMail from "../../utils/sendMail";
+import { v4 as uuid } from "uuid";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { compileEmail } from "../../emails/compileEmail";
 import { validationResult } from "express-validator";
+import { emailQueue } from "../../services/queue";
 
 const registerController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -44,7 +45,17 @@ const registerController = expressAsyncHandler(
       companyName: "Northbridge Collegiate",
       verifyUrl: url,
     });
-    await sendMail({ to: email, subject: "Verify Email Address", html });
+
+    await emailQueue.add(
+      "deliver",
+      {
+        to: email,
+        html,
+        subject: "Verify Email Address",
+      },
+      { jobId: uuid() },
+    );
+    // await sendMail({ to: email, subject: "Verify Email Address", html });
     return res
       .status(201)
       .json({ message: "Email sent to your account please verify" });

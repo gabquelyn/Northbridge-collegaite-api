@@ -5,8 +5,6 @@ export default async function initializePayment({
   amount,
   email,
   metadata,
-  application,
-  user,
   currency = "NGN",
 }: {
   amount: number;
@@ -19,8 +17,6 @@ export default async function initializePayment({
       value: number;
     }[];
   };
-  application: string;
-  user: string;
   currency?: string;
 }): Promise<{
   status: boolean;
@@ -62,16 +58,6 @@ export default async function initializePayment({
     );
 
     const data = response.data;
-    // create an invoice details for the application
-    await invoice.create({
-      application,
-      user,
-      code: data?.data.access_code,
-      reference: data?.data.reference,
-      currency,
-      amount,
-    });
-
     return data;
   } catch (error) {
     console.log(error);

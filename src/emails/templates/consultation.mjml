@@ -1,0 +1,30 @@
+const mjmlTemplate = `
+<mjml>
+  <mj-body background-color="#f4f4f4">
+    <mj-include path="../partials/header.mjml" />
+
+    <mj-section background-color="#ffffff" padding="20px 20px" border-radius="5px">
+      <mj-column>
+        <mj-text font-size="18px" color="#151e2f" font-weight="bold" padding-bottom="10px">
+          Consultation Details
+        </mj-text>
+
+        <mj-text font-size="15px" color="#555555" line-height="22px" padding-bottom="15px">
+          You have received a new consultation. Below are the details:
+        </mj-text>
+
+        <!-- Insert dynamic HTML here -->
+        ${consultationHtml}
+
+
+
+        <mj-text font-size="12px" color="#999999" align="center" padding-top="10px">
+          Please respond promptly to the consultation if needed.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-include path="../partials/footer.mjml" />
+  </mj-body>
+</mjml>
+`;

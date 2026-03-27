@@ -9,6 +9,7 @@ import User from "../../model/user";
 import { getCachedMoodleCourses } from "../../utils/getMoodleCached";
 import mongoose from "mongoose";
 import { fileUploadQueue } from "../../services/queue";
+import { UNIT_COURSE } from "../../config/prices";
 
 const editApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -242,13 +243,12 @@ const editApplication = expressAsyncHandler(
 
       if (mode === "off-site") {
         const response = await initializePayment({
-          amount: selectedCourseIds.length * 1045000,
+          amount: selectedCourseIds.length * UNIT_COURSE,
           email: user.email,
           metadata: {
             applicationId: prevApplication._id,
           },
-          application: prevApplication._id,
-          user: userId,
+
         });
 
         if (response.status) {

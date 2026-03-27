@@ -15,8 +15,12 @@ import editApplication from "../controllers/application/edit";
 import enrol from "../controllers/application/enrol";
 import {
   getCoursesCategories,
+  getMycourses,
   getOnlineCourses,
 } from "../controllers/application/courses";
+import enrolCourses from "../controllers/application/enrolcourses";
+import application from "../model/application";
+import getApplicationReceipt from "../controllers/application/receipt";
 
 const applicationRouter = Router();
 
@@ -118,7 +122,9 @@ applicationRouter.patch(
 );
 
 applicationRouter.get("/", VerifyJWT, getApplications);
-applicationRouter.get("/courses", VerifyJWT, getOnlineCourses);
+applicationRouter.get("/apply/courses", getOnlineCourses);
+applicationRouter.post("/courses/enrol", VerifyJWT, enrolCourses);
+applicationRouter.get("/courses/my", VerifyJWT, getMycourses);
 applicationRouter.get(
   "/courses/categories",
   cacheMiddleware,
@@ -126,7 +132,7 @@ applicationRouter.get(
 );
 
 applicationRouter.post(
-  "/enrol/:profile",
+  "/enrol/:id",
   [
     body("programs")
       .optional()
@@ -141,6 +147,13 @@ applicationRouter.post(
   ],
   VerifyJWT,
   enrol,
+);
+
+applicationRouter.get(
+  "/receipt/:id",
+  VerifyJWT,
+  OnlyAdmin,
+  getApplicationReceipt,
 );
 
 export default applicationRouter;

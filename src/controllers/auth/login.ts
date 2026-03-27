@@ -2,13 +2,14 @@ import { Response, Request } from "express";
 import expressAsyncHandler from "express-async-handler";
 import Token from "../../model/token";
 import User from "../../model/user";
-import sendMail from "../../utils/sendMail";
+import {v4 as uuid} from "uuid";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { compileEmail } from "../../emails/compileEmail";
+import { emailQueue } from "../../services/queue";
 
- const loginController = expressAsyncHandler(
+const loginController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { email, password } = req.body;
     const foundUser = await User.findOne({ email }).lean().exec();
@@ -42,7 +43,13 @@ import { compileEmail } from "../../emails/compileEmail";
           companyName: "Northbridge Collegiate",
           verifyUrl: url,
         });
-        await sendMail({ to: email, subject: "Verify Email Address", html });
+
+        await emailQueue.add("deliver", {
+          to: email,
+          html,
+          subject: "Verify email address",
+        }, {jobId: uuid()});
+        // await sendMail({ to: email, subject: "Verify Email Address", html });
       }
 
       return res
@@ -79,4 +86,4 @@ import { compileEmail } from "../../emails/compileEmail";
   },
 );
 
-export default loginController
+export default loginController;

@@ -6,7 +6,7 @@ import { CustomRequest } from "../../types/request";
 import Profile from "../../model/profile";
 import Application from "../../model/application";
 import initializePayment from "../../utils/initializePayment";
-
+import { UNIT_COURSE } from "../../config/prices";
 import { getCachedMoodleCourses } from "../../utils/getMoodleCached";
 import mongoose from "mongoose";
 import { fileUploadQueue } from "../../services/queue";
@@ -237,23 +237,23 @@ import { fileUploadQueue } from "../../services/queue";
           profileId: profile[0]._id,
         },
         {
+          jobId: application[0]._id,
           // attempts: 3,
           backoff: {
             type: "exponential",
             delay: 2000,
           },
-        },
+        }, 
       );
 
       if (mode === "off-site") {
         const response = await initializePayment({
-          amount: selectedCourseIds.length * 1045000,
+          amount: selectedCourseIds.length * UNIT_COURSE,
           email: guardian.email,
           metadata: {
             applicationId: application[0]._id,
           },
-          application: application[0]._id,
-          user: userId,
+
         });
 
         if (response.status) {

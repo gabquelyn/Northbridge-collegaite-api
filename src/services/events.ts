@@ -7,7 +7,11 @@ const connection = new IORedis({
   maxRetriesPerRequest: null,
 });
 
-export const uploadEvents = new QueueEvents("nbc", {
+export const uploadEvents = new QueueEvents("file-upload", {
+  connection,
+});
+
+export const emailEvents = new QueueEvents("send-email", {
   connection,
 });
 
@@ -20,5 +24,17 @@ uploadEvents.on("failed", ({ jobId, failedReason }) => {
 });
 
 uploadEvents.on("active", ({ jobId }) => {
-  console.log(`🚀 Job ${jobId} started`);
+  console.log(`Email 🚀 Job ${jobId} started`);
+});
+
+emailEvents.on("completed", ({ jobId, returnvalue }) => {
+  console.log(`Job ${jobId} completed ${returnvalue}`);
+});
+
+emailEvents.on("failed", ({ jobId, failedReason }) => {
+  console.error(`Email Job ${jobId} failed: ${failedReason} `);
+});
+
+emailEvents.on("active", ({ jobId }) => {
+  console.log(`Email 🚀 Job ${jobId} started`);
 });

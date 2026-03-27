@@ -15,7 +15,7 @@ const tokenSchema = new Schema<IToken>({
     type: Date,
     default: Date.now,
   },
-});
+}, { timestamps: true },);
 
 tokenSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 15 });
 

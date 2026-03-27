@@ -3,7 +3,7 @@ export interface IApplication extends mongoose.Document {
   profile: mongoose.Schema.Types.ObjectId;
   applicant: mongoose.Schema.Types.ObjectId;
 
-  programs: ["CAAP" | "GRADE11" | "GRADE12" | "AY12"];
+  programs: APPLICATION_PROGRAMS[];
   mode: "on-site" | "off-site";
   courses: number[];
 

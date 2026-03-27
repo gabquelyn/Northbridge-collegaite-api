@@ -1,25 +1,15 @@
 import mongoose from "mongoose";
 const invoiveSchema = new mongoose.Schema({
-  user: {
-    required: true,
-    ref: "User",
-    type: mongoose.Schema.Types.ObjectId,
-  },
-
   application: {
     required: true,
     ref: "Application",
     type: mongoose.Schema.Types.ObjectId,
   },
 
-  code: {
-    required: true,
-    type: String,
-  },
-
   reference: {
     required: true,
     type: String,
+    unique: true
   },
   status: {
     type: String,
@@ -33,6 +23,6 @@ const invoiveSchema = new mongoose.Schema({
     required: true,
     type: String,
   },
-});
+}, { timestamps: true },);
 
 export default mongoose.model("Invoice", invoiveSchema);

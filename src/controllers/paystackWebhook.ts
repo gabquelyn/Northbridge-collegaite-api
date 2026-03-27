@@ -1,13 +1,7 @@
 import { Request, Response } from "express";
 import expressAsyncHandler from "express-async-handler";
 import crypto from "crypto";
-import Application from "../model/application";
-import { createMoodleUser, getMoodleUserByEmail } from "../utils/moodle";
-import Profile from "../model/profile";
-import generatePassword from "../utils/generateRandomPassword";
-import sendMail from "../utils/sendMail";
-import { compileEmail } from "../emails/compileEmail";
-import invoice from "../model/invoice";
+import { paystackQueue } from "../services/queue";
 
 interface PayStackEvent {
   event: string;
@@ -36,68 +30,21 @@ const paystackWebhookHandler = expressAsyncHandler(
       console.log(response);
 
       if (response.event == "charge.success") {
-        //   * Mark admission as paid upon completion
-
+        // handle the hook
+        const { currency, amount, status, reference } = response.data;
         const applicationId = response.data.metadata.applicationId;
-        await invoice.findOneAndUpdate(
-          { reference: response.data.reference },
+
+        await paystackQueue.add(
+          "charged",
           {
-            currency: response.data.currency,
-            amount: response.data.amount,
-            status: response.data.status,
+            applicationId,
+            currency,
+            amount,
+            status,
+            reference,
           },
+          { jobId: response.data.reference },
         );
-
-        const application = await Application.findByIdAndUpdate(applicationId, {
-          paid: true,
-        })
-          .lean()
-          .exec();
-
-        const profile = await Profile.findById(application?.profile)
-          .lean()
-          .exec();
-
-        // ! MOODLE FOR ONSITE USERS
-        if (application?.mode == "on-site" && profile) {
-          // * Create a payment reference for the admission;
-          const { email, firstName, lastName } = profile.bio;
-          //  * Check moodle details and create
-          const moodleUser: { id: number }[] =
-            await getMoodleUserByEmail(email);
-          const password = generatePassword(6);
-
-          let userId;
-          if (moodleUser.length === 0) {
-            // * create a new moodle account using the application profile email
-            const id  = await createMoodleUser({
-              username: email,
-              password,
-              firstName,
-              lastName,
-              email,
-            });
-
-            userId = id
-
-            const { html } = compileEmail("moodle", {
-              studentEmail: email,
-              studentPassword: password,
-              companyName: "NBC",
-            });
-
-            // * send moodle details to user (CAAP)
-            await sendMail({
-              to: `${email}`,
-              html,
-              subject: "Study Account Credentials",
-            });
-          } else {
-            userId = moodleUser[0].id
-          }
-
-          // TODO: if it is on-site create moodle user, send them the details, and assign courses
-        }
       }
     }
 

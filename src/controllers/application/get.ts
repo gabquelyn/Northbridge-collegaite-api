@@ -26,6 +26,10 @@ export const getApplications = expressAsyncHandler(
 export const getApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { id } = req.params;
+    const user = await userModel
+      .findById((req as CustomRequest).id)
+      .lean()
+      .exec();
     const application = await Application.findById(id)
       .populate("profile")
       .populate("applicant")
@@ -41,6 +45,6 @@ export const getApplication = expressAsyncHandler(
         .lean()
         .exec();
     }
-    return res.status(200).json({ data: application, lastInvoice });
+    return res.status(200).json({ data: application, lastInvoice, user });
   },
 );

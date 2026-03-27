@@ -2,9 +2,10 @@ import { Response, Request } from "express";
 import expressAsyncHandler from "express-async-handler";
 import Token from "../../model/token";
 import User from "../../model/user";
-import sendMail from "../../utils/sendMail";
+import { v4 as uuid } from "uuid";
 import crypto from "crypto";
 import { compileEmail } from "../../emails/compileEmail";
+import { emailQueue } from "../../services/queue";
 
 const forgotPasswordController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -29,7 +30,16 @@ const forgotPasswordController = expressAsyncHandler(
       expiryTime: "15 minutes",
     });
 
-    await sendMail({ to: email, subject: "Reset Password", html });
+    await emailQueue.add(
+      "deliver",
+      {
+        to: email,
+        html,
+        subject: "Reset Password",
+      },
+      { jobId: uuid() },
+    );
+    // await sendMail({ to: email, subject: "Reset Password", html });
     // send the verification url via email
     return res
       .status(200)

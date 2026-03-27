@@ -12,7 +12,7 @@ import {
   enrolStudentInCourses,
   getMoodleUserByEmail,
 } from "../../utils/moodle";
-import { prices } from "../../config/prices";
+import { prices, APPLICATION_FEE } from "../../config/prices";
 import generatePassword from "../../utils/generateRandomPassword";
 
 const approveApplicationRequest = expressAsyncHandler(
@@ -99,7 +99,7 @@ const approveApplicationRequest = expressAsyncHandler(
       }
 
       const response = await initializePayment({
-        amount: totalPrice + 1335,
+        amount: totalPrice + APPLICATION_FEE,
         email: guardian.email,
         metadata: {
           applicationId: application._id,
@@ -112,12 +112,12 @@ const approveApplicationRequest = expressAsyncHandler(
             {
               display_name: "Profile & Enrolment Fee",
               variable_name: "AEF",
-              value: 1335 * 100,
+              value: APPLICATION_FEE * 100,
             },
           ],
+          
         },
-        application: application._id,
-        user: (req as CustomRequest).id,
+
       });
 
       if (response.status && response.data?.authorization_url) {

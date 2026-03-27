@@ -41,7 +41,7 @@ export const createMoodleUser = async ({
   return createdUserId;
 };
 
-export const getMoodleUserByEmail = async (email: string) => {
+export const getMoodleUserByEmail = async (email: string) : Promise<{id: number}[]>=> {
   try {
     const params = new URLSearchParams();
 
@@ -63,7 +63,7 @@ export const getMoodleUserByEmail = async (email: string) => {
   }
 };
 
-export async function getMoodleCourses(): Promise<{ id: number }[]> {
+export async function getMoodleCourses(): Promise<{ id: number, fullname: string }[]> {
   try {
     const params = new URLSearchParams();
 
@@ -146,4 +146,22 @@ export async function getMoodleCategories() {
     );
     throw error;
   }
+}
+
+export async function getCoursesByCategory(categoryId: number) : Promise<{id: number}[]>{
+  const params = new URLSearchParams();
+
+  params.append("wstoken", process.env.MOODLE_TOKEN as string);
+  params.append("wsfunction", "core_course_get_courses_by_field");
+  params.append("moodlewsrestformat", "json");
+
+  params.append("field", "category");
+  params.append("value", categoryId.toString());
+
+  const res = await axios.post(
+    `${process.env.MOODLE_URL}/webservice/rest/server.php`,
+    params
+  );
+
+  return res.data.courses || [];
 }

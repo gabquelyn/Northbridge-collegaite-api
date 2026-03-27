@@ -7,7 +7,15 @@ const connection = new IORedis({
   maxRetriesPerRequest: null,
 });
 
-export const fileUploadQueue = new Queue("nbc", {
+export const fileUploadQueue = new Queue("file-upload", {
+  connection,
+});
+
+export const emailQueue = new Queue("send-email", {
+  connection,
+});
+
+export const paystackQueue = new Queue("webhook", {
   connection,
 });
 
