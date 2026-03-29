@@ -24,6 +24,13 @@ const limiter = rateLimit({
   message: "Too many requests from this IP",
 });
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://northbridgec.ca",
+  "https://www.northbridgec.ca",
+];
+
+
 dotenv.config();
 connectDB();
 const app: Express = express();
@@ -33,10 +40,17 @@ app.use(limiter);
 app.use(logger);
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://northbridgec.ca", "https://www.northbridgec.ca/" ],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow REST tools like Postman
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-  }),
+  })
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
