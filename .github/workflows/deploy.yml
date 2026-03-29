@@ -67,6 +67,8 @@ jobs:
             
             cd /opt/app
 
+            rm -rf /opt/app/Caddyfile
+
             # Ensure Caddyfile exists
             if [ ! -f ./Caddyfile ]; then
                 echo "Fetching Caddyfile from GitHub..."
@@ -74,7 +76,7 @@ jobs:
                     -o Caddyfile \
                     https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/Caddyfile
             fi
-            
+
             curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -o docker-compose.yml \
               https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/docker-compose.yml
