@@ -2239,3 +2239,8 @@
 20260328	22:43:21	f1431619-4ad0-4e13-a1ae-4e8e3467c9d2	GET	/test	undefined	::ffff:172.18.0.1
 20260329	10:03:05	791d13b9-d4a7-43f2-8a02-72da61314fed	POST	/health	undefined	::ffff:172.18.0.1
 20260329	10:03:12	1e820989-516a-44eb-bcce-35cdf6e53c46	GET	/health	undefined	::ffff:172.18.0.1
+20260329	20:44:28	9c57fd21-d831-436f-9f3c-faf5527baee3	GET	/application/receipt/69c2bd9a2400c35a2dcf1a2b	undefined	::ffff:172.18.0.1
+20260329	20:44:47	7e6fec55-1119-426a-b5cd-768d5f45e7a8	GET	/auth	undefined	::ffff:172.18.0.1
+20260329	20:44:50	2e33323a-07e6-49fb-a53d-f28faa6118a6	POST	/auth	undefined	::ffff:172.18.0.1
+20260329	20:45:16	cda5014c-ba91-4e2a-be61-f51ed8cd6150	GET	/application/receipt/69c2bd9a2400c35a2dcf1a2b	undefined	::ffff:172.18.0.1
+20260329	20:46:23	8d67fb20-301d-4b8e-8393-67ce9e1cda5b	GET	/application/receipt/69c2bd9a2400c35a2dcf1a2b	undefined	::ffff:172.18.0.1

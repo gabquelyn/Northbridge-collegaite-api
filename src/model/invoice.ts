@@ -23,6 +23,6 @@ const invoiveSchema = new mongoose.Schema({
     required: true,
     type: String,
   },
-}, { timestamps: true },);
+}, { timestamps: true });
 
 export default mongoose.model("Invoice", invoiveSchema);

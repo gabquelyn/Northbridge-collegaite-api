@@ -7,7 +7,8 @@ const getApplicationReceipt = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { id } = req.params;
     const prevApplication = await Application.findById(id).lean().exec();
-    const foundInvoice = await Invoice.find({application: prevApplication?.id, status: "success"}).lean()
+    console.log(prevApplication)
+    const foundInvoice = await Invoice.find({application: prevApplication?._id, status: "success"}).lean()
 
   return res.status(200).json({data: foundInvoice})
   },

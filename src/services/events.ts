@@ -15,6 +15,10 @@ export const emailEvents = new QueueEvents("send-email", {
   connection,
 });
 
+export const webhookEvent = new QueueEvents("webhook", {
+  connection,
+});
+
 uploadEvents.on("completed", ({ jobId, returnvalue }) => {
   console.log(`Job ${jobId} completed ${returnvalue}`);
 });
@@ -37,4 +41,16 @@ emailEvents.on("failed", ({ jobId, failedReason }) => {
 
 emailEvents.on("active", ({ jobId }) => {
   console.log(`Email 🚀 Job ${jobId} started`);
+});
+
+webhookEvent.on("completed", ({ jobId, returnvalue }) => {
+  console.log(`Job ${jobId} completed ${returnvalue}`);
+});
+
+webhookEvent.on("failed", ({ jobId, failedReason }) => {
+  console.error(`Webhook Job ${jobId} failed: ${failedReason} `);
+});
+
+webhookEvent.on("active", ({ jobId }) => {
+  console.log(`Webhook 🚀 Job ${jobId} started`);
 });
