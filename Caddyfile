@@ -1,0 +1,17 @@
+
+api.northbridgec.ca {
+    
+    # Proxy all traffic to the API container
+    reverse_proxy api:5000
+
+    # Optional: add extra headers for security
+    header {
+        Strict-Transport-Security "max-age=31536000;"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+    }
+
+    # Enable automatic HTTPS
+    tls gabquelyn@gmail.com
+}

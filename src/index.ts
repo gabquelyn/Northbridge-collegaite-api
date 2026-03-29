@@ -10,20 +10,11 @@ import authRouter from "./routes/auth";
 import expressAsyncHandler from "express-async-handler";
 import applicationRouter from "./routes/application";
 import cors from "cors";
-import verifyPayment from "./utils/verifyPayment";
 import paystackWebhookHandler from "./controllers/paystackWebhook";
-import {
-  getCoursesByCategory,
-  getMoodleCourses,
-  getMoodleUserByEmail,
-} from "./utils/moodle";
 import { compileEmail } from "./emails/compileEmail";
 import { rateLimit } from "express-rate-limit";
 import { getCachedMoodleCourses } from "./utils/getMoodleCached";
 import { emailQueue } from "./services/queue";
-import VerifyJWT from "./middlewares/VerifyJwt";
-import user from "./model/user";
-import { CustomRequest } from "./types/request";
 import profileRouter from "./routes/profile";
 
 const limiter = rateLimit({
@@ -59,34 +50,15 @@ app.get(
   // "/email/:template",
   "/test",
   expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {
-    const consultation = {
-      question: "What is the treatment plan?",
-      reply: "You should follow the prescribed medication for 2 weeks.",
-      doctor: "Dr. Smith",
-      date: "2026-03-27",
-    };
-
-    const { html } = compileEmail("review", {
-      applicantName: "emm",
-      reviewMessage: "erereruiereiurb ruibebr reiuber buirebbr ",
-      applicationId: "rerheer",
-      programName: "CAAP",
-      applicationPortalUrl: `${process.env.FRONTEND_URL}/dashboard/application/rekreer`,
-    });
-
-    await emailQueue.add(
-      "deliver",
-      {
-        to: "gabquelyn@gmail.com",
-        html,
-        subject: "Application Review message",
-      },
-      // { jobId: uuid() },
-    );
-    return res.status(200).json({ message: "email sent" });
+    const {html} = compileEmail("welcome", {})
+    const courses = await getCachedMoodleCourses();
+    return res.status(200).json({ courses });
   }),
 );
 
+app.get("/health", (req, res: Response) => {
+  return res.status(200).json({ message: "Server ready" });
+});
 app.use(errorHandler);
 
 mongoose.connection.on("open", () => {

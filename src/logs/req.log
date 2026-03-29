@@ -2235,3 +2235,5 @@
 20260327	21:29:57	8bdde320-860c-4522-bb08-c4161dec4b5a	POST	/application/courses/enrol	http://localhost:3000	::ffff:172.18.0.1
 20260327	21:29:57	57ef6cae-6e0a-4593-ab85-cf99037c18fa	GET	/application/courses/my	http://localhost:3000	::ffff:172.18.0.1
 20260327	21:29:57	a3c214cc-e77c-4d40-8ff3-e2a15c995a60	GET	/auth/refresh	http://localhost:3000	::ffff:172.18.0.1
+20260328	22:37:31	1d0f88f6-7c74-4b7b-98ef-5d0016bac039	GET	/test	undefined	::ffff:172.18.0.1
+20260328	22:43:21	f1431619-4ad0-4e13-a1ae-4e8e3467c9d2	GET	/test	undefined	::ffff:172.18.0.1

@@ -1,16 +1,45 @@
-FROM node:20-alpine
+# -------- Base --------
+FROM node:20-alpine AS base
 
 WORKDIR /app
 
+# Install all dependencies (dev + prod)
 COPY package*.json ./
 RUN npm ci
 
+# Copy source files
 COPY . .
 
-ARG NODE_ENV=development
+# -------- Development --------
+FROM base AS development
 
-RUN if [ "$NODE_ENV" = "production" ]; then npm run build; fi
+ENV NODE_ENV=development
+# Expose dev port
+EXPOSE 5000
+# Run ts-node-dev for hot reload
+# CMD ["npm", "run", "dev:"]
 
+# -------- Build Stage --------
+FROM base AS builder
+
+ENV NODE_ENV=production
+# Build TypeScript
+RUN npm run build
+
+# -------- Production --------
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Only install production deps for smaller image
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy built files from builder stage
+COPY --from=builder /app/dist ./dist
+
+# Expose prod port
 EXPOSE 5000
 
-CMD ["npm", "run", "start"]
+# Run built JavaScript
+CMD ["node", "dist/index.js"]

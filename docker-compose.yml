@@ -1,54 +1,64 @@
-
 services:
+  caddy:
+    image: caddy:alpine
+    container_name: caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    restart: unless-stopped
+
   redis:
-    image: redis:7
+    image: redis:7-alpine
+    container_name: redis
     volumes:
       - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
 
   api:
-    build:
-      context: .
-      args:
-        NODE_ENV: production
-    command: npm run start
-    ports:
-      - "${PORT}:${PORT}"
-    depends_on:
-      redis:
-        condition: service_healthy
+    image: ${DOCKER_USERNAME}/app:latest
+    container_name: api
+    command: node dist/index.js
+    volumes:
+      - uploads_data:/app/uploads
+    expose:
+      - "${PORT}"
     env_file:
       - .env
-    restart: unless-stopped
-
-  worker:
-    build:
-      context: .
-      args:
-        NODE_ENV: production
-    command: node dist/worker.js
     depends_on:
       - redis
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${PORT}/health || exit 1"]
+      interval: 10s
+      retries: 5
+
+  worker:
+    image: ${DOCKER_USERNAME}/app:latest
+    command: node dist/worker.js
     env_file:
       - .env
-    restart: unless-stopped
+    depends_on:
+      - redis
+    restart: on-failure
 
   events:
-    build:
-      context: .
-      args:
-        NODE_ENV: production
+    image: ${DOCKER_USERNAME}/app:latest
     command: node dist/events.js
-    depends_on:
-      redis:
-        condition: service_healthy
     env_file:
       - .env
+    depends_on:
+      - redis
     restart: unless-stopped
 
 volumes:
   redis_data:
+  caddy_data:
+  caddy_config:
+  uploads_data:

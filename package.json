@@ -9,7 +9,7 @@
     "dev:server": "ts-node-dev --respawn --transpile-only --poll ./src/index.ts",
     "dev:worker": "ts-node-dev --respawn --transpile-only --poll ./src/worker.ts",
     "dev:events": "ts-node-dev --respawn --transpile-only --poll ./src/events.ts",
-    "docker:dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
     "docker:prod": "docker-compose up --build",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:worker\" \"npm run dev:events\""
   },
