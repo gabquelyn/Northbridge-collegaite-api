@@ -31,6 +31,9 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 
+# Install curl (for health checks) and bash if needed
+RUN apk add --no-cache curl bash
+
 # Only install production deps for smaller image
 COPY package*.json ./
 # Copy Caddyfile into the image
