@@ -4,87 +4,86 @@ on:
   push:
     branches:
       - main
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 3. Build & Push Image
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: |
-            ${{secrets.DOCKER_USERNAME}}/app:latest
-          build-args: |
-            NODE_ENV=production
+          tags: ${{ secrets.DOCKER_USERNAME }}/app:latest
 
-      # 4. Deploy on VPS
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          PAYSTACK_SECRET_KEY: ${{ secrets.PAYSTACK_SECRET_KEY }}
+          PAYSTACK_PUBLIC_KEY: ${{ secrets.PAYSTACK_PUBLIC_KEY }}
+          MOODLE_TOKEN: ${{ secrets.MOODLE_TOKEN }}
+          EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
+          ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: "22"
-          passphrase: ${{secrets.VPS_SSH_PASSPHRASE}}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
           script: |
-            # create app directory
-            mkdir -p /opt/app 
+            set -e
+
+            mkdir -p /opt/app
             cd /opt/app
 
-            # env file from secret
-            cat > .env <<-EOF
-                MONGO_URI=${{secrets.MONGO_URI}}
-                GOOGLE_CLIENT_ID=${{secrets.GOOGLE_CLIENT_ID}}
-                CLOUDINARY_CLOUD_NAME=${{secrets.CLOUDINARY_CLOUD_NAME}}
-                CLOUDINARY_API_KEY=${{secrets.CLOUDINARY_API_KEY}}
-                CLOUDINARY_API_SECRET=${{secrets.CLOUDINARY_API_SECRET}}
-                PAYSTACK_URI=https://api.paystack.co
-                PAYSTACK_SECRET_KEY=${{secrets.PAYSTACK_SECRET_KEY}}
-                PAYSTACK_PUBLIC_KEY=${{secrets.PAYSTACK_PUBLIC_KEY}}
-                MOODLE_TOKEN=${{secrets.MOODLE_TOKEN}}
-                MOODLE_URL=https://study.northbridgec.ca
-                EMAIL_HOST=${{secrets.EMAIL_HOST}}
-                EMAIL_USER=${{secrets.EMAIL_USER}}
-                EMAIL_PASS=${{secrets.EMAIL_PASS}}
-                CONTACT="Northbridge Collegiate <contact@northbridgec.ca>"
-                REFRESH_TOKEN_SECRET=${{secrets.REFRESH_TOKEN_SECRET}}
-                ACCESS_TOKEN_SECRET=${{secrets.ACCESS_TOKEN_SECRET}}
-                REDIS_HOST=redis
-                REDIS_PORT=6379
-                FRONTEND_URL=https://northbridgec.ca
-                DOCKER_USERNAME=${{secrets.DOCKER_USERNAME}}
-                PORT=5000
-            EOF 
+            printf "%s\n" \
+            "MONGO_URI=$MONGO_URI" \
+            "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" \
+            "CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME" \
+            "CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY" \
+            "CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET" \
+            "PAYSTACK_URI=https://api.paystack.co" \
+            "PAYSTACK_SECRET_KEY=$PAYSTACK_SECRET_KEY" \
+            "PAYSTACK_PUBLIC_KEY=$PAYSTACK_PUBLIC_KEY" \
+            "MOODLE_TOKEN=$MOODLE_TOKEN" \
+            "MOODLE_URL=https://study.northbridgec.ca" \
+            "EMAIL_HOST=$EMAIL_HOST" \
+            "EMAIL_USER=$EMAIL_USER" \
+            "EMAIL_PASS=$EMAIL_PASS" \
+            "CONTACT=Northbridge Collegiate <contact@northbridgec.ca>" \
+            "REFRESH_TOKEN_SECRET=$REFRESH_TOKEN_SECRET" \
+            "ACCESS_TOKEN_SECRET=$ACCESS_TOKEN_SECRET" \
+            "REDIS_HOST=redis" \
+            "REDIS_PORT=6379" \
+            "FRONTEND_URL=https://northbridgec.ca" \
+            "DOCKER_USERNAME=$DOCKER_USERNAME" \
+            "PORT=5000" \
+            > .env
 
-
-            # Always pull latest docker compose
             curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -o docker-compose.yml \
-            https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/docker-compose.yml
+              -o docker-compose.yml \
+              https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/docker-compose.yml
 
+            docker compose --env-file .env pull
+            docker compose --env-file .env up -d
 
-            # Pull latest image
-            docker compose -f docker-compose.yml --env-file .env pull
-
-            # Start the new containers removing orphans limited down time
-            docker compose -f docker-compose.yml --env-file .env up -d
-
-            # Clean up old images
-            docker image prune -af --filter "dangling=true" 
+            docker image prune -af --filter "dangling=true"
