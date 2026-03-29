@@ -64,7 +64,17 @@ jobs:
             "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" \
             "PORT=5000" \
             > .env
+            
+            cd /opt/app
 
+            # Ensure Caddyfile exists
+            if [ ! -f ./Caddyfile ]; then
+                echo "Fetching Caddyfile from GitHub..."
+                curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                    -o Caddyfile \
+                    https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/Caddyfile
+            fi
+            
             curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -o docker-compose.yml \
               https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/docker-compose.yml
