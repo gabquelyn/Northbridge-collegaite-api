@@ -45,7 +45,7 @@ jobs:
             "MONGO_URI=${{secrets.MONGO_URI}}" \
             "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" \
             "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
-            "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_SECRET }}" \
+            "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" \
             "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" \
             "PAYSTACK_URI=https://api.paystack.co" \
             "PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}" \
