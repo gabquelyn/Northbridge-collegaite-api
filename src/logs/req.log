@@ -2250,3 +2250,7 @@
 20260329	21:53:04	0cd4178a-d618-426c-90d4-d3f206e20e5c	GET	/test	undefined	::ffff:172.18.0.1
 20260329	22:03:17	10ef8e99-f9a7-4e61-ba11-1fec42c0c45f	GET	/test	undefined	::ffff:172.18.0.1
 20260329	22:04:56	686316f7-87b7-46d5-977d-330c5aec212b	GET	/test	undefined	::ffff:172.18.0.1
+20260329	22:56:58	8fd35469-bcd8-4e37-af56-29b82c85c701	POST	/auth	undefined	::ffff:172.18.0.1
+20260329	22:57:11	d5456f8b-0acd-4d19-8d60-ca89060995c6	POST	/auth	undefined	::ffff:172.18.0.1
+20260329	22:57:47	f485e8b6-7f44-404a-99a9-d3e4ffbec69c	POST	/application/	undefined	::ffff:172.18.0.1
+20260329	22:59:02	d5922e07-e822-42fd-947c-73fd74e56240	POST	/application/	undefined	::ffff:172.18.0.1

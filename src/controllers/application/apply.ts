@@ -243,7 +243,7 @@ const requestApplication = expressAsyncHandler(
         profileId: profile[0]._id,
       },
       {
-        jobId: application[0]._id,
+        jobId: application[0]._id.toString(),
         // attempts: 3,
         backoff: {
           type: "exponential",
