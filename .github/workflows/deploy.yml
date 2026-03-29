@@ -82,6 +82,9 @@ jobs:
             curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -o docker-compose.yml \
               https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/docker-compose.yml
+            
+            echo "DOCKER_USERNAME=$DOCKER_USERNAME"
+            cat /opt/app/.env
 
             docker compose --env-file .env pull
             docker compose --env-file .env up -d
