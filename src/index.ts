@@ -24,7 +24,12 @@ const limiter = rateLimit({
   message: "Too many requests from this IP",
 });
 
-const allowedOrigins = ["https://www.northbridgec.ca", "https://northbridgec.ca"];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://northbridgec.ca",
+  "https://www.northbridgec.ca",
+];
+
 
 dotenv.config();
 connectDB();
