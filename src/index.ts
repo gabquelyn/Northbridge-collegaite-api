@@ -33,7 +33,7 @@ app.use(limiter);
 app.use(logger);
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://northbridgec.ca"],
+    origin: ["http://localhost:3000", "https://northbridgec.ca", "https://www.northbridgec.ca/" ],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
