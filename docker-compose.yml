@@ -28,7 +28,7 @@ services:
     volumes:
       - uploads_data:/app/uploads
     expose:
-      - "${PORT}"
+      - "5000"
     env_file:
       - .env
     depends_on:
