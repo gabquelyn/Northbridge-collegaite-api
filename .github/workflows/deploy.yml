@@ -69,7 +69,7 @@ jobs:
             "EMAIL_HOST=$EMAIL_HOST" \
             "EMAIL_USER=$EMAIL_USER" \
             "EMAIL_PASS=$EMAIL_PASS" \
-            "CONTACT=Northbridge Collegiate <contact@northbridgec.ca>" \
+            "CONTACT=\"Northbridge Collegiate <contact@northbridgec.ca>\"" \
             "REFRESH_TOKEN_SECRET=$REFRESH_TOKEN_SECRET" \
             "ACCESS_TOKEN_SECRET=$ACCESS_TOKEN_SECRET" \
             "REDIS_HOST=redis" \
