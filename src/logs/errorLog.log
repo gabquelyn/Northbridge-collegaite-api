@@ -88,3 +88,5 @@
 20260327	20:37:50	b5d20a92-6b0d-4e2f-85f9-d0b681840485	getaddrinfo ENOTFOUND study.northbridgec.ca	GET	/application/apply/courses	http://localhost:3000
 20260329	22:03:22	197a0170-d42b-4b41-b6f4-48fd322e6ede	Cannot read properties of undefined (reading 'id')	GET	/test	undefined
 20260329	22:59:04	db3136ba-a5f3-415b-aee9-5ac059a553f6	jobId.startsWith is not a function	POST	/application/	undefined
+20260329	23:49:30	a7854881-0f60-4eb4-be53-abdb47cdcbc8	programs is not iterable	POST	/application/enrol/69c2a3bbb6e9161547017089	undefined
+20260329	23:51:21	e9059fbd-172e-4975-8cd5-2fd8a80e1c25	Unexpected token '"', ""{\n  \"em"... is not valid JSON	POST	/application/enrol/69c2a3bbb6e9161547017089	undefined

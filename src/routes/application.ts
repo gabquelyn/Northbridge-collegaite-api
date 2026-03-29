@@ -127,7 +127,6 @@ applicationRouter.post(
   "/enrol/:id",
   [
     body("programs")
-      .optional()
       .isArray()
       .custom((value) => {
         for (const program of value) {
