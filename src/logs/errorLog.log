@@ -86,3 +86,4 @@
 20260327	20:27:30	51fb071a-36ba-408d-b32e-d92f7b2bfd2d	getaddrinfo EAI_AGAIN study.northbridgec.ca	GET	/application/apply/courses	http://localhost:3000
 20260327	20:37:49	ff152ea4-5a83-4c08-b599-c245b13b2d50	getaddrinfo ENOTFOUND study.northbridgec.ca	GET	/application/apply/courses	http://localhost:3000
 20260327	20:37:50	b5d20a92-6b0d-4e2f-85f9-d0b681840485	getaddrinfo ENOTFOUND study.northbridgec.ca	GET	/application/apply/courses	http://localhost:3000
+20260329	22:03:22	197a0170-d42b-4b41-b6f4-48fd322e6ede	Cannot read properties of undefined (reading 'id')	GET	/test	undefined

@@ -16,6 +16,8 @@ import { rateLimit } from "express-rate-limit";
 import { getCachedMoodleCourses } from "./utils/getMoodleCached";
 import profileRouter from "./routes/profile";
 import courseRouter from "./routes/course";
+import moodleCredentials from "./utils/moodleCredentials";
+import { enrolStudentInCourses } from "./utils/moodle";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -28,7 +30,6 @@ const allowedOrigins = [
   "https://northbridgec.ca",
   "https://www.northbridgec.ca",
 ];
-
 
 dotenv.config();
 connectDB();
@@ -52,7 +53,7 @@ app.use(
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-  })
+  }),
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -69,8 +70,14 @@ app.get(
   "/test",
   expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {
     const { html } = compileEmail("welcome", {});
-    const courses = await getCachedMoodleCourses();
-    return res.status(200).json({ courses });
+    // const id = await moodleCredentials({
+    //   email: "gabquelyn@gmail.com",
+    //   firstName: "Arebamen",
+    //   lastName: "Gabriel",
+    // });
+
+    // const response = await enrolStudentInCourses(id, [1, 3]);
+    // return res.status(200).json({ response, id });
   }),
 );
 

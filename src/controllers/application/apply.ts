@@ -1,5 +1,5 @@
 import expressAsyncHandler from "express-async-handler";
-import {Request, Response } from "express";
+import { Request, Response } from "express";
 import userModel from "../../model/user";
 import { validationResult } from "express-validator";
 import { CustomRequest } from "../../types/request";
@@ -11,7 +11,7 @@ import { getCachedMoodleCourses } from "../../utils/getMoodleCached";
 import mongoose from "mongoose";
 import { fileUploadQueue } from "../../services/queue";
 
- const requestApplication = expressAsyncHandler(
+const requestApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const result = validationResult(req);
 
@@ -174,9 +174,9 @@ import { fileUploadQueue } from "../../services/queue";
     // Using transactions to monitor db
     const session = await mongoose.startSession();
     session.startTransaction();
-
+    let profile, application;
     try {
-      const profile = await Profile.create(
+      profile = await Profile.create(
         [
           {
             guardian: userId,
@@ -216,7 +216,7 @@ import { fileUploadQueue } from "../../services/queue";
         { session },
       );
 
-      const application = await Application.create(
+      application = await Application.create(
         [
           {
             profile: profile[0]._id,
@@ -229,45 +229,44 @@ import { fileUploadQueue } from "../../services/queue";
         { session },
       );
       await session.commitTransaction();
-
-      await fileUploadQueue.add(
-        "upload-files",
-        {
-          files,
-          profileId: profile[0]._id,
-        },
-        {
-          jobId: application[0]._id,
-          // attempts: 3,
-          backoff: {
-            type: "exponential",
-            delay: 2000,
-          },
-        }, 
-      );
-
-      if (mode === "off-site") {
-        const response = await initializePayment({
-          amount: selectedCourseIds.length * UNIT_COURSE,
-          email: guardian.email,
-          metadata: {
-            applicationId: application[0]._id,
-          },
-
-        });
-
-        if (response.status) {
-          return res.status(201).json({
-            paymentUrl: response.data?.authorization_url,
-            accessCode: response.data?.access_code,
-          });
-        }
-      }
     } catch (err) {
       await session.abortTransaction();
       throw err;
     } finally {
       session.endSession();
+    }
+
+    await fileUploadQueue.add(
+      "upload-files",
+      {
+        files,
+        profileId: profile[0]._id,
+      },
+      {
+        jobId: application[0]._id,
+        // attempts: 3,
+        backoff: {
+          type: "exponential",
+          delay: 2000,
+        },
+      },
+    );
+
+    if (mode === "off-site") {
+      const response = await initializePayment({
+        amount: selectedCourseIds.length * UNIT_COURSE,
+        email: guardian.email,
+        metadata: {
+          applicationId: application[0]._id,
+        },
+      });
+
+      if (response.status) {
+        return res.status(201).json({
+          paymentUrl: response.data?.authorization_url,
+          accessCode: response.data?.access_code,
+        });
+      }
     }
 
     return res.status(201).json({ message: "Admission request submitted" });

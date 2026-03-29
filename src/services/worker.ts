@@ -80,7 +80,7 @@ async function myWorker() {
             {
               $setOnInsert: {
                 currency,
-                amount: amount / 100,
+                amount,
                 status,
                 reference,
                 application: applicationId,

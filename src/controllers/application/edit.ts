@@ -228,43 +228,43 @@ const editApplication = expressAsyncHandler(
         { session },
       );
       await session.commitTransaction();
-
-      await fileUploadQueue.add(
-        "upload-files",
-        {
-          files,
-          profileId: prevProfile._id,
-        },
-        {
-          // attempts: 3,
-          backoff: {
-            type: "exponential",
-            delay: 2000,
-          },
-        },
-      );
-
-      if (mode === "off-site") {
-        const response = await initializePayment({
-          amount: selectedCourseIds.length * UNIT_COURSE,
-          email: user.email,
-          metadata: {
-            applicationId: prevApplication._id,
-          },
-        });
-
-        if (response.status) {
-          return res.status(201).json({
-            paymentUrl: response.data?.authorization_url,
-            accessCode: response.data?.access_code,
-          });
-        }
-      }
     } catch (err) {
       await session.abortTransaction();
       throw err;
     } finally {
       session.endSession();
+    }
+
+    await fileUploadQueue.add(
+      "upload-files",
+      {
+        files,
+        profileId: prevProfile._id,
+      },
+      {
+        // attempts: 3,
+        backoff: {
+          type: "exponential",
+          delay: 2000,
+        },
+      },
+    );
+
+    if (mode === "off-site") {
+      const response = await initializePayment({
+        amount: selectedCourseIds.length * UNIT_COURSE,
+        email: user.email,
+        metadata: {
+          applicationId: prevApplication._id,
+        },
+      });
+
+      if (response.status) {
+        return res.status(201).json({
+          paymentUrl: response.data?.authorization_url,
+          accessCode: response.data?.access_code,
+        });
+      }
     }
 
     return res.status(201).json({ message: "Admission details edited" });

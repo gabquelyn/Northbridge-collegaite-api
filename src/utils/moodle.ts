@@ -41,7 +41,9 @@ export const createMoodleUser = async ({
   return createdUserId;
 };
 
-export const getMoodleUserByEmail = async (email: string) : Promise<{id: number}[]>=> {
+export const getMoodleUserByEmail = async (
+  email: string,
+): Promise<{ id: number }[]> => {
   try {
     const params = new URLSearchParams();
 
@@ -63,7 +65,9 @@ export const getMoodleUserByEmail = async (email: string) : Promise<{id: number}
   }
 };
 
-export async function getMoodleCourses(): Promise<{ id: number, fullname: string }[]> {
+export async function getMoodleCourses(): Promise<
+  { id: number; fullname: string }[]
+> {
   try {
     const params = new URLSearchParams();
 
@@ -111,11 +115,13 @@ export async function enrolStudentInCourses(
   params.append("moodlewsrestformat", "json");
 
   // Prepare enrolments for all courses
-  courseIds.forEach((courseId, index) => {
-    params.append(`enrolments[${index}][roleid]`, roleid.toString());
-    params.append(`enrolments[${index}][userid]`, userid.toString());
-    params.append(`enrolments[${index}][courseid]`, courseId.toString());
-  });
+  courseIds
+    .filter((id) => id !== 1)
+    .forEach((courseId, index) => {
+      params.append(`enrolments[${index}][roleid]`, roleid.toString());
+      params.append(`enrolments[${index}][userid]`, userid.toString());
+      params.append(`enrolments[${index}][courseid]`, courseId.toString());
+    });
 
   const response = await axios.post(
     `${process.env.MOODLE_URL}/webservice/rest/server.php`,
@@ -135,20 +141,22 @@ export async function getMoodleCategories() {
 
     const response = await axios.post(
       `${MOODLE_URL}/webservice/rest/server.php`,
-      params
+      params,
     );
 
     return response.data;
   } catch (error: any) {
     console.error(
       "Failed to retrieve Moodle categories:",
-      error.response?.data || error.message
+      error.response?.data || error.message,
     );
     throw error;
   }
 }
 
-export async function getCoursesByCategory(categoryId: number) : Promise<{id: number}[]>{
+export async function getCoursesByCategory(
+  categoryId: number,
+): Promise<{ id: number }[]> {
   const params = new URLSearchParams();
 
   params.append("wstoken", process.env.MOODLE_TOKEN as string);
@@ -160,7 +168,7 @@ export async function getCoursesByCategory(categoryId: number) : Promise<{id: nu
 
   const res = await axios.post(
     `${process.env.MOODLE_URL}/webservice/rest/server.php`,
-    params
+    params,
   );
 
   return res.data.courses || [];
