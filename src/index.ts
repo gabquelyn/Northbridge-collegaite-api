@@ -14,7 +14,6 @@ import paystackWebhookHandler from "./controllers/paystackWebhook";
 import { compileEmail } from "./emails/compileEmail";
 import { rateLimit } from "express-rate-limit";
 import { getCachedMoodleCourses } from "./utils/getMoodleCached";
-import { emailQueue } from "./services/queue";
 import profileRouter from "./routes/profile";
 import courseRouter from "./routes/course";
 
@@ -52,7 +51,7 @@ app.use(
     },
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
   })
 );
 app.use(express.json());
