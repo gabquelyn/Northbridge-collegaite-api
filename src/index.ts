@@ -62,7 +62,7 @@ app.use(cookierParser());
 app.use("/auth", authRouter);
 app.use("/application", applicationRouter);
 app.use("/courses", courseRouter);
-app.get("/webhook", paystackWebhookHandler);
+app.post("/webhook", paystackWebhookHandler);
 app.use("/profile", profileRouter);
 app.get(
   // "/email/:template",
