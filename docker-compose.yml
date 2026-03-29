@@ -70,8 +70,6 @@ services:
     depends_on:
       - redis
     restart: unless-stopped
-    volumes:
-      - uploads_data:/app/uploads
     networks:
       - web
 
