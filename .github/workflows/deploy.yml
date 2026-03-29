@@ -28,21 +28,7 @@ jobs:
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
-        env:
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-          PAYSTACK_SECRET_KEY: ${{ secrets.PAYSTACK_SECRET_KEY }}
-          PAYSTACK_PUBLIC_KEY: ${{ secrets.PAYSTACK_PUBLIC_KEY }}
-          MOODLE_TOKEN: ${{ secrets.MOODLE_TOKEN }}
-          EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
-          EMAIL_USER: ${{ secrets.EMAIL_USER }}
-          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
-          REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
-          ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
@@ -56,26 +42,26 @@ jobs:
             cd /opt/app
 
             printf "%s\n" \
-            "MONGO_URI=$MONGO_URI" \
-            "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" \
-            "CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME" \
-            "CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY" \
-            "CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET" \
+            "MONGO_URI=${{secrets.MONGO_URI}}" \
+            "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" \
+            "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
+            "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_SECRET }}" \
+            "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" \
             "PAYSTACK_URI=https://api.paystack.co" \
-            "PAYSTACK_SECRET_KEY=$PAYSTACK_SECRET_KEY" \
-            "PAYSTACK_PUBLIC_KEY=$PAYSTACK_PUBLIC_KEY" \
-            "MOODLE_TOKEN=$MOODLE_TOKEN" \
+            "PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}" \
+            "PAYSTACK_PUBLIC_KEY=${{ secrets.PAYSTACK_PUBLIC_KEY }}" \
+            "MOODLE_TOKEN=${{ secrets.MOODLE_TOKEN }}" \
             "MOODLE_URL=https://study.northbridgec.ca" \
-            "EMAIL_HOST=$EMAIL_HOST" \
-            "EMAIL_USER=$EMAIL_USER" \
-            "EMAIL_PASS=$EMAIL_PASS" \
+            "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" \
+            "EMAIL_USER=${{ secrets.EMAIL_USER }}" \
+            "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" \
             "CONTACT=\"Northbridge Collegiate <contact@northbridgec.ca>\"" \
-            "REFRESH_TOKEN_SECRET=$REFRESH_TOKEN_SECRET" \
-            "ACCESS_TOKEN_SECRET=$ACCESS_TOKEN_SECRET" \
+            "REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}" \
+            "ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}" \
             "REDIS_HOST=redis" \
             "REDIS_PORT=6379" \
             "FRONTEND_URL=https://northbridgec.ca" \
-            "DOCKER_USERNAME=$DOCKER_USERNAME" \
+            "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" \
             "PORT=5000" \
             > .env
 
@@ -83,9 +69,6 @@ jobs:
               -o docker-compose.yml \
               https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/docker-compose.yml
 
-            set -a
-            source .env
-            set +a
             
             echo "DOCKER_USERNAME=$DOCKER_USERNAME"
             cat /opt/app/.env
