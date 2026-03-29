@@ -2,6 +2,8 @@ services:
   caddy:
     image: caddy:alpine
     container_name: caddy
+    networks:
+      - appnet
     ports:
       - "80:80"
       - "443:443"
@@ -10,7 +12,8 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     restart: unless-stopped
 
   redis:
@@ -27,8 +30,8 @@ services:
     command: node dist/index.js
     volumes:
       - uploads_data:/app/uploads
-    expose:
-      - "5000"
+    networks:
+      - appnet
     env_file:
       - .env
     depends_on:
@@ -38,6 +41,8 @@ services:
       test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
       interval: 10s
       retries: 5
+    expose: 
+      - "5000"
 
   worker:
     image: ${DOCKER_USERNAME}/app:latest
@@ -62,3 +67,7 @@ volumes:
   caddy_data:
   caddy_config:
   uploads_data:
+
+networks:
+  appnet:
+    driver: bridge

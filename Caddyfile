@@ -1,6 +1,9 @@
 
 api.northbridgec.ca {
     
+    # Enable automatic HTTPS
+    tls gabquelyn@gmail.com
+
     # Proxy all traffic to the API container
     reverse_proxy api:5000
 
@@ -12,6 +15,4 @@ api.northbridgec.ca {
         X-XSS-Protection "1; mode=block"
     }
 
-    # Enable automatic HTTPS
-    tls gabquelyn@gmail.com
 }
