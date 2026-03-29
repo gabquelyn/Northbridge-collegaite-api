@@ -1,6 +1,6 @@
 services:
   caddy:
-    image: caddy:alpine
+    image: caddy:2.7.8
     container_name: caddy
     networks:
       - appnet
