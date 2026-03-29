@@ -37,7 +37,7 @@ RUN apk add --no-cache curl bash
 # Only install production deps for smaller image
 COPY package*.json ./
 # Copy Caddyfile into the image
-COPY Caddyfile /etc/caddy/Caddyfile
+
 RUN npm ci --only=production
 
 # Copy built files from builder stage
