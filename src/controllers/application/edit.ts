@@ -243,6 +243,7 @@ const editApplication = expressAsyncHandler(
       },
       {
         // attempts: 3,
+        jobId: prevApplication._id.toString(),
         backoff: {
           type: "exponential",
           delay: 2000,
