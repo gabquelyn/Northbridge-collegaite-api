@@ -4,7 +4,7 @@ import userModel from "../../model/user";
 import Profile from "../../model/profile";
 import Application from "../../model/application";
 import initializePayment from "../../utils/initializePayment";
-import { compileEmail } from "../../emails/compileEmail";
+import { compileEmail } from "../../utils/compileEmail";
 import {
   enrolStudentInCourses,
 } from "../../utils/moodle";

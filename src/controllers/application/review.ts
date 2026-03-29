@@ -4,7 +4,7 @@ import { emailQueue } from "../../services/queue";
 import Application from "../../model/application";
 import { v4 as uuid } from "uuid";
 import User from "../../model/user";
-import { compileEmail } from "../../emails/compileEmail";
+import { compileEmail } from "../../utils/compileEmail";
 const reviewApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { reason } = req.body;

@@ -11,7 +11,7 @@ import expressAsyncHandler from "express-async-handler";
 import applicationRouter from "./routes/application";
 import cors from "cors";
 import paystackWebhookHandler from "./controllers/paystackWebhook";
-import { compileEmail } from "./emails/compileEmail";
+import { compileEmail } from "./utils/compileEmail";
 import { rateLimit } from "express-rate-limit";
 import { getCachedMoodleCourses } from "./utils/getMoodleCached";
 import { emailQueue } from "./services/queue";

@@ -6,7 +6,7 @@ import {v4 as uuid} from "uuid";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { compileEmail } from "../../emails/compileEmail";
+import { compileEmail } from "../../utils/compileEmail";
 import { emailQueue } from "../../services/queue";
 
 const loginController = expressAsyncHandler(

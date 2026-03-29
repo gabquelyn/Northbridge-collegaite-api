@@ -36,12 +36,16 @@ RUN apk add --no-cache curl bash
 
 # Only install production deps for smaller image
 COPY package*.json ./
+
 # Copy Caddyfile into the image
 
 RUN npm ci --only=production
 
 # Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
+
+# Copy mjml
+COPY --from=builder /app/emails ./emails
 
 # Expose prod port
 EXPOSE 5000

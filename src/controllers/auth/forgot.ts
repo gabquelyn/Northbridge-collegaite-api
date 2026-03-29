@@ -4,7 +4,7 @@ import Token from "../../model/token";
 import User from "../../model/user";
 import { v4 as uuid } from "uuid";
 import crypto from "crypto";
-import { compileEmail } from "../../emails/compileEmail";
+import { compileEmail } from "../../utils/compileEmail";
 import { emailQueue } from "../../services/queue";
 
 const forgotPasswordController = expressAsyncHandler(

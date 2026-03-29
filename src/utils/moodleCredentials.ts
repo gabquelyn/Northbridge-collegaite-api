@@ -1,7 +1,7 @@
 import sendMail from "./sendMail";
 import { createMoodleUser, getMoodleUserByEmail } from "./moodle";
 import generatePassword from "./generateRandomPassword";
-import { compileEmail } from "../emails/compileEmail";
+import { compileEmail } from "./compileEmail";
 export default async function moodleCredentials(details: {
   email: string;
   firstName: string;
