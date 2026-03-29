@@ -16,6 +16,7 @@ import { rateLimit } from "express-rate-limit";
 import { getCachedMoodleCourses } from "./utils/getMoodleCached";
 import { emailQueue } from "./services/queue";
 import profileRouter from "./routes/profile";
+import courseRouter from "./routes/course";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -44,13 +45,14 @@ app.use(cookierParser());
 
 app.use("/auth", authRouter);
 app.use("/application", applicationRouter);
+app.use("/courses", courseRouter);
 app.get("/webhook", paystackWebhookHandler);
 app.use("/profile", profileRouter);
 app.get(
   // "/email/:template",
   "/test",
   expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {
-    const {html} = compileEmail("welcome", {})
+    const { html } = compileEmail("welcome", {});
     const courses = await getCachedMoodleCourses();
     return res.status(200).json({ courses });
   }),

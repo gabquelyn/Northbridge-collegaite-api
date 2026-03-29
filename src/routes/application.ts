@@ -122,14 +122,6 @@ applicationRouter.patch(
 );
 
 applicationRouter.get("/", VerifyJWT, getApplications);
-applicationRouter.get("/apply/courses", getOnlineCourses);
-applicationRouter.post("/courses/enrol", VerifyJWT, enrolCourses);
-applicationRouter.get("/courses/my", VerifyJWT, getMycourses);
-applicationRouter.get(
-  "/courses/categories",
-  cacheMiddleware,
-  getCoursesCategories,
-);
 
 applicationRouter.post(
   "/enrol/:id",
@@ -143,7 +135,6 @@ applicationRouter.post(
         }
       })
       .withMessage("Invalid course program selected"),
-    body("courses").optional().isArray().withMessage("Missing required fields"),
   ],
   VerifyJWT,
   enrol,
@@ -156,13 +147,6 @@ applicationRouter.get(
   getApplicationReceipt,
 );
 
-applicationRouter.post(
-  "/review/:id",
-  VerifyJWT,
-  OnlyAdmin,
-  reviewApplication,
-);
-
-
+applicationRouter.post("/review/:id", VerifyJWT, OnlyAdmin, reviewApplication);
 
 export default applicationRouter;

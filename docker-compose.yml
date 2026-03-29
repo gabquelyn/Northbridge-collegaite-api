@@ -10,7 +10,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
-      
+
     depends_on:
       - api
     restart: unless-stopped
@@ -26,7 +26,9 @@ services:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
     restart: unless-stopped
-
+    networks:
+      - web
+      
   api:
     image: ${DOCKER_USERNAME}/app:latest
     container_name: api
