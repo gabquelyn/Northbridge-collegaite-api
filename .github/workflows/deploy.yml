@@ -78,5 +78,5 @@ jobs:
             docker compose --env-file .env pull
             docker compose --env-file .env up -d
 
-            #prune dangling images
-            docker image prune -af --filter "dangling=true"
+            #prune pld unused images
+            docker image prune -af
