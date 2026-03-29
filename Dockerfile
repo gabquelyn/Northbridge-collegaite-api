@@ -44,8 +44,8 @@ RUN npm ci --only=production
 # Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Copy mjml
-COPY --from=builder /app/emails ./emails
+# 👇 Copy raw emails (NOT from dist)
+COPY --from=base /app/emails ./dist/emails
 
 # Expose prod port
 EXPOSE 5000
