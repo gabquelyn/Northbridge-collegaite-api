@@ -77,7 +77,7 @@ jobs:
             # Always pull latest docker compose
             curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -o docker-compose.yml \
-            https://raw.githubusercontent.com/${{ github.repository_owner }}/${{ github.repository }}/main/docker-compose.yml
+            https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/docker-compose.yml
 
 
             # Pull latest image
