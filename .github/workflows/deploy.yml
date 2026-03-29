@@ -12,18 +12,18 @@ jobs:
     steps:
       # 1. Checkout code
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # 2. Login to Docker Hub
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v5
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       # 3. Build & Push Image
       - name: Build and Push Docker Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
@@ -73,7 +73,9 @@ jobs:
 
 
             # Always pull latest docker compose
-            curl -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" -o docker-compose.yml https://raw.githubusercontent.com/${{github.repository}}/refs/heads/main/docker-compose.yml
+            curl -H "Authorization: token ${{secrets.GITHUB_TOKEN}}" \
+                -o docker-compose.yml \
+                https://raw.githubusercontent.com/${{ github.repository_owner }}/$(basename ${{ github.repository }})/main/docker-compose.yml
 
 
             # Pull latest image
