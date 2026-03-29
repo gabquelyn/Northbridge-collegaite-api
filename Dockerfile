@@ -45,7 +45,7 @@ RUN npm ci --only=production
 COPY --from=builder /app/dist ./dist
 
 # 👇 Copy raw emails (NOT from dist)
-COPY --from=base /app/emails ./dist/emails
+COPY --from=base /app/src/emails ./dist/emails
 
 # Expose prod port
 EXPOSE 5000

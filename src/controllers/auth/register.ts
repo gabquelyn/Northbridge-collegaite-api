@@ -5,7 +5,7 @@ import User from "../../model/user";
 import { v4 as uuid } from "uuid";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import { compileEmail } from "../../utils/compileEmail";
+import { compileEmail } from "../../emails/compileEmail";
 import { validationResult } from "express-validator";
 import { emailQueue } from "../../services/queue";
 
