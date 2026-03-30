@@ -11,7 +11,13 @@ type CompliedTemplate = {
 const cachedTemplate: Record<string, CompliedTemplate> = {};
 
 export const compileEmail = (
-  templateName: "forget" | "payment" | "welcome" | "moodle" | "consultation" | "review",
+  templateName:
+    | "forget"
+    | "payment"
+    | "welcome"
+    | "moodle"
+    | "review"
+    | "inquire",
   data: any,
 ): { html: string; text: string } => {
   if (!cachedTemplate[templateName]) {
