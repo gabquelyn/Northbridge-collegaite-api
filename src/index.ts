@@ -18,6 +18,8 @@ import profileRouter from "./routes/profile";
 import courseRouter from "./routes/course";
 import moodleCredentials from "./utils/moodleCredentials";
 import { enrolStudentInCourses } from "./utils/moodle";
+import { emailQueue } from "./services/queue";
+import consultationRouter from "./routes/consultation";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -61,6 +63,7 @@ app.use("/", express.static(path.join(__dirname, "public")));
 app.use(cookierParser());
 
 app.use("/auth", authRouter);
+app.use("/consultation", consultationRouter)
 app.use("/application", applicationRouter);
 app.use("/courses", courseRouter);
 app.post("/webhook", paystackWebhookHandler);
@@ -69,7 +72,15 @@ app.get(
   // "/email/:template",
   "/test",
   expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {
-    const { html } = compileEmail("welcome", {});
+    const { html } = compileEmail("consultation", {
+      fullname: "Gabriel",
+      email: "gabquelyn@gmail.com",
+      phoneNumber: "50984394839",
+      country: "Nigeria",
+      city: "Ibadan",
+      academicBackground: "SSCE",
+      pathway: "CAAP",
+    });
     // const id = await moodleCredentials({
     //   email: "gabquelyn@gmail.com",
     //   firstName: "Arebamen",
@@ -78,6 +89,12 @@ app.get(
 
     // const response = await enrolStudentInCourses(id, [1, 3]);
     // return res.status(200).json({ response, id });
+    await emailQueue.add("deliver", {
+      to: "gabquelyn@gmail.com",
+      html,
+      subject: "Complete Payment For Programs",
+    });
+    res.send(html);
   }),
 );
 

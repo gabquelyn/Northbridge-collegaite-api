@@ -1,30 +1,58 @@
-const mjmlTemplate = `
 <mjml>
   <mj-body background-color="#f4f4f4">
     <mj-include path="../partials/header.mjml" />
 
-    <mj-section background-color="#ffffff" padding="20px 20px" border-radius="5px">
-      <mj-column>
-        <mj-text font-size="18px" color="#151e2f" font-weight="bold" padding-bottom="10px">
-          Consultation Details
-        </mj-text>
+```
+<mj-section background-color="#ffffff" padding="20px 20px" border-radius="5px">
+  <mj-column>
+    <mj-text font-size="18px" color="#151e2f" font-weight="bold" padding-bottom="10px">
+      Consultation Details
+    </mj-text>
 
-        <mj-text font-size="15px" color="#555555" line-height="22px" padding-bottom="15px">
-          You have received a new consultation. Below are the details:
-        </mj-text>
+    <mj-text font-size="15px" color="#555555" line-height="22px" padding-bottom="15px">
+      You have received a new consultation. Below are the details:
+    </mj-text>
 
-        <!-- Insert dynamic HTML here -->
-        ${consultationHtml}
+    <!-- User Details -->
+    <mj-table>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; color: #151e2f;">Full Name:</td>
+        <td style="padding: 8px 0; color: #555555;">{{fullName}}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; color: #151e2f;">Email:</td>
+        <td style="padding: 8px 0; color: #555555;">{{email}}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; color: #151e2f;">Phone Number:</td>
+        <td style="padding: 8px 0; color: #555555;">{{phoneNumber}}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; color: #151e2f;">Country:</td>
+        <td style="padding: 8px 0; color: #555555;">{{country}}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; color: #151e2f;">City:</td>
+        <td style="padding: 8px 0; color: #555555;">{{city}}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; color: #151e2f;">Academic Background:</td>
+        <td style="padding: 8px 0; color: #555555;">{{academicBackground}}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; font-weight: bold; color: #151e2f;">Pathway:</td>
+        <td style="padding: 8px 0; color: #555555;">{{pathway}}</td>
+      </tr>
+    </mj-table>
 
+    <mj-text font-size="12px" color="#999999" align="center" padding-top="20px">
+      Please respond promptly to the consultation if needed.
+    </mj-text>
+  </mj-column>
+</mj-section>
 
+<mj-include path="../partials/footer.mjml" />
+```
 
-        <mj-text font-size="12px" color="#999999" align="center" padding-top="10px">
-          Please respond promptly to the consultation if needed.
-        </mj-text>
-      </mj-column>
-    </mj-section>
-
-    <mj-include path="../partials/footer.mjml" />
   </mj-body>
 </mjml>
-`;

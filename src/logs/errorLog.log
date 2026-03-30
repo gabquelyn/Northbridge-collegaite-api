@@ -90,3 +90,4 @@
 20260329	22:59:04	db3136ba-a5f3-415b-aee9-5ac059a553f6	jobId.startsWith is not a function	POST	/application/	undefined
 20260329	23:49:30	a7854881-0f60-4eb4-be53-abdb47cdcbc8	programs is not iterable	POST	/application/enrol/69c2a3bbb6e9161547017089	undefined
 20260329	23:51:21	e9059fbd-172e-4975-8cd5-2fd8a80e1c25	Unexpected token '"', ""{\n  \"em"... is not valid JSON	POST	/application/enrol/69c2a3bbb6e9161547017089	undefined
+20260329	23:54:52	a89c613d-250b-44b5-885c-0e4dd15018d9	Unexpected token '"', ""{\n  \"em"... is not valid JSON	POST	/application/enrol/69c2a3bbb6e9161547017089	undefined
