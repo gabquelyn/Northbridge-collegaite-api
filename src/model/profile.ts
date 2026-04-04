@@ -46,10 +46,7 @@ const profileSchema = new mongoose.Schema<IProfile>(
         required: true,
         type: String,
       },
-      unit: {
-        required: true,
-        type: String,
-      },
+      unit: String,
       country: {
         required: true,
         type: String,
