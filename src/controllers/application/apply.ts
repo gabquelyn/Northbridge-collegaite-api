@@ -298,7 +298,7 @@ const requestApplication = expressAsyncHandler(
     });
 
     await emailQueue.add("deliver", {
-      to: "contact@northbridgec.ca",
+      to: "admissions@northbridgec.ca",
       html,
       subject: "New Application Request",
     });
