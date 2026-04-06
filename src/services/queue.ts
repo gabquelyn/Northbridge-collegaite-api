@@ -1,4 +1,4 @@
-import { Queue } from "bullmq";
+import { Queue} from "bullmq";
 import IORedis from "ioredis";
 
 const connection = new IORedis({
@@ -19,3 +19,6 @@ export const paystackQueue = new Queue("webhook", {
   connection,
 });
 
+export const paymentCampaignQueue = new Queue("campaign", {
+  connection,
+});

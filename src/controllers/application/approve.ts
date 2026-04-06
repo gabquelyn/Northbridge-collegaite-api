@@ -5,13 +5,11 @@ import Profile from "../../model/profile";
 import Application from "../../model/application";
 import initializePayment from "../../utils/initializePayment";
 import { compileEmail } from "../../emails/compileEmail";
-import {
-  enrolStudentInCourses,
-} from "../../utils/moodle";
+import { enrolStudentInCourses } from "../../utils/moodle";
 import { prices, APPLICATION_FEE } from "../../config/prices";
 import moodleCredentials from "../../utils/moodleCredentials";
 import { emailQueue } from "../../services/queue";
-import {v4 as uuid} from "uuid";
+import { v4 as uuid } from "uuid";
 
 const approveApplicationRequest = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -81,6 +79,7 @@ const approveApplicationRequest = expressAsyncHandler(
             },
           ],
         },
+        applicationId: application._id,
       });
 
       if (response.status && response.data?.authorization_url) {

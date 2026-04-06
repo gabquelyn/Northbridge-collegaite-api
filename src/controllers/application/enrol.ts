@@ -27,7 +27,9 @@ const enrol = expressAsyncHandler(
     if (!prevApplication?.paid)
       return res
         .status(400)
-        .json({ message: `Payment for previous programs (${prevApplication.programs.join(", ")})  not made` });
+        .json({
+          message: `Payment for previous programs (${prevApplication.programs.join(", ")})  not made`,
+        });
 
     const appliedCourseSet = new Set(prevApplication.programs);
     const selectedProgramSet = new Set(programs);
@@ -72,6 +74,7 @@ const enrol = expressAsyncHandler(
           })),
         ],
       },
+      applicationId: prevApplication._id,
     });
 
     await temp.create({

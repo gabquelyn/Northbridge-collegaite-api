@@ -9,6 +9,11 @@ import Invoice from "../model/invoice";
 import Temp from "../model/temp";
 import moodleCredentials from "../utils/moodleCredentials";
 import { enrolStudentInCourses, getCoursesByCategory } from "../utils/moodle";
+import { emailQueue } from "./queue";
+import User from "../model/user";
+import { compileEmail } from "../emails/compileEmail";
+import moment from "moment";
+
 const connection = new IORedis({
   host: process.env.REDIS_HOST || "redis",
   port: Number(process.env.REDIS_PORT) || 6379,
@@ -167,6 +172,64 @@ async function myWorker() {
       },
     );
 
+    const paymentCampaignWorker = new Worker("campaign", async (job) => {
+      if (job.name === "check-record") {
+        const invoices = await Invoice.find({ status: "pending" })
+          .lean()
+          .exec();
+
+        if (!invoices.length) return;
+
+        // Bulk fetch applications
+        const applicationIds = invoices.map((i) => i.application);
+        const applications = await Application.find({
+          _id: { $in: applicationIds },
+        })
+          .lean()
+          .exec();
+        const applicationsMap = Object.fromEntries(
+          applications.map((a) => [a._id.toString(), a]),
+        );
+
+        // Bulk fetch users
+        const userIds = applications.map((a) => a.applicant);
+        const users = await User.find({ _id: { $in: userIds } })
+          .lean()
+          .exec();
+        const usersMap = Object.fromEntries(
+          users.map((u) => [u._id.toString(), u]),
+        );
+
+        // Push email jobs concurrently
+        await Promise.all(
+          invoices.map(async (invoice) => {
+            const application = applicationsMap[invoice.application.toString()];
+            if (!application || application.paid) return;
+
+            const applicant = usersMap[application.applicant.toString()];
+            if (!applicant) return;
+
+            const { html } = compileEmail("reminder", {
+              applicantName: applicant.name,
+              program:
+                application.programs?.join(", ") ||
+                `${application.courses.length} courses`,
+              applicationDate: moment(application.createdAt).format(
+                "YYYY MMM D, h:mm A",
+              ),
+              paymentUrl: invoice.url,
+            });
+
+            await emailQueue.add(
+              "deliver",
+              { to: applicant.email, html, subject: "Complete your payment" },
+              { jobId: `payment-${invoice._id}` },
+            );
+          }),
+        );
+      }
+    });
+
     // Events listeners
     fileUploadWorker.on("failed", (job, err) => {
       console.error(`Job ${job?.id} failed`, err);
@@ -177,6 +240,10 @@ async function myWorker() {
     });
 
     paystackWorker.on("failed", (job, err) => {
+      console.error(`Job ${job?.id} failed`, err);
+    });
+
+    paymentCampaignWorker.on("failed", (job, err) => {
       console.error(`Job ${job?.id} failed`, err);
     });
 

@@ -19,6 +19,10 @@ export const webhookEvent = new QueueEvents("webhook", {
   connection,
 });
 
+export const paymentCampaignEvent = new QueueEvents("campaign", {
+  connection,
+});
+
 uploadEvents.on("completed", ({ jobId, returnvalue }) => {
   console.log(`Job ${jobId} completed ${returnvalue}`);
 });
@@ -53,4 +57,16 @@ webhookEvent.on("failed", ({ jobId, failedReason }) => {
 
 webhookEvent.on("active", ({ jobId }) => {
   console.log(`Webhook 🚀 Job ${jobId} started`);
+});
+
+paymentCampaignEvent.on("completed", ({ jobId, returnvalue }) => {
+  console.log(`Payment Campaign Job ${jobId} completed ${returnvalue}`);
+});
+
+paymentCampaignEvent.on("failed", ({ jobId, failedReason }) => {
+  console.error(`Payment Campaign Job ${jobId} failed: ${failedReason} `);
+});
+
+paymentCampaignEvent.on("active", ({ jobId }) => {
+  console.log(`Payment Campaign 🚀 Job ${jobId} started`);
 });

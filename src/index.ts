@@ -11,15 +11,11 @@ import expressAsyncHandler from "express-async-handler";
 import applicationRouter from "./routes/application";
 import cors from "cors";
 import paystackWebhookHandler from "./controllers/paystackWebhook";
-import { compileEmail } from "./emails/compileEmail";
 import { rateLimit } from "express-rate-limit";
-import { getCachedMoodleCourses } from "./utils/getMoodleCached";
 import profileRouter from "./routes/profile";
 import courseRouter from "./routes/course";
-import moodleCredentials from "./utils/moodleCredentials";
-import { enrolStudentInCourses } from "./utils/moodle";
-import { emailQueue } from "./services/queue";
 import consultationRouter from "./routes/consultation";
+import {paymentCampaignQueue } from "./services/queue";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -101,6 +97,14 @@ app.use(errorHandler);
 mongoose.connection.on("open", () => {
   console.log("Connected to DB");
   app.listen(port, () => {
+    paymentCampaignQueue.add(
+      "check-record",
+      {},
+      {
+        repeat: { every: 48 * 60 * 60 * 1000 },
+        jobId: "record-checker",
+      },
+    );
     console.log(`Server running on port ${port}`);
   });
 });

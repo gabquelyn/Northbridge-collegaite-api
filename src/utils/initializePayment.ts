@@ -6,6 +6,7 @@ export default async function initializePayment({
   email,
   metadata,
   currency = "NGN",
+  applicationId,
 }: {
   amount: number;
   email: string;
@@ -18,6 +19,7 @@ export default async function initializePayment({
     }[];
   };
   currency?: string;
+  applicationId: string;
 }): Promise<{
   status: boolean;
   message: string;
@@ -58,6 +60,14 @@ export default async function initializePayment({
     );
 
     const data = response.data;
+    await invoice.create({
+      application: applicationId,
+      url: data?.authorization_url,
+      reference: data?.reference,
+      status: "pending",
+      amount,
+      currency,
+    });
     return data;
   } catch (error) {
     console.log(error);

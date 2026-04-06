@@ -1,0 +1,79 @@
+<mjml>
+  <mj-body background-color="#f4f4f4">
+    <mj-include path="../partials/header.mjml" />
+
+    <mj-section
+      background-color="#ffffff"
+      padding="20px 20px"
+      border-radius="5px"
+    >
+      <mj-column>
+        <!-- Heading -->
+        <mj-text
+          font-size="18px"
+          color="#151e2f"
+          font-weight="bold"
+          padding-bottom="10px"
+        >
+        Payment Reminder
+        </mj-text>
+
+        <!-- Intro -->
+        <mj-text
+          font-size="15px"
+          color="#555555"
+          line-height="22px"
+          padding-bottom="15px"
+        >
+          Hello {{ applicantName }},<br /><br />
+          This is a reminder to complete your payment for your application.
+        </mj-text>
+
+        <!-- Details -->
+        <mj-table>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #151e2f">
+              Program:
+            </td>
+            <td style="padding: 8px 0; color: #555555">
+              {{ program }}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #151e2f">
+              Application Date:
+            </td>
+            <td style="padding: 8px 0; color: #555555">
+              {{ applicationDate }}
+            </td>
+          </tr>
+        </mj-table>
+
+        <!-- CTA -->
+        <mj-button
+          background-color="#1e88e5"
+          color="#ffffff"
+          font-size="16px"
+          font-weight="bold"
+          border-radius="5px"
+          href="{{ paymentUrl }}"
+          padding="20px 0"
+        >
+          Complete Payment
+        </mj-button>
+
+        <!-- Footer -->
+        <mj-text
+          font-size="12px"
+          color="#999999"
+          align="center"
+          padding-top="10px"
+        >
+          If you have already completed your payment, please ignore this message.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-include path="../partials/footer.mjml" />
+  </mj-body>
+</mjml>

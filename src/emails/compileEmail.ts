@@ -18,7 +18,8 @@ export const compileEmail = (
     | "moodle"
     | "review"
     | "inquire"
-    | "notification",
+    | "notification"
+    | "reminder",
   data: any,
 ): { html: string; text: string } => {
   if (!cachedTemplate[templateName]) {

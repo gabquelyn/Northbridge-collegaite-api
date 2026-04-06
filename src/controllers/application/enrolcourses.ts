@@ -61,6 +61,7 @@ const enrolCourses = expressAsyncHandler(
         metadata: {
           applicationId: offSiteApplication._id,
         },
+        applicationId: offSiteApplication._id,
       });
 
       paymentUrl = response.data?.authorization_url;
@@ -72,6 +73,7 @@ const enrolCourses = expressAsyncHandler(
         metadata: {
           applicationId: offSiteApplication._id,
         },
+        applicationId: offSiteApplication._id,
       });
 
       paymentUrl = response.data?.authorization_url;
