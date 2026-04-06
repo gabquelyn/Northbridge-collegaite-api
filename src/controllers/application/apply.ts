@@ -9,7 +9,8 @@ import initializePayment from "../../utils/initializePayment";
 import { UNIT_COURSE } from "../../config/prices";
 import { getCachedMoodleCourses } from "../../utils/getMoodleCached";
 import mongoose from "mongoose";
-import { fileUploadQueue } from "../../services/queue";
+import { emailQueue, fileUploadQueue } from "../../services/queue";
+import { compileEmail } from "../../emails/compileEmail";
 
 const requestApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -268,6 +269,21 @@ const requestApplication = expressAsyncHandler(
         });
       }
     }
+
+    const { html } = compileEmail("notification", {
+      adminName: "Admin",
+      applicantName: `${firstName} ${lastName}`,
+      applicantEmail: email,
+      program: `${mode} ${mode == "off-site" ? `${selectedCourseIds.length} courses` : `${programsArray.join(", ")}`}`,
+      submissionDate: new Date().toDateString(),
+      dashboardUrl: `${process.env.FRONTEND_URL}/application/${application[0]._id.toString()}`,
+    });
+
+    await emailQueue.add("deliver", {
+      to: "contact@northbridgec.ca",
+      html,
+      subject: "New Application Request",
+    });
 
     return res.status(201).json({ message: "Admission request submitted" });
   },

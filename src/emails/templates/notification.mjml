@@ -1,0 +1,53 @@
+<mjml>
+  <mj-body background-color="#f4f4f4">
+    <mj-include path="../partials/header.mjml" />
+
+    <!-- Main Content -->
+    <mj-section background-color="#ffffff" padding="30px 20px">
+      <mj-column>
+
+        <!-- Heading -->
+        <mj-text font-size="20px" font-weight="bold" color="#151e2f" padding-bottom="10px">
+          🎓 New Admission Notification
+        </mj-text>
+
+        <!-- Message -->
+        <mj-text font-size="16px" line-height="25px" color="#555555">
+          Hello {{adminName}}, <br /><br />
+          A new admission has been successfully submitted on <strong>NBC</strong>.
+        </mj-text>
+
+        <!-- Admission Details -->
+        <mj-divider border-color="#eeeeee" padding="20px 0" />
+
+        <mj-text font-size="14px" color="#333333" line-height="22px">
+          <strong>Applicant Name:</strong> {{ applicantName }} <br />
+          <strong>Email Address:</strong> {{ applicantEmail }} <br />
+          <strong>Program:</strong> {{ program }} <br />
+          <strong>Submission Date:</strong> {{ submissionDate }} <br />
+        </mj-text>
+
+        <!-- CTA Button -->
+        <mj-button
+          background-color="#1e88e5"
+          color="#ffffff"
+          font-size="16px"
+          font-weight="bold"
+          border-radius="5px"
+          href="{{dashboardUrl}}"
+          padding="20px 0"
+        >
+          View Admission
+        </mj-button>
+
+        <!-- Footer Note -->
+        <mj-text font-size="12px" color="#999999" padding-top="10px">
+          Please log in to your dashboard to review and take necessary action.
+        </mj-text>
+
+      </mj-column>
+    </mj-section>
+
+    <mj-include path="../partials/footer.mjml" />
+  </mj-body>
+</mjml>
