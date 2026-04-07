@@ -258,6 +258,7 @@ const editApplication = expressAsyncHandler(
         metadata: {
           applicationId: prevApplication._id,
         },
+        applicationId: prevApplication._id,
       });
 
       if (response.status) {
