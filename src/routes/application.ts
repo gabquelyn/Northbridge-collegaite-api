@@ -113,7 +113,7 @@ applicationRouter.patch(
       .custom((value) => {
         const programs: APPLICATION_PROGRAMS[] = JSON.parse(value);
         for (const program of programs) {
-          return ["CAAP", "GRADE11", "GRADE12", "AY12"].includes(program);
+          return ["CAAP", "GRADE11", "GRADE12", "AY12", "DIRECT"].includes(program);
         }
       }),
   ],

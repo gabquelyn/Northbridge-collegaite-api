@@ -10,6 +10,7 @@ import { getCachedMoodleCourses } from "../../utils/getMoodleCached";
 import mongoose from "mongoose";
 import { fileUploadQueue } from "../../services/queue";
 import { UNIT_COURSE } from "../../config/prices";
+import moment from "moment";
 
 const editApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -108,7 +109,13 @@ const editApplication = expressAsyncHandler(
         return res.status(400).json({ message: "Invalid programs format" });
       }
 
-      const VALID_PROGRAMS = new Set(["CAAP", "AY12", "GRADE11", "GRADE12"]);
+      const VALID_PROGRAMS = new Set([
+        "CAAP",
+        "AY12",
+        "GRADE11",
+        "GRADE12",
+        "DIRECT",
+      ]);
       const programsSet = new Set(programsArray);
 
       for (const p of programsArray) {
@@ -129,18 +136,14 @@ const editApplication = expressAsyncHandler(
           .status(400)
           .json({ message: "Non-canadian students are mandated to take CAAP" });
 
-      //! AY12 must accompany Grade 12
-      if (programsSet.has("AY12") && !programsSet.has("GRADE12")) {
-        return res
-          .status(400)
-          .json({ message: "Ay 12 must be accompanied with Grade 12" });
-      }
+      const now = moment();
+      const current = now.format("MM-DD");
+      const isWithinRange = current >= "11-01" && current <= "12-15";
 
-      //! Grade 11 must be done before Grade 12
-      if (programsSet.has("GRADE12") && !programsSet.has("GRADE11")) {
-        return res
-          .status(400)
-          .json({ message: "Grade 11 must be done before Grade 12" });
+      if (programsSet.has("AY12") && !isWithinRange) {
+        return res.status(400).json({
+          message: "Application window for Academic Year (AY12) closed",
+        });
       }
     }
 

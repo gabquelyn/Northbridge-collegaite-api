@@ -100,6 +100,13 @@ async function myWorker() {
 
           const { email, firstName, lastName } = profile.bio;
           // * For an Enrollment into a previously paid application
+
+          const id = await moodleCredentials({
+            email,
+            firstName,
+            lastName,
+          });
+
           if (application.paid) {
             const additional = await Temp.findOne({
               application: applicationId,
@@ -115,13 +122,6 @@ async function myWorker() {
                 application.courses = [...courseSet];
                 await application.save();
                 // Grant access on Moodle
-
-                const id = await moodleCredentials({
-                  email,
-                  firstName,
-                  lastName,
-                });
-
                 await enrolStudentInCourses(id, additional.courses);
               }
 
@@ -135,28 +135,15 @@ async function myWorker() {
               }
             }
           } else {
-            // ! MOODLE FOR ONSITE USERS
             const programsSet = new Set(application.programs);
             if (application?.mode == "on-site") {
+              // ! GRANTING ACCESS INTO SELECTED PROGRAMS
               if (programsSet.has("CAAP")) {
-                const id = await moodleCredentials({
-                  email,
-                  firstName,
-                  lastName,
-                });
                 // enroll course in category id: 2
                 const coursesInCategory = await getCoursesByCategory(2);
                 const courseIds = coursesInCategory.map((course) => course.id);
                 await enrolStudentInCourses(id, courseIds);
               }
-            }
-            if (application.mode == "off-site") {
-              const id = await moodleCredentials({
-                email,
-                firstName,
-                lastName,
-              });
-              await enrolStudentInCourses(id, application.courses);
             }
           }
           application.paid = true;

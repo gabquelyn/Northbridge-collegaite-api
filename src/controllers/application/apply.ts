@@ -128,19 +128,6 @@ const requestApplication = expressAsyncHandler(
           .status(400)
           .json({ message: "Non-canadian students are mandated to take CAAP" });
 
-      //! AY12 must accompany Grade 12
-      if (programsSet.has("AY12") && !programsSet.has("GRADE12")) {
-        return res
-          .status(400)
-          .json({ message: "Ay 12 must be accompanied with Grade 12" });
-      }
-
-      //! Grade 11 must be done before Grade 12
-      if (programsSet.has("GRADE12") && !programsSet.has("GRADE11")) {
-        return res
-          .status(400)
-          .json({ message: "Grade 11 must be done before Grade 12" });
-      }
 
       const now = moment();
       const current = now.format("MM-DD");
