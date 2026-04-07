@@ -49,7 +49,10 @@ export default async function initializePayment({
           "capitec_pay",
           "payattitude",
         ],
-        metadata,
+        metadata: {
+          ...metadata,
+          cancel_action: process.env.FRONTEND_URL,
+        },
       },
       {
         headers: {

@@ -6,7 +6,7 @@ import { CustomRequest } from "../../types/request";
 import Profile from "../../model/profile";
 import Application from "../../model/application";
 import initializePayment from "../../utils/initializePayment";
-import { UNIT_COURSE } from "../../config/prices";
+import { APPLICATION_FEE, UNIT_COURSE } from "../../config/prices";
 import { getCachedMoodleCourses } from "../../utils/getMoodleCached";
 import mongoose from "mongoose";
 import { emailQueue, fileUploadQueue } from "../../services/queue";
@@ -272,7 +272,7 @@ const requestApplication = expressAsyncHandler(
 
     if (mode === "off-site") {
       const response = await initializePayment({
-        amount: selectedCourseIds.length * UNIT_COURSE,
+        amount: selectedCourseIds.length * UNIT_COURSE + APPLICATION_FEE,
         email: guardian.email,
         metadata: {
           applicationId: application[0]._id,
