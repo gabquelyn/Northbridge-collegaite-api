@@ -146,9 +146,9 @@ const requestApplication = expressAsyncHandler(
       const current = now.format("MM-DD");
       const isWithinRange = current >= "11-01" && current <= "12-15";
 
-      if (programsSet.has("DIRECT") && !isWithinRange) {
+      if (programsSet.has("AY12") && !isWithinRange) {
         return res.status(400).json({
-          message: "Application window for Direct entry pathway closed",
+          message: "Application window for Academic Year (AY12) closed",
         });
       }
     }
