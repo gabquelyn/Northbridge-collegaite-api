@@ -63,10 +63,11 @@ export default async function initializePayment({
     );
 
     const data = response.data;
+
     await invoice.create({
       application: applicationId,
-      url: data?.authorization_url,
-      reference: data?.reference,
+      url: data.data?.authorization_url,
+      reference: data.data?.reference,
       status: "pending",
       amount,
       currency,
