@@ -19,7 +19,7 @@ const applicationSchema = new mongoose.Schema<IApplication>(
       {
         type: String,
         required: true,
-        enum: ["CAAP", "GRADE11", "GRADE12", "AY12"],
+        enum: ["CAAP", "GRADE11", "GRADE12", "AY12", "DIRECT"],
       },
     ],
 
