@@ -70,7 +70,7 @@ const enrol = expressAsyncHandler(
           ...prices.map((p) => ({
             display_name: p.detail,
             variable_name: p.name,
-            value: p.amount,
+            value: p.amount * 100,
           })),
         ],
       },
