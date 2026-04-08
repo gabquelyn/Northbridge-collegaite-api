@@ -47,16 +47,6 @@ const enrol = expressAsyncHandler(
           .json({ message: "Program already in previous application" });
     }
 
-    if (!appliedCourseSet.has("GRADE11") && selectedProgramSet.has("GRADE12"))
-      return res.status(400).json({
-        message: "Grade 11 applcation comes before grade 12",
-      });
-
-    if (!appliedCourseSet.has("GRADE12") && selectedProgramSet.has("AY12"))
-      return res.status(400).json({
-        message: "Grade 12 applcation comes before Grade 11",
-      });
-
     const totalPrice = cost(programs, true);
     const response = await initializePayment({
       amount: prevApplication?.installment ? totalPrice / 2 : totalPrice,
