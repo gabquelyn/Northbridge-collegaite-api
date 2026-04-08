@@ -21,6 +21,7 @@ import {
 import enrolCourses from "../controllers/application/enrolcourses";
 import getApplicationReceipt from "../controllers/application/receipt";
 import reviewApplication from "../controllers/application/review";
+import payOutstanding from "../controllers/application/outsanding";
 
 const applicationRouter = Router();
 
@@ -60,7 +61,9 @@ applicationRouter.post(
       .custom((value) => {
         const programs: APPLICATION_PROGRAMS[] = JSON.parse(value);
         for (const program of programs) {
-          return ["CAAP", "GRADE11", "GRADE12", "AY12", "DIRECT"].includes(program);
+          return ["CAAP", "GRADE11", "GRADE12", "AY12", "DIRECT"].includes(
+            program,
+          );
         }
       }),
   ],
@@ -113,7 +116,9 @@ applicationRouter.patch(
       .custom((value) => {
         const programs: APPLICATION_PROGRAMS[] = JSON.parse(value);
         for (const program of programs) {
-          return ["CAAP", "GRADE11", "GRADE12", "AY12", "DIRECT"].includes(program);
+          return ["CAAP", "GRADE11", "GRADE12", "AY12", "DIRECT"].includes(
+            program,
+          );
         }
       }),
   ],
@@ -121,6 +126,7 @@ applicationRouter.patch(
 );
 
 applicationRouter.get("/", VerifyJWT, getApplications);
+applicationRouter.post("/pay/:id", VerifyJWT, payOutstanding);
 
 applicationRouter.post(
   "/enrol/:id",

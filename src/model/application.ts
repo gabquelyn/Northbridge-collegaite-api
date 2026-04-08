@@ -30,7 +30,8 @@ const applicationSchema = new mongoose.Schema<IApplication>(
     },
 
     outstanding: {
-      type: Number, default: 0
+      type: Number,
+      default: 0,
     },
 
     //   for off-site students
@@ -42,6 +43,11 @@ const applicationSchema = new mongoose.Schema<IApplication>(
     ],
 
     granted: {
+      type: Boolean,
+      default: false,
+    },
+
+    paused: {
       type: Boolean,
       default: false,
     },

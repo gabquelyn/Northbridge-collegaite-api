@@ -8,6 +8,7 @@ export interface IApplication extends mongoose.Document {
   courses: number[];
 
   granted: boolean;
+  paused: boolean;
   paid: boolean;
   completed: boolean;
   createdAt?: string;
