@@ -10,10 +10,12 @@ import { prices, APPLICATION_FEE } from "../../config/prices";
 import moodleCredentials from "../../utils/moodleCredentials";
 import { emailQueue } from "../../services/queue";
 import { v4 as uuid } from "uuid";
+import cost from "../../utils/programs";
 
 const approveApplicationRequest = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { id } = req.params;
+    const { installment } = req.body;
     const application = await Application.findById(id).exec();
     const profile = await Profile.findById(application?.profile).lean().exec();
     const guardian = await userModel
@@ -52,17 +54,9 @@ const approveApplicationRequest = expressAsyncHandler(
     if (application.mode == "on-site") {
       //* calculate all the prices for the selected program
 
-      let totalPrice = 0;
-      for (const program of application.programs) {
-        for (const price of prices) {
-          if (program === price.name) {
-            totalPrice += price.amount;
-          }
-        }
-      }
-
+      const totalPrice = cost(application.programs);
       const response = await initializePayment({
-        amount: totalPrice + APPLICATION_FEE,
+        amount: installment ? totalPrice / 2 : totalPrice,
         email: guardian.email,
         metadata: {
           applicationId: application._id,

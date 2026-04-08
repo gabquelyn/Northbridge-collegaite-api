@@ -7,6 +7,7 @@ import initializePayment from "../../utils/initializePayment";
 import User from "../../model/user";
 import { prices } from "../../config/prices";
 import temp from "../../model/temp";
+import cost from "../../utils/programs";
 
 const enrol = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -25,11 +26,15 @@ const enrol = expressAsyncHandler(
       return res.status(404).json({ message: "Admission is still in review" });
 
     if (!prevApplication?.paid)
-      return res
-        .status(400)
-        .json({
-          message: `Payment for previous programs (${prevApplication.programs.join(", ")})  not made`,
-        });
+      return res.status(400).json({
+        message: `Payment for previous programs (${prevApplication.programs.join(", ")})  not made`,
+      });
+
+    if (prevApplication.outstanding !== 0) {
+      return res.status(400).json({
+        message: `Outstanding fee of ${prevApplication.outstanding} needs to be paid before enrolling in another program`,
+      });
+    }
 
     const appliedCourseSet = new Set(prevApplication.programs);
     const selectedProgramSet = new Set(programs);
@@ -52,15 +57,7 @@ const enrol = expressAsyncHandler(
         message: "Grade 12 applcation comes before Grade 11",
       });
 
-    let totalPrice = 0;
-    for (const program of programs) {
-      for (const price of prices) {
-        if (program === price.name) {
-          totalPrice += price.amount;
-        }
-      }
-    }
-
+    const totalPrice = cost(programs, true);
     const response = await initializePayment({
       amount: totalPrice,
       email: user.email,

@@ -13,6 +13,8 @@ import { emailQueue } from "./queue";
 import User from "../model/user";
 import { compileEmail } from "../emails/compileEmail";
 import moment from "moment";
+import { APPLICATION_FEE, prices } from "../config/prices";
+import cost from "../utils/programs";
 
 const connection = new IORedis({
   host: process.env.REDIS_HOST || "redis",
@@ -78,25 +80,20 @@ async function myWorker() {
             .lean()
             .exec();
 
-          if (!profile || !application) return { success: false };
+          const invoice = await Invoice.findOne({ reference }).exec();
 
-          const invoice = await Invoice.findOneAndUpdate(
-            { reference },
-            {
-              $setOnInsert: {
-                currency,
-                amount,
-                status,
-                reference,
-                application: applicationId,
-              },
-            },
-            { upsert: true, new: false }, // returns null if inserted
-          );
+          if (!profile || !application || !invoice)
+            throw new Error("Missing important details");
 
-          if (invoice) {
-            return { success: true };
+          if (invoice.status == "success") {
+            return console.log("Invoice already processed");
           }
+
+          invoice.currency = currency;
+          invoice.amount = amount;
+          invoice.status = "success";
+          invoice.application = applicationId;
+          await invoice.save();
 
           const { email, firstName, lastName } = profile.bio;
           // * For an Enrollment into a previously paid application
@@ -107,7 +104,8 @@ async function myWorker() {
             lastName,
           });
 
-          if (application.paid) {
+          // * Enrollment in a new program/course without an outsanding fee
+          if (application.paid && application.outstanding <= 0) {
             const additional = await Temp.findOne({
               application: applicationId,
               reference: reference,
@@ -144,6 +142,21 @@ async function myWorker() {
                 const courseIds = coursesInCategory.map((course) => course.id);
                 await enrolStudentInCourses(id, courseIds);
               }
+
+              // ! CHECKING IF IT IS INSTALLMENTAL PAYMENT
+              const totalPrice = cost(application.programs);
+              // cummulate all invoices for the application and remove from kobo
+              const totalPayed =
+                (
+                  await Invoice.find({
+                    application: applicationId,
+                    status: "success",
+                  })
+                    .lean()
+                    .exec()
+                ).reduce((sum, inv) => sum + inv.amount, 0) / 100;
+
+              application.outstanding = totalPrice - totalPayed;
             }
           }
           application.paid = true;

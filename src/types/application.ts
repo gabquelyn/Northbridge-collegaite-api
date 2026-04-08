@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 export interface IApplication extends mongoose.Document {
   profile: mongoose.Schema.Types.ObjectId;
   applicant: mongoose.Schema.Types.ObjectId;
-
+  outstanding: number;
   programs: APPLICATION_PROGRAMS[];
   mode: "on-site" | "off-site";
   courses: number[];
@@ -10,5 +10,5 @@ export interface IApplication extends mongoose.Document {
   granted: boolean;
   paid: boolean;
   completed: boolean;
-  createdAt?: string
+  createdAt?: string;
 }

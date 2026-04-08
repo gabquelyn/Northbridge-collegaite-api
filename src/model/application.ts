@@ -29,6 +29,10 @@ const applicationSchema = new mongoose.Schema<IApplication>(
       enum: ["on-site", "off-site"],
     },
 
+    outstanding: {
+      type: Number, default: 0
+    },
+
     //   for off-site students
     courses: [
       {
