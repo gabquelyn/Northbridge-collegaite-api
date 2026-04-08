@@ -104,6 +104,16 @@ async function myWorker() {
             lastName,
           });
 
+          const totalPayed =
+            (
+              await Invoice.find({
+                application: applicationId,
+                status: "success",
+              })
+                .lean()
+                .exec()
+            ).reduce((sum, inv) => sum + inv.amount, 0) / 100;
+
           // * Enrollment in a new program/course without an outsanding fee
           if (application.paid && application.outstanding <= 0) {
             const additional = await Temp.findOne({
@@ -129,7 +139,8 @@ async function myWorker() {
                   ...additional.programs,
                 ]);
                 application.programs = [...programs];
-                await application.save();
+                const totalPrice = cost([...programs]);
+                application.outstanding = totalPrice - totalPayed;
               }
             }
           } else {
@@ -146,15 +157,6 @@ async function myWorker() {
               // ! CHECKING IF IT IS INSTALLMENTAL PAYMENT
               const totalPrice = cost(application.programs);
               // cummulate all invoices for the application and convert from units
-              const totalPayed =
-                (
-                  await Invoice.find({
-                    application: applicationId,
-                    status: "success",
-                  })
-                    .lean()
-                    .exec()
-                ).reduce((sum, inv) => sum + inv.amount, 0) / 100;
 
               application.outstanding = totalPrice - totalPayed;
             }

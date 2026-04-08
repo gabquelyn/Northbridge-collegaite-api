@@ -47,6 +47,11 @@ const applicationSchema = new mongoose.Schema<IApplication>(
       default: false,
     },
 
+    installment: {
+      type: Boolean,
+      default: false,
+    },
+
     paused: {
       type: Boolean,
       default: false,

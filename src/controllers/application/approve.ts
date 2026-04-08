@@ -55,6 +55,8 @@ const approveApplicationRequest = expressAsyncHandler(
       //* calculate all the prices for the selected program
 
       const totalPrice = cost(application.programs);
+      if (installment) application.installment = true;
+
       const response = await initializePayment({
         amount: installment ? totalPrice / 2 : totalPrice,
         email: guardian.email,
@@ -94,6 +96,7 @@ const approveApplicationRequest = expressAsyncHandler(
           },
           { jobId: uuid() },
         );
+        await application.save();
       }
     }
 

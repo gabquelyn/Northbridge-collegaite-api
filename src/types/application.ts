@@ -6,7 +6,7 @@ export interface IApplication extends mongoose.Document {
   programs: APPLICATION_PROGRAMS[];
   mode: "on-site" | "off-site";
   courses: number[];
-
+  installment: boolean;
   granted: boolean;
   paused: boolean;
   paid: boolean;
