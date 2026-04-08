@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-const invoiveSchema = new mongoose.Schema(
+import { IInvoice } from "../types/invoice";
+const invoiveSchema = new mongoose.Schema<IInvoice>(
   {
     application: {
       required: true,
@@ -19,7 +20,7 @@ const invoiveSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      default: false,
+      default: "pending",
     },
     amount: {
       required: true,
@@ -33,4 +34,4 @@ const invoiveSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-export default mongoose.model("Invoice", invoiveSchema);
+export default mongoose.model<IInvoice>("Invoice", invoiveSchema);

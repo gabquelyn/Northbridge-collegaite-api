@@ -145,7 +145,7 @@ async function myWorker() {
 
               // ! CHECKING IF IT IS INSTALLMENTAL PAYMENT
               const totalPrice = cost(application.programs);
-              // cummulate all invoices for the application and remove from kobo
+              // cummulate all invoices for the application and convert from units
               const totalPayed =
                 (
                   await Invoice.find({
@@ -160,7 +160,7 @@ async function myWorker() {
             }
           }
           application.paid = true;
-          application.save();
+          await application.save();
         }
 
         return { success: true };
