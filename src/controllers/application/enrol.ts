@@ -30,7 +30,7 @@ const enrol = expressAsyncHandler(
         message: `Payment for previous programs (${prevApplication.programs.join(", ")})  not made`,
       });
 
-    if (prevApplication.outstanding !== 0) {
+    if (prevApplication.outstanding <= 0) {
       return res.status(400).json({
         message: `Outstanding fee of ${prevApplication.outstanding} needs to be paid before enrolling in another program`,
       });
