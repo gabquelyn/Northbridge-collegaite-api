@@ -49,7 +49,7 @@ const enrol = expressAsyncHandler(
 
     const totalPrice = cost(programs, true);
     const response = await initializePayment({
-      amount: prevApplication?.installment ? totalPrice / 2 : totalPrice,
+      amount: prevApplication?.installment ? totalPrice * 0.6 : totalPrice,
       email: user.email,
       metadata: {
         applicationId: prevApplication._id,
