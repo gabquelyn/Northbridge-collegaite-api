@@ -1,0 +1,95 @@
+<mjml>
+  <mj-body background-color="#f4f4f4">
+    <mj-include path="../partials/header.mjml" />
+
+    <mj-section background-color="#ffffff" padding="30px 20px">
+      <mj-column>
+        <!-- Title -->
+        <mj-text
+          font-size="22px"
+          font-weight="bold"
+          color="#b71c1c"
+          align="center"
+        >
+          Account Suspension Notice
+        </mj-text>
+
+        <!-- Greeting -->
+        <mj-text font-size="16px" color="#555555" padding-top="10px">
+          Dear {{ studentName }} and Family,
+        </mj-text>
+
+        <!-- Message -->
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          We hope this message finds you well.
+        </mj-text>
+
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          This is to inform you that your access to the Northbridge Collegiate
+          learning platform (Moodle) has been <strong>suspended</strong> due to
+          an outstanding balance on your account.
+        </mj-text>
+
+        <!-- Highlight Box -->
+        <mj-text
+          background-color="#fff4f4"
+          padding="18px"
+          font-size="15px"
+          color="#333333"
+        >
+          <strong>Outstanding Balance:</strong> {{ amount }} <br /><br />
+          <strong>Status:</strong> Access to learning resources temporarily disabled
+        </mj-text>
+
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          Despite previous reminders, payment for the pending balance has not
+          been received. As a result, your access has been restricted in
+          accordance with our enrollment policy.
+        </mj-text>
+
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          To restore full access to your courses and learning materials, kindly
+          complete your payment as soon as possible.
+        </mj-text>
+
+        <!-- CTA Button -->
+        <mj-button
+          background-color="#1e88e5"
+          color="#ffffff"
+          font-size="16px"
+          font-weight="bold"
+          border-radius="5px"
+          href="{{ paymentUrl }}"
+          padding="25px 0"
+          align="center"
+        >
+          Complete Payment Now
+        </mj-button>
+
+        <!-- Note -->
+        <mj-text font-size="12px" color="#999999" align="center">
+          Your access will be automatically restored once payment is confirmed.
+        </mj-text>
+
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          If you have already made this payment, please disregard this message or
+          contact the admissions office for assistance.
+        </mj-text>
+
+        <!-- Closing -->
+        <mj-text
+          font-size="15px"
+          color="#555555"
+          padding-top="20px"
+          line-height="20px"
+        >
+          Warm regards,<br /><br />
+          <strong>Admissions & Accounts Team</strong><br />
+          Northbridge Collegiate
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-include path="../partials/footer.mjml" />
+  </mj-body>
+</mjml>

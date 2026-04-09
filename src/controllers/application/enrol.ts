@@ -8,6 +8,7 @@ import User from "../../model/user";
 import { prices } from "../../config/prices";
 import temp from "../../model/temp";
 import cost from "../../utils/programs";
+import moment from "moment";
 
 const enrol = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -38,6 +39,16 @@ const enrol = expressAsyncHandler(
 
     const appliedCourseSet = new Set(prevApplication.programs);
     const selectedProgramSet = new Set(programs);
+    const now = moment();
+    const current = now.format("MM-DD");
+    const isWithinRange = current >= "11-01" && current <= "12-15";
+
+    if (selectedProgramSet.has("AY12") && !isWithinRange) {
+      return res.status(400).json({
+        message: "Application window for Academic Year (AY12) closed",
+      });
+    }
+
     // * check if the admission requested already on the course or program
 
     for (const program of programs) {

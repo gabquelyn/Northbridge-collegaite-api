@@ -22,3 +22,7 @@ export const paystackQueue = new Queue("webhook", {
 export const paymentCampaignQueue = new Queue("campaign", {
   connection,
 });
+
+export const suspendDebtorQueue = new Queue("suspend", {
+  connection,
+});

@@ -16,6 +16,10 @@
       NBC © {{ date }}. All rights reserved.
     </mj-text>
 
+    <mj-text font-size="13px" color="#777777" align="center" padding="5px 0 0 0">
+      +234-704-700-2406 | +1-416-644-1114
+    </mj-text>
+
     <!-- Social / Links -->
     <mj-social
       font-size="12px"

@@ -1,9 +1,7 @@
 import { Router } from "express";
 import VerifyJWT from "../middlewares/VerifyJwt";
-// import multer, { memoryStorage } from "multer";
 import { body } from "express-validator";
 import OnlyAdmin from "../middlewares/onlyAdmin";
-import cacheMiddleware from "../middlewares/cache";
 import { upload } from "../config/multer";
 import requestApplication from "../controllers/application/apply";
 import approveApplicationRequest from "../controllers/application/approve";
@@ -13,12 +11,6 @@ import {
 } from "../controllers/application/get";
 import editApplication from "../controllers/application/edit";
 import enrol from "../controllers/application/enrol";
-import {
-  getCoursesCategories,
-  getMycourses,
-  getOnlineCourses,
-} from "../controllers/application/courses";
-import enrolCourses from "../controllers/application/enrolcourses";
 import getApplicationReceipt from "../controllers/application/receipt";
 import reviewApplication from "../controllers/application/review";
 import payOutstanding from "../controllers/application/outsanding";

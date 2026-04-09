@@ -19,7 +19,9 @@ export const compileEmail = (
     | "review"
     | "inquire"
     | "notification"
-    | "reminder",
+    | "reminder"
+    | "suspension"
+    | "restore",
   data: any,
 ): { html: string; text: string } => {
   if (!cachedTemplate[templateName]) {

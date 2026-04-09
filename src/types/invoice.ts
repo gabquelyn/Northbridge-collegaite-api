@@ -7,4 +7,5 @@ export interface IInvoice extends mongoose.Document{
     status: string,
     amount: number,
     currency: string
+    createdAt: string
 }

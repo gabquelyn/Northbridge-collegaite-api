@@ -1,0 +1,87 @@
+<mjml>
+  <mj-body background-color="#f4f4f4">
+    <mj-include path="../partials/header.mjml" />
+
+    <mj-section background-color="#ffffff" padding="30px 20px">
+      <mj-column>
+        <!-- Title -->
+        <mj-text
+          font-size="22px"
+          font-weight="bold"
+          color="#1b5e20"
+          align="center"
+        >
+          Account Access Restored
+        </mj-text>
+
+        <!-- Greeting -->
+        <mj-text font-size="16px" color="#555555" padding-top="10px">
+          Dear {{ studentName }} and Family,
+        </mj-text>
+
+        <!-- Message -->
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          We are pleased to inform you that your access to the Northbridge
+          Collegiate learning platform (Moodle) has been
+          <strong>fully restored</strong>.
+        </mj-text>
+
+        <!-- Highlight Box -->
+        <mj-text
+          background-color="#f1f8f4"
+          padding="18px"
+          font-size="15px"
+          color="#333333"
+        >
+          <strong>Status:</strong> Active <br /><br />
+          <strong>Access:</strong> All learning resources are now available
+        </mj-text>
+
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          This update reflects the successful resolution of your outstanding
+          balance. You may now log in and continue your academic activities
+          without any restrictions.
+        </mj-text>
+
+        <!-- CTA Button -->
+        <mj-button
+          background-color="#1e88e5"
+          color="#ffffff"
+          font-size="16px"
+          font-weight="bold"
+          border-radius="5px"
+          href="{{ loginUrl }}"
+          padding="25px 0"
+          align="center"
+        >
+          Access Your Learning Portal
+        </mj-button>
+
+        <!-- Note -->
+        <mj-text font-size="12px" color="#999999" align="center">
+          If you experience any issues accessing your account, please contact
+          support.
+        </mj-text>
+
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          We appreciate your prompt attention to this matter and look forward to
+          your continued success at Northbridge Collegiate.
+        </mj-text>
+
+        <!-- Closing -->
+        <mj-text
+          font-size="15px"
+          color="#555555"
+          padding-top="20px"
+          line-height="20px"
+        >
+          Warm regards,<br /><br />
+          <strong>Admissions & Accounts Team</strong><br />
+          Northbridge Collegiate
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-include path="../partials/footer.mjml" />
+  </mj-body>
+</mjml>

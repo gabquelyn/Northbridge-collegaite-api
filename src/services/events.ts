@@ -23,6 +23,10 @@ export const paymentCampaignEvent = new QueueEvents("campaign", {
   connection,
 });
 
+export const suspendDebtorEvent = new QueueEvents("suspend", {
+  connection,
+});
+
 uploadEvents.on("completed", ({ jobId, returnvalue }) => {
   console.log(`Job ${jobId} completed ${returnvalue}`);
 });
@@ -69,4 +73,16 @@ paymentCampaignEvent.on("failed", ({ jobId, failedReason }) => {
 
 paymentCampaignEvent.on("active", ({ jobId }) => {
   console.log(`Payment Campaign 🚀 Job ${jobId} started`);
+});
+
+suspendDebtorEvent.on("completed", ({ jobId, returnvalue }) => {
+  console.log(`Suspend debtor Job ${jobId} completed ${returnvalue}`);
+});
+
+suspendDebtorEvent.on("failed", ({ jobId, failedReason }) => {
+  console.error(`Suspend debtor Job ${jobId} failed: ${failedReason} `);
+});
+
+suspendDebtorEvent.on("active", ({ jobId }) => {
+  console.log(`Suspend debtor 🚀 Job ${jobId} started`);
 });

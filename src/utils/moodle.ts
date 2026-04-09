@@ -173,3 +173,38 @@ export async function getCoursesByCategory(
 
   return res.data.courses || [];
 }
+
+
+export const suspendMoodleUserByEmail = async (email: string, reverse ?: boolean) => {
+  try {
+    // 1. Get user by email
+    const users = await getMoodleUserByEmail(email);
+
+    if (!users || users.length === 0) {
+      throw new Error("User not found in Moodle");
+    }
+
+    const userId = users[0].id;
+
+    // 2. Prepare request
+    const params = new URLSearchParams();
+
+    params.append("wstoken", MOODLE_TOKEN as string);
+    params.append("wsfunction", "core_user_update_users");
+    params.append("moodlewsrestformat", "json");
+
+    params.append("users[0][id]", String(userId));
+    params.append("users[0][suspended]", reverse ? "0" : "1");
+
+    // 3. Call Moodle API
+    const response = await axios.post(
+      `${MOODLE_URL}/webservice/rest/server.php`,
+      params
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error("Suspend user failed:", error.response?.data || error);
+    throw error;
+  }
+};

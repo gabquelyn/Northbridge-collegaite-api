@@ -15,7 +15,7 @@ import { rateLimit } from "express-rate-limit";
 import profileRouter from "./routes/profile";
 import courseRouter from "./routes/course";
 import consultationRouter from "./routes/consultation";
-import {paymentCampaignQueue } from "./services/queue";
+import { paymentCampaignQueue, suspendDebtorQueue } from "./services/queue";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -94,17 +94,28 @@ app.get("/health", (req, res: Response) => {
 });
 app.use(errorHandler);
 
-mongoose.connection.on("open", () => {
+mongoose.connection.on("open", async () => {
   console.log("Connected to DB");
-  app.listen(port, () => {
-    paymentCampaignQueue.add(
-      "check-record",
-      {},
-      {
-        repeat: { every: 48 * 60 * 60 * 1000 },
-        jobId: "record-checker",
+  await paymentCampaignQueue.add(
+    "check-record",
+    {},
+    {
+      repeat: { every: 48 * 60 * 60 * 1000 },
+      jobId: "record-checker",
+    },
+  );
+
+  await suspendDebtorQueue.add(
+    "installment",
+    {},
+    {
+      repeat: {
+        every: 24 * 60 * 60 * 1000,
+        jobId: "installment-checker",
       },
-    );
+    },
+  );
+  app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });
 });

@@ -8,13 +8,18 @@ import Application from "../model/application";
 import Invoice from "../model/invoice";
 import Temp from "../model/temp";
 import moodleCredentials from "../utils/moodleCredentials";
-import { enrolStudentInCourses, getCoursesByCategory } from "../utils/moodle";
+import {
+  enrolStudentInCourses,
+  getCoursesByCategory,
+  suspendMoodleUserByEmail,
+} from "../utils/moodle";
 import { emailQueue } from "./queue";
 import User from "../model/user";
 import { compileEmail } from "../emails/compileEmail";
 import moment from "moment";
-import { APPLICATION_FEE, prices } from "../config/prices";
 import cost from "../utils/programs";
+import initializePayment from "../utils/initializePayment";
+import { formatCurrency } from "../utils/formatCurrency";
 
 const connection = new IORedis({
   host: process.env.REDIS_HOST || "redis",
@@ -82,6 +87,26 @@ async function myWorker() {
 
           const invoice = await Invoice.findOne({ reference }).exec();
 
+          // CAAP COURSES
+          const CAAP_COURSES_PROMISE = getCoursesByCategory(2);
+          const GRADE12_COURSES_PROMISE = getCoursesByCategory(3);
+          const GRADE11_COURSES_PROMISE = getCoursesByCategory(4);
+
+          const [CAPP_COURSES, GRADE12_COURSES, GRADE11_COURSES] =
+            await Promise.all([
+              CAAP_COURSES_PROMISE,
+              GRADE12_COURSES_PROMISE,
+              GRADE11_COURSES_PROMISE,
+            ]);
+
+          const PROGRAM_COURSES_MAP: Record<APPLICATION_PROGRAMS, number[]> = {
+            CAAP: CAPP_COURSES.map((course) => course.id),
+            GRADE12: GRADE12_COURSES.map((course) => course.id),
+            DIRECT: GRADE12_COURSES.map((course) => course.id),
+            GRADE11: GRADE11_COURSES.map((course) => course.id),
+            AY12: [],
+          };
+
           if (!profile || !application || !invoice)
             throw new Error("Missing important details");
 
@@ -98,7 +123,7 @@ async function myWorker() {
           const { email, firstName, lastName } = profile.bio;
           // * For an Enrollment into a previously paid application
 
-          const id = await moodleCredentials({
+          const studentId = await moodleCredentials({
             email,
             firstName,
             lastName,
@@ -130,7 +155,7 @@ async function myWorker() {
                 application.courses = [...courseSet];
                 await application.save();
                 // Grant access on Moodle
-                await enrolStudentInCourses(id, additional.courses);
+                await enrolStudentInCourses(studentId, additional.courses);
               }
 
               if (additional.programs.length > 0) {
@@ -141,24 +166,56 @@ async function myWorker() {
                 application.programs = [...programs];
                 const totalPrice = cost([...programs]);
                 application.outstanding = totalPrice - totalPayed;
+
+                // enrol in the new programs
+                const coursesIds = [
+                  ...new Set(
+                    Array.from(additional.programs).flatMap(
+                      (program) => PROGRAM_COURSES_MAP[program] ?? [],
+                    ),
+                  ),
+                ];
+
+                await enrolStudentInCourses(studentId, coursesIds);
               }
             }
           } else {
             const programsSet = new Set(application.programs);
             if (application?.mode == "on-site") {
-              // ! GRANTING ACCESS INTO SELECTED PROGRAMS
-              if (programsSet.has("CAAP")) {
-                // enroll course in category id: 2
-                const coursesInCategory = await getCoursesByCategory(2);
-                const courseIds = coursesInCategory.map((course) => course.id);
-                await enrolStudentInCourses(id, courseIds);
+              if (application.paused) {
+                // unsuspending mail
+                await suspendMoodleUserByEmail(profile.bio.email, true);
+                application.paused = false;
+                const { html } = compileEmail("restore", {
+                  studentName: profile.bio.firstName,
+                  loginUrl: "https://study.northbridgec.ca/login",
+                });
+                await emailQueue.add(
+                  "deliver",
+                  {
+                    to: email,
+                    html,
+                    subject: "Account Suspension",
+                  },
+                  { jobId: `mail-${application._id}` },
+                );
               }
+              // ! GRANTING ACCESS INTO SELECTED PROGRAMS
+              const coursesIds = [
+                ...new Set(
+                  Array.from(programsSet).flatMap(
+                    (program) => PROGRAM_COURSES_MAP[program] ?? [],
+                  ),
+                ),
+              ];
 
               // ! CHECKING IF IT IS INSTALLMENTAL PAYMENT
               const totalPrice = cost(application.programs);
               // cummulate all invoices for the application and convert from units
-
               application.outstanding = totalPrice - totalPayed;
+
+              // * Enrol into moodle programs
+              await enrolStudentInCourses(studentId, coursesIds);
             }
           }
           application.paid = true;
@@ -232,6 +289,90 @@ async function myWorker() {
       }
     });
 
+    const suspendDebtorWorker = new Worker(
+      "suspend",
+      async (job) => {
+        if (job.name !== "installment") return;
+
+        const installmentApplications = await Application.find({
+          installment: { $gt: 0 },
+          mode: "on-site",
+          paused: { $ne: true },
+        }).exec();
+
+        if (!installmentApplications.length) return { success: true };
+
+        for (const application of installmentApplications) {
+          try {
+            const [lastInvoice, profile, user] = await Promise.all([
+              Invoice.findOne({
+                application: application._id,
+                status: "success",
+              })
+                .sort({ createdAt: -1 })
+                .lean()
+                .exec(),
+
+              Profile.findById(application.profile).lean().exec(),
+              User.findById(application.applicant).lean().exec(),
+            ]);
+
+            if (!lastInvoice || !profile) continue;
+
+            const email = profile?.bio?.email || user?.email;
+            if (!email) continue;
+
+            const daysDiff = moment().diff(
+              moment(lastInvoice.createdAt),
+              "days",
+            );
+
+            if (daysDiff <= 56) continue;
+
+            // Suspend Moodle
+            await suspendMoodleUserByEmail(profile.bio.email);
+
+            // Create payment
+            const response = await initializePayment({
+              amount: application.outstanding,
+              email: user?.email || "",
+              applicationId: application._id,
+              metadata: {
+                applicationId: application._id,
+              },
+            });
+
+            // Email
+            const { html } = compileEmail("suspension", {
+              studentName: profile.bio.firstName,
+              amount: formatCurrency(application.outstanding),
+              paymentUrl: response.data.authorization_url,
+              date: moment().format("MMMM Do YYYY, h:mm A"),
+            });
+
+            await emailQueue.add(
+              "deliver",
+              {
+                to: email,
+                html,
+                subject: "Account Suspension",
+              },
+              { jobId: `payment-${response.data.reference}` },
+            );
+
+            application.paused = true;
+            await application.save();
+          } catch (err) {
+            console.error("Failed for application:", application._id, err);
+          }
+        }
+      },
+      {
+        connection,
+        concurrency: 5,
+      },
+    );
+
     // Events listeners
     fileUploadWorker.on("failed", (job, err) => {
       console.error(`Job ${job?.id} failed`, err);
@@ -242,6 +383,10 @@ async function myWorker() {
     });
 
     paystackWorker.on("failed", (job, err) => {
+      console.error(`Job ${job?.id} failed`, err);
+    });
+
+    suspendDebtorWorker.on("failed", (job, err) => {
       console.error(`Job ${job?.id} failed`, err);
     });
 
