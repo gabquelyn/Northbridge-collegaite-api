@@ -67,26 +67,7 @@ app.use("/profile", profileRouter);
 app.get(
   // "/email/:template",
   "/test",
-  expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {
-    // const data = {
-    //   fullname: "Gabriel",
-    //   email: "gabquelyn@gmail.com",
-    //   phoneNumber: "50984394839",
-    //   country: "Nigeria",
-    //   city: "Ibadan",
-    //   academicBackground: "SSCE",
-    //   pathway: "CAAP",
-    // };
-    // const { html } = compileEmail("inquire", {
-    //   fields: Object.entries(data).map(([key, value]) => ({ key, value })),
-    // });
-    // await emailQueue.add("deliver", {
-    //   to: "gabquelyn@gmail.com",
-    //   html,
-    //   subject: "Complete Payment For Programs",
-    // });
-    // res.send(html);
-  }),
+  expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {}),
 );
 
 app.get("/health", (req, res: Response) => {
