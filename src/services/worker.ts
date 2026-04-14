@@ -90,7 +90,7 @@ async function myWorker() {
           // CAAP COURSES
           const CAAP_COURSES_PROMISE = getCoursesByCategory(2);
           const GRADE12_COURSES_PROMISE = getCoursesByCategory(3);
-          const GRADE11_COURSES_PROMISE = getCoursesByCategory(4);
+          const GRADE11_COURSES_PROMISE = getCoursesByCategory(6);
 
           const [CAPP_COURSES, GRADE12_COURSES, GRADE11_COURSES] =
             await Promise.all([
