@@ -64,7 +64,6 @@ const requestApplication = expressAsyncHandler(
       secondaryEntry,
     }: { [key: string]: string; mode: "on-site" | "off-site" } = req.body;
 
-    const canadianStudent = String(canadian).toLowerCase() === "true";
     const userId = (req as CustomRequest).id;
     const guardianPromise = userModel.findById(userId).lean().exec();
 
@@ -121,12 +120,6 @@ const requestApplication = expressAsyncHandler(
           message: `${mode} students are expected to pick at least a program`,
         });
       }
-
-      //! non-canadian student must take CAAP alongside other programs
-      if (!canadianStudent && !programsSet.has("CAAP"))
-        return res
-          .status(400)
-          .json({ message: "Non-canadian students are mandated to take CAAP" });
 
 
       const now = moment();
