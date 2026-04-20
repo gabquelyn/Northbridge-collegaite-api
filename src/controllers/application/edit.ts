@@ -130,12 +130,6 @@ const editApplication = expressAsyncHandler(
         });
       }
 
-      //! non-canadian student must take CAAP alongside other programs
-      if (!canadianStudent && !programsSet.has("CAAP"))
-        return res
-          .status(400)
-          .json({ message: "Non-canadian students are mandated to take CAAP" });
-
       const now = moment();
       const current = now.format("MM-DD");
       const isWithinRange = current >= "11-01" && current <= "12-15";
