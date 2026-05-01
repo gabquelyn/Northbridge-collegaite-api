@@ -1,0 +1,60 @@
+<mjml>
+  <mj-body background-color="#f4f4f4">
+    <mj-include path="../partials/header.mjml" />
+
+    <mj-section background-color="#ffffff" padding="30px 20px">
+      <mj-column>
+
+        <!-- Title -->
+        <mj-text font-size="20px" font-weight="bold" color="#151e2f">
+          New Job Application Received
+        </mj-text>
+
+        <!-- Applicant Info -->
+        <mj-text font-size="16px" color="#555555" padding-top="20px">
+          <strong>Name:</strong> {{ name }} <br />
+          <strong>Email:</strong> {{ email }}
+        </mj-text>
+
+        <!-- Resume Button -->
+        <mj-button
+          background-color="#151e2f"
+          color="#ffffff"
+          font-size="14px"
+          border-radius="5px"
+          href="{{ resumeUrl }}"
+          padding="20px 0 10px 0"
+        >
+          View Resume
+        </mj-button>
+
+        <!-- Cover Letter Button -->
+        <mj-button
+          background-color="#e53935"
+          color="#ffffff"
+          font-size="14px"
+          border-radius="5px"
+          href="{{ coverLetterUrl }}"
+          padding="10px 0 20px 0"
+        >
+          View Cover Letter
+        </mj-button>
+
+        <!-- Optional fallback text -->
+        <mj-text
+          font-size="12px"
+          color="#999999"
+          align="center"
+        >
+          If the buttons do not work, copy and paste the links below into your browser:
+          <br /><br />
+          Resume: {{ resumeUrl }} <br />
+          Cover Letter: {{ coverLetterUrl }}
+        </mj-text>
+
+      </mj-column>
+    </mj-section>
+
+    <mj-include path="../partials/footer.mjml" />
+  </mj-body>
+</mjml>

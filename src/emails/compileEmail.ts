@@ -21,7 +21,9 @@ export const compileEmail = (
     | "notification"
     | "reminder"
     | "suspension"
-    | "restore",
+    | "restore"
+    | "join",
+
   data: any,
 ): { html: string; text: string } => {
   if (!cachedTemplate[templateName]) {

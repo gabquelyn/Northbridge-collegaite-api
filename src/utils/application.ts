@@ -2,7 +2,10 @@ import fs from "fs/promises";
 import pLimit from "p-limit";
 import uploadFileStream from "../config/upload";
 
-export async function uploadFilesFromPaths(files: FipeUploadPaths) {
+export async function uploadFilesFromPaths(
+  files: FipeUploadPaths,
+  folder?: string,
+) {
   const limit = pLimit(5); // ✅ reduced
   const results: { [index: string]: DocumentFile[] } = {};
   const tasks: Promise<void>[] = [];
@@ -14,7 +17,10 @@ export async function uploadFilesFromPaths(files: FipeUploadPaths) {
           let result;
 
           try {
-            result = await uploadFileStream(filePath, "student-documents");
+            result = await uploadFileStream(
+              filePath,
+              folder || "student-documents",
+            );
 
             if (!results[field]) results[field] = [];
 
