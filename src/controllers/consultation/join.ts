@@ -35,9 +35,10 @@ export const joinApplication = expressAsyncHandler(
     });
 
     await emailQueue.add("deliver", {
-      to: "gabquelyn@gmail.com",
+      to: "contact@northbridgec.ca",
       html,
       subject: "New Job Application",
     });
+    return res.status(200).json({ message: "" });
   },
 );
