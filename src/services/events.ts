@@ -36,7 +36,7 @@ uploadEvents.on("failed", ({ jobId, failedReason }) => {
 });
 
 uploadEvents.on("active", ({ jobId }) => {
-  console.log(`Email 🚀 Job ${jobId} started`);
+  console.log(`Upload 🚀 Job ${jobId} started`);
 });
 
 emailEvents.on("completed", ({ jobId, returnvalue }) => {

@@ -97,7 +97,6 @@ applicationRouter.patch(
     body("gender").custom((value) => ["M", "F"].includes(value)),
     body("street").notEmpty().escape(),
     body("city").notEmpty().escape(),
-    body("unit").notEmpty().escape(),
     body("currentSchool").notEmpty().escape(),
     body("homeSchool").notEmpty().escape(),
     body("secondaryEntry").isDate().escape(),

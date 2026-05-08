@@ -232,6 +232,7 @@ const editApplication = expressAsyncHandler(
       session.endSession();
     }
 
+
     await fileUploadQueue.add(
       "upload-files",
       {
@@ -240,7 +241,7 @@ const editApplication = expressAsyncHandler(
       },
       {
         // attempts: 3,
-        jobId: prevApplication._id.toString(),
+        // jobId: prevApplication._id.toString(),
         backoff: {
           type: "exponential",
           delay: 2000,
