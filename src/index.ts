@@ -16,6 +16,7 @@ import profileRouter from "./routes/profile";
 import courseRouter from "./routes/course";
 import consultationRouter from "./routes/consultation";
 import { paymentCampaignQueue, suspendDebtorQueue } from "./services/queue";
+import { getSignedUrl } from "./config/upload";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -65,9 +66,18 @@ app.use("/courses", courseRouter);
 app.post("/webhook", paystackWebhookHandler);
 app.use("/profile", profileRouter);
 app.get(
-  // "/email/:template",
   "/test",
-  expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {}),
+  expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {
+   
+    // const url = await getSignedUrl({
+    //   publicId:
+    //     "student-documents/1778262698534.docx",
+    //   resourceType: "raw",
+    //   format: "docx",
+    // });
+
+    // return res.status(200).json({ url,  });
+  }),
 );
 
 app.get("/health", (req, res: Response) => {

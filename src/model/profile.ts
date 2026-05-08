@@ -83,7 +83,7 @@ const profileSchema = new mongoose.Schema<IProfile>(
       },
       qualification: String,
     },
-
+    
     citizenship: {
       language: { required: true, type: String },
       birthCountry: { required: true, type: String },
@@ -105,10 +105,42 @@ const profileSchema = new mongoose.Schema<IProfile>(
     },
 
     documents: {
-      transcripts: [{ url: String, public_id: String, filename: String }],
-      govId: [{ url: String, public_id: String, filename: String }],
-      passport: [{ url: String, public_id: String, filename: String }],
-      others: [{ url: String, public_id: String, filename: String }],
+      transcripts: [
+        {
+          url: String,
+          public_id: String,
+          filename: String,
+          format: String,
+          resource_type: String,
+        },
+      ],
+      govId: [
+        {
+          url: String,
+          public_id: String,
+          filename: String,
+          format: String,
+          resource_type: String,
+        },
+      ],
+      passport: [
+        {
+          url: String,
+          public_id: String,
+          filename: String,
+          format: String,
+          resource_type: String,
+        },
+      ],
+      others: [
+        {
+          url: String,
+          public_id: String,
+          filename: String,
+          format: String,
+          resource_type: String,
+        },
+      ],
     },
   },
   { timestamps: true },

@@ -14,6 +14,7 @@ services:
   api:
     build:
       context: .
+      target: development
       args:
         NODE_ENV: development
     container_name: api

@@ -28,6 +28,8 @@ export async function uploadFilesFromPaths(
               url: result.secure_url,
               public_id: result.public_id,
               filename: result.original_filename,
+              format: result.format,
+              resource_type: result.resource_type,
             });
           } finally {
             // 🧹 ALWAYS delete temp file

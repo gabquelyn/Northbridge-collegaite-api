@@ -17,9 +17,9 @@ type FileFields = {
 type FipeUploadPaths = Record<string, string[]>;
 
 type DocumentFile = {
-  url: string;
   public_id: string;
   filename: string;
+  format: string;
+  resource_type: string;
+  url: string
 };
-
-

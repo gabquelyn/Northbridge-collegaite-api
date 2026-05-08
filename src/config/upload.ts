@@ -30,31 +30,33 @@ cloudinary.config({
 
 export function uploadFileStream(
   filePath: string,
-  folder: string
+  folder: string,
 ): Promise<any> {
   return new Promise((resolve, reject) => {
-    const ext = path.extname(filePath)
+    const ext = path.extname(filePath);
+    const filename = path.basename(filePath);
+
     const stream = cloudinary.uploader.upload_stream(
       {
         folder,
-        resource_type: "auto", 
+        resource_type: "auto",
         public_id: `${Date.now()}${ext}`,
+        type: "authenticated",
+        filename_override: filename,
       },
       (error, result) => {
         if (error) return reject(error);
         resolve(result);
-      }
+      },
     );
-
     fs.createReadStream(filePath).pipe(stream);
   });
 }
 
-export default uploadFileStream
-
+export default uploadFileStream;
 
 export async function deleteUploadedFiles(
-  uploadedFiles: Record<string, UploadedFile[]>
+  uploadedFiles: Record<string, UploadedFile[]>,
 ): Promise<void> {
   const publicIds = Object.values(uploadedFiles)
     .flat()
@@ -69,7 +71,30 @@ export async function deleteUploadedFiles(
       cloudinary.uploader.destroy(publicId).catch((err) => {
         // optional: log error but don't fail entire cleanup
         console.error(`Failed to delete ${publicId}`, err);
-      })
-    )
+      }),
+    ),
   );
+}
+
+export async function getSignedUrl({
+  publicId,
+  resourceType,
+  format,
+  expiresIn = 60 * 5, // 5 minutes
+  type = "authenticated",
+}: {
+  publicId: string;
+  resourceType: string;
+  format: string;
+  expiresIn?: number;
+  type?: "authenticated" | "upload";
+}) {
+  const expiresAt = Math.floor(Date.now() / 1000) + expiresIn;
+
+  return cloudinary.utils.private_download_url(publicId, format, {
+    resource_type: resourceType,
+    type,
+    expires_at: expiresAt,
+    // attachment: true,
+  });
 }
