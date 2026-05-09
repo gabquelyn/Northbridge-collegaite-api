@@ -15,6 +15,7 @@ import getApplicationReceipt from "../controllers/application/receipt";
 import reviewApplication from "../controllers/application/review";
 import payOutstanding from "../controllers/application/outsanding";
 import getFile from "../controllers/application/getFile";
+import deleteApplication from "../controllers/application/deleteApplication";
 
 const applicationRouter = Router();
 
@@ -63,11 +64,7 @@ applicationRouter.post(
   requestApplication,
 );
 
-applicationRouter.get(
-  "/document",
-  VerifyJWT,
-  getFile,
-);
+applicationRouter.get("/document", VerifyJWT, getFile);
 
 applicationRouter.post(
   "/approve/:id",
@@ -75,7 +72,6 @@ applicationRouter.post(
   OnlyAdmin,
   approveApplicationRequest,
 );
-
 
 applicationRouter.get("/:id", VerifyJWT, getApplication);
 
@@ -149,6 +145,8 @@ applicationRouter.get(
   OnlyAdmin,
   getApplicationReceipt,
 );
+
+applicationRouter.delete("/:id", VerifyJWT, OnlyAdmin, deleteApplication);
 
 applicationRouter.post("/review/:id", VerifyJWT, OnlyAdmin, reviewApplication);
 
