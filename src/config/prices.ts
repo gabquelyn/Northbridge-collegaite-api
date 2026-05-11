@@ -11,5 +11,5 @@
       { name: "AY12", amount: 3700000, detail: "AY 12" },
     ];
 
-    export const UNIT_COURSE = 888250
+    export const UNIT_COURSE = 665000
     export const APPLICATION_FEE = 675000
