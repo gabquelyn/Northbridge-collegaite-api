@@ -23,7 +23,7 @@ applicationRouter.post(
   "/",
   VerifyJWT,
   upload.fields([
-    { name: "transcripts", maxCount: 1 },
+    { name: "transcripts", maxCount: 3 },
     { name: "passport", maxCount: 1 },
     { name: "govId", maxCount: 1 },
     { name: "others", maxCount: 3 },
