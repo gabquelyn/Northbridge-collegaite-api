@@ -77,7 +77,7 @@ app.get(
     // });
 
     const url = await initializePayment({
-      amount: 50,
+      amount: 100,
       email: "gabquelyn@gmail.com",
       customerName: "Gabs",
       metadata: {
