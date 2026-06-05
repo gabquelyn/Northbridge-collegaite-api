@@ -73,7 +73,6 @@ export default async function initializePayment({
     );
 
     const { responseBody, requestSuccessful, responseMessage } = response.data;
-    console.log(responseBody);
     await invoice.create({
       application: applicationId,
       url: responseBody?.checkoutUrl,

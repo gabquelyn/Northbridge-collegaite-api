@@ -5,7 +5,7 @@ import { validationResult } from "express-validator";
 import { getCachedMoodleCourses } from "../../utils/getMoodleCached";
 import Application from "../../model/application";
 import initializePayment from "../../utils/initializePayment";
-import { UNIT_COURSE } from "../../config/prices";
+import { APPLICATION_FEE, UNIT_COURSE } from "../../config/prices";
 import User from "../../model/user";
 import temp from "../../model/temp";
 
@@ -49,7 +49,7 @@ const enrolCourses = expressAsyncHandler(
     }
 
     // add to selected not paid and trigger the payment
-    let paymentUrl, accessCode;
+    let paymentUrl;
     if (!offSiteApplication.paid) {
       const newCourseSelection = [...offSiteApplication.courses, ...courses];
       offSiteApplication.courses = newCourseSelection;
@@ -68,7 +68,7 @@ const enrolCourses = expressAsyncHandler(
       paymentUrl = response.data?.authorization_url;
     } else {
       const response = await initializePayment({
-        amount: courses.length * UNIT_COURSE,
+        amount: (courses.length * UNIT_COURSE) + APPLICATION_FEE,
         email: user?.email || "",
         metadata: {
           applicationId: offSiteApplication._id,
@@ -89,7 +89,6 @@ const enrolCourses = expressAsyncHandler(
     // send payment link for everything
     return res.status(201).json({
       paymentUrl,
-      accessCode,
     });
   },
 );
