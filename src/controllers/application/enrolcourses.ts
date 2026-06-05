@@ -62,10 +62,10 @@ const enrolCourses = expressAsyncHandler(
           applicationId: offSiteApplication._id,
         },
         applicationId: offSiteApplication._id,
+        customerName: user?.name || "",
       });
 
       paymentUrl = response.data?.authorization_url;
-      accessCode = response.data?.access_code;
     } else {
       const response = await initializePayment({
         amount: courses.length * UNIT_COURSE,
@@ -74,10 +74,11 @@ const enrolCourses = expressAsyncHandler(
           applicationId: offSiteApplication._id,
         },
         applicationId: offSiteApplication._id,
+        customerName: user?.name || "",
       });
 
       paymentUrl = response.data?.authorization_url;
-      accessCode = response.data?.access_code;
+
       await temp.create({
         application: offSiteApplication._id,
         courses,

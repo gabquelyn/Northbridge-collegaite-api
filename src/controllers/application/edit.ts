@@ -232,7 +232,6 @@ const editApplication = expressAsyncHandler(
       session.endSession();
     }
 
-
     await fileUploadQueue.add(
       "upload-files",
       {
@@ -257,12 +256,12 @@ const editApplication = expressAsyncHandler(
           applicationId: prevApplication._id,
         },
         applicationId: prevApplication._id,
+        customerName: user?.name || "",
       });
 
       if (response.status) {
         return res.status(201).json({
           paymentUrl: response.data?.authorization_url,
-          accessCode: response.data?.access_code,
         });
       }
     }

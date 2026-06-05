@@ -40,7 +40,7 @@ const approveApplicationRequest = expressAsyncHandler(
 
     // ! ACTIONS FOR MATURED STUDENTS (BUYING OF UNIT COURSES)
     if (application.mode == "off-site") {
-      // TODO: Increase payment check by relying on Paystack
+      // TODO: Increase payment srutiny
       if (!application.paid)
         return res
           .status(400)
@@ -76,6 +76,7 @@ const approveApplicationRequest = expressAsyncHandler(
           ],
         },
         applicationId: application._id,
+        customerName: guardian.name
       });
 
       if (response.status && response.data?.authorization_url) {

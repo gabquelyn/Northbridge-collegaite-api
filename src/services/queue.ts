@@ -15,7 +15,7 @@ export const emailQueue = new Queue("send-email", {
   connection,
 });
 
-export const paystackQueue = new Queue("webhook", {
+export const paymentWebhookQueue = new Queue("webhook", {
   connection,
 });
 

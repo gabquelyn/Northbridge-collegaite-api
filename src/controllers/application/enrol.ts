@@ -73,6 +73,7 @@ const enrol = expressAsyncHandler(
         ],
       },
       applicationId: prevApplication._id,
+      customerName: user?.name || "",
     });
 
     await temp.create({
@@ -83,7 +84,6 @@ const enrol = expressAsyncHandler(
 
     return res.status(200).json({
       paymentUrl: response.data.authorization_url,
-      accessCode: response.data.access_code,
     });
   },
 );

@@ -10,13 +10,14 @@ import authRouter from "./routes/auth";
 import expressAsyncHandler from "express-async-handler";
 import applicationRouter from "./routes/application";
 import cors from "cors";
-import paystackWebhookHandler from "./controllers/paystackWebhook";
+import paymentWebhook from "./controllers/paymentWebhook";
 import { rateLimit } from "express-rate-limit";
 import profileRouter from "./routes/profile";
 import courseRouter from "./routes/course";
 import consultationRouter from "./routes/consultation";
 import { paymentCampaignQueue, suspendDebtorQueue } from "./services/queue";
 import { getSignedUrl } from "./config/upload";
+import initializePayment from "./utils/initializePayment";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -63,12 +64,11 @@ app.use("/auth", authRouter);
 app.use("/consultation", consultationRouter);
 app.use("/application", applicationRouter);
 app.use("/courses", courseRouter);
-app.post("/webhook", paystackWebhookHandler);
+app.post("/webhook", paymentWebhook);
 app.use("/profile", profileRouter);
 app.get(
   "/test",
   expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {
-   
     // const url = await getSignedUrl({
     //   publicId:
     //     "student-documents/1778262698534.docx",
@@ -76,7 +76,16 @@ app.get(
     //   format: "docx",
     // });
 
-    // return res.status(200).json({ url,  });
+    const url = await initializePayment({
+      amount: 800.43,
+      email: "gabquelyn@gmail.com",
+      customerName: "Gabs",
+      metadata: {
+        test: "test",
+      },
+      applicationId: "someAppId",
+    });
+    return res.status(200).json({ url,  });
   }),
 );
 

@@ -121,7 +121,6 @@ const requestApplication = expressAsyncHandler(
         });
       }
 
-
       const now = moment();
       const current = now.format("MM-DD");
       const isWithinRange = current >= "11-01" && current <= "12-15";
@@ -258,12 +257,12 @@ const requestApplication = expressAsyncHandler(
           applicationId: application[0]._id,
         },
         applicationId: application[0]._id,
+        customerName: guardian.name,
       });
 
       if (response.status) {
         return res.status(201).json({
           paymentUrl: response.data?.authorization_url,
-          accessCode: response.data?.access_code,
         });
       }
     }

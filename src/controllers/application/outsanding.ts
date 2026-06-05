@@ -30,6 +30,7 @@ const payOutstanding = expressAsyncHandler(
         ],
       },
       applicationId: prev._id,
+      customerName: guardian?.name || ""
     });
 
     return res

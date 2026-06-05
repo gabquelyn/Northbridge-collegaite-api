@@ -98,3 +98,8 @@
 20260509	12:34:04	08dfd1bd-637e-42f7-87cc-2bc61d758826	getaddrinfo ENOTFOUND ac-wc1gipf-shard-00-00.ju1epyg.mongodb.net	GET	/profile	http://localhost:3000
 20260509	12:34:37	83b51595-1d78-48b2-9ef1-4ad88080ac72	getaddrinfo ENOTFOUND ac-wc1gipf-shard-00-00.ju1epyg.mongodb.net	GET	/profile	http://localhost:3000
 20260509	12:35:08	a5eaf04c-b4ad-4ce3-8e49-c3fba249f231	getaddrinfo ENOTFOUND ac-wc1gipf-shard-00-00.ju1epyg.mongodb.net	GET	/profile	http://localhost:3000
+20260605	08:38:32	410ac0a9-8717-4d40-bba3-b4f35514c10a	Failed to initialize payment	GET	/test	undefined
+20260605	08:40:44	fd422f14-2733-4596-954c-c8485bee2c0b	Failed to initialize payment	GET	/test	undefined
+20260605	08:54:17	5f6d6bb2-1d37-4470-bd9b-a49d66c0be35	Failed to initialize payment	GET	/test	undefined
+20260605	09:00:03	b8559bda-1cce-4922-8eef-b82b77a93d60	Failed to initialize payment	GET	/test	undefined
+20260605	09:02:42	7a4e9243-04bf-410d-aa53-0dfc17f07502	Failed to initialize payment	GET	/test	undefined

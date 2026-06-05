@@ -27,6 +27,8 @@ const connection = new IORedis({
   maxRetriesPerRequest: null,
 });
 
+// max days for payment expectancy
+const MAX_DAYS_WITHOUTPAYMENT = 56;
 async function myWorker() {
   try {
     await connectDB();
@@ -74,7 +76,7 @@ async function myWorker() {
       },
     );
 
-    const paystackWorker = new Worker(
+    const paymentWebhookWorker = new Worker(
       "webhook",
       async (job) => {
         if (job.name === "charged") {
@@ -335,7 +337,7 @@ async function myWorker() {
               "days",
             );
 
-            if (daysDiff <= 56) continue;
+            if (daysDiff <= MAX_DAYS_WITHOUTPAYMENT) continue;
 
             // Suspend Moodle
             await suspendMoodleUserByEmail(profile.bio.email);
@@ -348,6 +350,7 @@ async function myWorker() {
               metadata: {
                 applicationId: application._id,
               },
+              customerName: user?.name || "",
             });
 
             // Email
@@ -390,7 +393,7 @@ async function myWorker() {
       console.error(`Job ${job?.id} failed`, err);
     });
 
-    paystackWorker.on("failed", (job, err) => {
+    paymentWebhookWorker.on("failed", (job, err) => {
       console.error(`Job ${job?.id} failed`, err);
     });
 
