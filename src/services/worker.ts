@@ -80,154 +80,148 @@ async function myWorker() {
       "webhook",
       async (job) => {
         if (job.name === "charged") {
-          try {
-            const { applicationId, currency, amount, status, reference } =
-              job.data;
-            const application =
-              await Application.findById(applicationId).exec();
-            const profile = await Profile.findById(application?.profile)
-              .lean()
-              .exec();
+          const { applicationId, currency, amount, status, reference } =
+            job.data;
+          const application = await Application.findById(applicationId).exec();
+          const profile = await Profile.findById(application?.profile)
+            .lean()
+            .exec();
 
-            const invoice = await Invoice.findOne({ reference }).exec();
+          const invoice = await Invoice.findOne({ reference }).exec();
 
-            // CAAP COURSES
-            const CAAP_COURSES_PROMISE = getCoursesByCategory(2);
-            const GRADE12_COURSES_PROMISE = getCoursesByCategory(3);
-            const GRADE11_COURSES_PROMISE = getCoursesByCategory(6);
+          // CAAP COURSES
+          const CAAP_COURSES_PROMISE = getCoursesByCategory(2);
+          const GRADE12_COURSES_PROMISE = getCoursesByCategory(3);
+          const GRADE11_COURSES_PROMISE = getCoursesByCategory(6);
 
-            const [CAPP_COURSES, GRADE12_COURSES, GRADE11_COURSES] =
-              await Promise.all([
-                CAAP_COURSES_PROMISE,
-                GRADE12_COURSES_PROMISE,
-                GRADE11_COURSES_PROMISE,
-              ]);
+          const [CAPP_COURSES, GRADE12_COURSES, GRADE11_COURSES] =
+            await Promise.all([
+              CAAP_COURSES_PROMISE,
+              GRADE12_COURSES_PROMISE,
+              GRADE11_COURSES_PROMISE,
+            ]);
 
-            const PROGRAM_COURSES_MAP: Record<APPLICATION_PROGRAMS, number[]> =
-              {
-                CAAP: CAPP_COURSES.map((course) => course.id),
-                GRADE12: GRADE12_COURSES.map((course) => course.id),
-                DIRECT: GRADE12_COURSES.map((course) => course.id),
-                GRADE11: GRADE11_COURSES.map((course) => course.id),
-                AY12: [],
-              };
+          const PROGRAM_COURSES_MAP: Record<APPLICATION_PROGRAMS, number[]> = {
+            CAAP: CAPP_COURSES.map((course) => course.id),
+            GRADE12: GRADE12_COURSES.map((course) => course.id),
+            DIRECT: GRADE12_COURSES.map((course) => course.id),
+            GRADE11: GRADE11_COURSES.map((course) => course.id),
+            AY12: [],
+          };
 
-            if (!profile || !application || !invoice)
-              throw new Error("Missing important details");
+          if (!profile || !application || !invoice)
+            throw new Error("Missing important details");
 
-            if (invoice.status == "success") {
-              return console.log("Invoice already processed");
-            }
+          if (invoice.status == "success") {
+            return console.log("Invoice already processed");
+          }
 
-            invoice.currency = currency;
-            invoice.amount = amount;
-            invoice.status = "success";
-            invoice.application = applicationId;
-            await invoice.save();
+          invoice.currency = currency;
+          invoice.amount = amount;
+          invoice.status = "success";
+          invoice.application = applicationId;
+          await invoice.save();
 
-            const { email, firstName, lastName } = profile.bio;
-            // * For an Enrollment into a previously paid application
+          const { email, firstName, lastName } = profile.bio;
+          // * For an Enrollment into a previously paid application
 
-            const studentId = await moodleCredentials({
-              email,
-              firstName,
-              lastName,
+          const studentId = await moodleCredentials({
+            email,
+            firstName,
+            lastName,
+          });
+
+          const totalPayed =
+            (
+              await Invoice.find({
+                application: applicationId,
+                status: "success",
+              })
+                .lean()
+                .exec()
+            ).reduce((sum, inv) => sum + inv.amount, 0) / 100;
+
+          // * Enrollment in a new program/course without an outsanding fee
+          if (application.paid && application.outstanding <= 0) {
+            const additional = await Temp.findOne({
+              application: applicationId,
+              reference: reference,
             });
 
-            const totalPayed =
-              (
-                await Invoice.find({
-                  application: applicationId,
-                  status: "success",
-                })
-                  .lean()
-                  .exec()
-              ).reduce((sum, inv) => sum + inv.amount, 0) / 100;
-
-            // * Enrollment in a new program/course without an outsanding fee
-            if (application.paid && application.outstanding <= 0) {
-              const additional = await Temp.findOne({
-                application: applicationId,
-                reference: reference,
-              });
-
-              if (additional) {
-                if (additional.courses.length > 0) {
-                  const courseSet = new Set([
-                    ...application.courses,
-                    ...additional.courses,
-                  ]);
-                  application.courses = [...courseSet];
-                  await application.save();
-                  // Grant access on Moodle
-                  await enrolStudentInCourses(studentId, additional.courses);
-                }
-
-                if (additional.programs.length > 0) {
-                  const programs = new Set([
-                    ...application.programs,
-                    ...additional.programs,
-                  ]);
-                  application.programs = [...programs];
-                  const totalPrice = cost([...programs]);
-                  application.outstanding = totalPrice - totalPayed;
-
-                  // enrol in the new programs
-                  const coursesIds = [
-                    ...new Set(
-                      Array.from(additional.programs).flatMap(
-                        (program) => PROGRAM_COURSES_MAP[program] ?? [],
-                      ),
-                    ),
-                  ];
-
-                  await enrolStudentInCourses(studentId, coursesIds);
-                }
+            if (additional) {
+              if (additional.courses.length > 0) {
+                const courseSet = new Set([
+                  ...application.courses,
+                  ...additional.courses,
+                ]);
+                application.courses = [...courseSet];
+                await application.save();
+                // Grant access on Moodle
+                await enrolStudentInCourses(studentId, additional.courses);
               }
-            } else {
-              const programsSet = new Set(application.programs);
-              if (application?.mode == "on-site") {
-                if (application.paused) {
-                  // unsuspending mail
-                  await suspendMoodleUserByEmail(profile.bio.email, true);
-                  application.paused = false;
-                  const { html } = compileEmail("restore", {
-                    studentName: profile.bio.firstName,
-                    loginUrl: "https://study.northbridgec.ca/login",
-                  });
-                  await emailQueue.add(
-                    "deliver",
-                    {
-                      to: email,
-                      html,
-                      subject: "Account Suspension",
-                    },
-                    { jobId: `mail-${application._id}` },
-                  );
-                }
-                // ! GRANTING ACCESS INTO SELECTED PROGRAMS
+
+              if (additional.programs.length > 0) {
+                const programs = new Set([
+                  ...application.programs,
+                  ...additional.programs,
+                ]);
+                application.programs = [...programs];
+                const totalPrice = cost([...programs]);
+                application.outstanding = totalPrice - totalPayed;
+
+                // enrol in the new programs
                 const coursesIds = [
                   ...new Set(
-                    Array.from(programsSet).flatMap(
+                    Array.from(additional.programs).flatMap(
                       (program) => PROGRAM_COURSES_MAP[program] ?? [],
                     ),
                   ),
                 ];
 
-                // ! CHECKING IF IT IS INSTALLMENTAL PAYMENT
-                const totalPrice = cost(application.programs);
-                // cummulate all invoices for the application and convert from units
-                application.outstanding = totalPrice - totalPayed;
-
-                // * Enrol into moodle programs
                 await enrolStudentInCourses(studentId, coursesIds);
               }
             }
-            application.paid = true;
-            await application.save();
-          } catch (err) {
-            console.log(err);
+          } else {
+            const programsSet = new Set(application.programs);
+            if (application?.mode == "on-site") {
+              if (application.paused) {
+                // unsuspending mail
+                await suspendMoodleUserByEmail(profile.bio.email, true);
+                application.paused = false;
+                const { html } = compileEmail("restore", {
+                  studentName: profile.bio.firstName,
+                  loginUrl: "https://study.northbridgec.ca/login",
+                });
+                await emailQueue.add(
+                  "deliver",
+                  {
+                    to: email,
+                    html,
+                    subject: "Account Suspension",
+                  },
+                  { jobId: `mail-${application._id}` },
+                );
+              }
+              // ! GRANTING ACCESS INTO SELECTED PROGRAMS
+              const coursesIds = [
+                ...new Set(
+                  Array.from(programsSet).flatMap(
+                    (program) => PROGRAM_COURSES_MAP[program] ?? [],
+                  ),
+                ),
+              ];
+
+              // ! CHECKING IF IT IS INSTALLMENTAL PAYMENT
+              const totalPrice = cost(application.programs);
+              // cummulate all invoices for the application and convert from units
+              application.outstanding = totalPrice - totalPayed;
+
+              // * Enrol into moodle programs
+              await enrolStudentInCourses(studentId, coursesIds);
+            }
           }
+          application.paid = true;
+          await application.save();
         }
 
         return { success: true };
