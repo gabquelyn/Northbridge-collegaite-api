@@ -79,8 +79,8 @@ async function myWorker() {
     const paymentWebhookWorker = new Worker(
       "webhook",
       async (job) => {
-        try {
-          if (job.name === "charged") {
+        if (job.name === "charged") {
+          try {
             const { applicationId, currency, amount, status, reference } =
               job.data;
             const application =
@@ -225,10 +225,11 @@ async function myWorker() {
             }
             application.paid = true;
             await application.save();
+          } catch (err) {
+            console.log(err);
           }
-        } catch (err) {
-          console.log(err);
         }
+
         return { success: true };
       },
 
