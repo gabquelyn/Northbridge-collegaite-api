@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -25,10 +29,11 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/app:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
-
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
@@ -37,52 +42,44 @@ jobs:
           passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
           script: |
             set -e
-
             mkdir -p /opt/app
             cd /opt/app
 
             printf "%s\n" \
-            "MONGO_URI=${{secrets.MONGO_URI}}" \
-            "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" \
-            "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
-            "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" \
-            "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" \
-            "MONNIFY_BASE_URL=${{ secrets.MONNIFY_BASE_URL }}" \
-            "MONNIFY_CONTRACT_CODE=${{ secrets.MONNIFY_CONTRACT_CODE }}" \
-            "MONNIFY_API_KEY=${{ secrets.MONNIFY_API_KEY }}" \
-            "MONNIFY_SECRET_KEY=${{ secrets.MONNIFY_SECRET_KEY }}" \
-            "MOODLE_TOKEN=${{ secrets.MOODLE_TOKEN }}" \
-            "MOODLE_URL=https://study.northbridgec.ca" \
-            "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" \
-            "EMAIL_USER=${{ secrets.EMAIL_USER }}" \
-            "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" \
-            "CONTACT=\"Northbridge Collegiate <contact@northbridgec.ca>\"" \
-            "REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}" \
-            "ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}" \
-            "REDIS_HOST=redis" \
-            "REDIS_PORT=6379" \
-            "FRONTEND_URL=https://northbridgec.ca" \
-            "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" \
-            "PORT=5000" \
-            > .env
-            
-            cd /opt/app
+              "MONGO_URI=${{ secrets.MONGO_URI }}" \
+              "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" \
+              "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
+              "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" \
+              "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" \
+              "MONNIFY_BASE_URL=${{ secrets.MONNIFY_BASE_URL }}" \
+              "MONNIFY_CONTRACT_CODE=${{ secrets.MONNIFY_CONTRACT_CODE }}" \
+              "MONNIFY_API_KEY=${{ secrets.MONNIFY_API_KEY }}" \
+              "MONNIFY_SECRET_KEY=${{ secrets.MONNIFY_SECRET_KEY }}" \
+              "MOODLE_TOKEN=${{ secrets.MOODLE_TOKEN }}" \
+              "MOODLE_URL=https://study.northbridgec.ca" \
+              "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" \
+              "EMAIL_USER=${{ secrets.EMAIL_USER }}" \
+              "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" \
+              "CONTACT=Northbridge Collegiate <contact@northbridgec.ca>" \
+              "REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}" \
+              "ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}" \
+              "REDIS_HOST=redis" \
+              "REDIS_PORT=6379" \
+              "FRONTEND_URL=https://northbridgec.ca" \
+              "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" \
+              "PORT=5000" \
+              > .env
+
+            export $(cat .env | xargs)
 
             curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -o docker-compose.yml \
               https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/docker-compose.yml
 
-            # Caddyfile
             curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -o Caddyfile \
               https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/Caddyfile
 
-            
-            echo "DOCKER_USERNAME=$DOCKER_USERNAME"
-            cat /opt/app/.env
-
             docker compose --env-file .env pull
-            docker compose --env-file .env up -d
-
-            #prune pld unused images
+            docker compose --env-file .env up -d --force-recreate --remove-orphans
             docker image prune -af

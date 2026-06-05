@@ -56,7 +56,7 @@ const enrolCourses = expressAsyncHandler(
       await offSiteApplication.save();
 
       const response = await initializePayment({
-        amount: newCourseSelection.length * UNIT_COURSE,
+        amount: newCourseSelection.length * UNIT_COURSE + APPLICATION_FEE,
         email: user?.email || "",
         metadata: {
           applicationId: offSiteApplication._id,
@@ -68,7 +68,7 @@ const enrolCourses = expressAsyncHandler(
       paymentUrl = response.data?.authorization_url;
     } else {
       const response = await initializePayment({
-        amount: (courses.length * UNIT_COURSE) + APPLICATION_FEE,
+        amount: courses.length * UNIT_COURSE,
         email: user?.email || "",
         metadata: {
           applicationId: offSiteApplication._id,
