@@ -47,9 +47,10 @@ jobs:
             "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
             "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" \
             "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" \
-            "PAYSTACK_URI=https://api.paystack.co" \
-            "PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}" \
-            "PAYSTACK_PUBLIC_KEY=${{ secrets.PAYSTACK_PUBLIC_KEY }}" \
+            "MONNIFY_BASE_URL=${{ secrets.MONNIFY_BASE_URL }}" \
+            "MONNIFY_CONTRACT_CODE=${{ secrets.MONNIFY_CONTRACT_CODE }}" \
+            "MONNIFY_API_KEY=${{ secrets.MONNIFY_API_KEY }}" \
+            "MONNIFY_SECRET_KEY=${{ secrets.MONNIFY_SECRET_KEY }}" \
             "MOODLE_TOKEN=${{ secrets.MOODLE_TOKEN }}" \
             "MOODLE_URL=https://study.northbridgec.ca" \
             "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" \
