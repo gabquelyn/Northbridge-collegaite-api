@@ -222,6 +222,7 @@ async function myWorker() {
           }
           application.paid = true;
           await application.save();
+         
         }
 
         return { success: true };
