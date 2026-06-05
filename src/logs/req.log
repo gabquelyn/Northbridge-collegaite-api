@@ -2623,3 +2623,9 @@
 20260605	08:54:13	618e49f1-38eb-404d-9005-bf46130f6fc1	GET	/test	undefined	::ffff:172.18.0.1
 20260605	08:59:59	bb65ffd3-8f26-4bfa-9db9-a23150b7ec40	GET	/test	undefined	::ffff:172.18.0.1
 20260605	09:02:36	4eae3723-01f1-4cd1-bcab-3b099110a1e7	GET	/test	undefined	::ffff:172.18.0.1
+20260605	09:30:29	0c4c3961-a09d-4d2e-ad19-4d3b3444a2ef	GET	/courses/apply	undefined	::ffff:172.18.0.1
+20260605	09:36:17	89979dc3-67b5-438a-9036-9c0efa560d24	GET	/courses/apply	undefined	::ffff:172.18.0.1
+20260605	09:37:26	d786a9ac-de7a-46f6-ba42-7a91150ecd36	GET	/courses/apply	undefined	::ffff:172.18.0.1
+20260605	09:38:11	85995f55-24f5-40c4-a84d-bf4f08c556df	GET	/courses/apply	undefined	::ffff:172.18.0.1
+20260605	09:39:23	0c8b732b-cdd3-4895-8b7e-b8463fb423cb	GET	/courses/apply	undefined	::ffff:172.18.0.1
+20260605	09:39:51	88b42bb1-6f9e-4812-aadc-aa421150e77c	GET	/courses/apply	undefined	::ffff:172.18.0.1

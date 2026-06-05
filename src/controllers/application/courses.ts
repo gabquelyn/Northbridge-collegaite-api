@@ -9,7 +9,7 @@ import { CustomRequest } from "../../types/request";
 export const getOnlineCourses = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const data = await getCachedMoodleCourses();
-    return res.status(200).json({ data });
+    return res.status(200).json({ data: data.filter((c) => c.id !== 1) });
   },
 );
 
@@ -25,12 +25,10 @@ export const getMycourses = expressAsyncHandler(
       applicant: (req as CustomRequest).id,
       mode: "off-site",
     });
-    return res
-      .status(200)
-      .json({
-        data: onlineApplication?.courses,
-        paid: onlineApplication?.paid,
-        granted: onlineApplication?.granted
-      });
+    return res.status(200).json({
+      data: onlineApplication?.courses,
+      paid: onlineApplication?.paid,
+      granted: onlineApplication?.granted,
+    });
   },
 );
