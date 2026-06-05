@@ -28,6 +28,7 @@ interface MonnifyEvent {
 const monnifyWebhookHandler = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     // Confirm webhook source — formula is HMAC-SHA512(secretKey, rawBody)
+    console.log("Event received");
     const hash = crypto
       .createHmac("sha512", process.env.MONNIFY_SECRET_KEY || "")
       .update(JSON.stringify(req.body))
