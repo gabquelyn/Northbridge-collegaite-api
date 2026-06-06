@@ -35,7 +35,7 @@ services:
     command: node dist/index.js
     volumes:
       - uploads_data:/app/uploads
-      - logs_data:/app/uploads
+      - logs_data:/app/logs
     expose:
       - "5000"
     env_file:
