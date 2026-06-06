@@ -45,7 +45,7 @@ services:
     restart: on-failure
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
-      interval: 5m
+      interval: 60s
       retries: 5
     networks:
       - web
