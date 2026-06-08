@@ -12,4 +12,4 @@
     ];
 
     export const UNIT_COURSE = 665000
-    export const APPLICATION_FEE = 675000
+    export const APPLICATION_FEE = 195000
