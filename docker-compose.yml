@@ -44,7 +44,7 @@ services:
       - redis
     restart: on-failure
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 60s
       retries: 5
     networks:
@@ -81,6 +81,6 @@ volumes:
   uploads_data:
   logs_data:
 
-networks: 
+networks:
   web:
     driver: bridge
