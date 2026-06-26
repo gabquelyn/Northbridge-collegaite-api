@@ -83,7 +83,7 @@ app.get(
       metadata: {
         test: "test",
       },
-      applicationId: "someAppId",
+      applicationId: "a3f29c8b1e6d4072f8b3c1a9",
     });
     return res.status(200).json({ url,  });
   }),

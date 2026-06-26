@@ -9,6 +9,7 @@ export const getApplications = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const user = await userModel
       .findById((req as CustomRequest).id)
+      .select("-password")
       .lean()
       .exec();
 

@@ -106,3 +106,5 @@
 20260605	10:53:16	fe123a28-ca24-4cb8-ac7e-034fd6a26d5e	Failed to initialize payment	GET	/test	undefined
 20260605	11:04:29	661b595e-c74f-4998-acbb-d8e14b2cd720	Failed to initialize payment	GET	/test	undefined
 20260605	11:53:15	9d430b62-4c5c-4383-8ba5-32d12b5bf320	Failed to initialize payment	GET	/test	undefined
+20260626	22:58:54	b5dc6ca0-7e8a-4139-bf6b-4153a41adf6f	Cast to ObjectId failed for value "approve" (type string) at path "_id" for model "Application"	GET	/application/approve	undefined
+20260626	23:00:00	09bd96b9-b587-43b1-bdfe-eaef40eb67af	Failed to initialize payment	POST	/application/approve/69fe64c6a481018f96603433	undefined

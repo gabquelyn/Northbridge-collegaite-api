@@ -22,10 +22,16 @@ const approveApplicationRequest = expressAsyncHandler(
       .findById(application?.applicant)
       .lean()
       .exec();
+
     if (!application || !profile || !guardian)
       return res
         .status(404)
-        .json({ message: "Important admission details not found" });
+        .json({
+          message: "Important admission details not found",
+          application,
+          profile,
+          guardian,
+        });
 
     const { email, firstName, lastName } = profile.bio;
 
@@ -62,21 +68,9 @@ const approveApplicationRequest = expressAsyncHandler(
         email: guardian.email,
         metadata: {
           applicationId: application._id,
-          custom_fields: [
-            ...prices.map((p) => ({
-              display_name: p.detail,
-              variable_name: p.name,
-              value: p.amount * 100,
-            })),
-            {
-              display_name: "Profile & Enrolment Fee",
-              variable_name: "AEF",
-              value: APPLICATION_FEE * 100,
-            },
-          ],
         },
         applicationId: application._id,
-        customerName: guardian.name
+        customerName: guardian.name,
       });
 
       if (response.status && response.data?.authorization_url) {
@@ -103,6 +97,7 @@ const approveApplicationRequest = expressAsyncHandler(
 
     application.granted = true;
     await application.save();
+
     return res.status(200).json({
       message:
         application.mode == "on-site"
