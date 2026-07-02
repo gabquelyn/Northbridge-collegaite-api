@@ -38,7 +38,7 @@ const loginController = expressAsyncHandler(
         });
       }
 
-      const url = `${process.env.FRONTEND_URL}/auth/${foundUser._id}/verify/${existingToken.token}`;
+      const url = `${process.env.FRONTEND_URL}/verify-email/?id=${foundUser._id}&token=${existingToken.token}`;
 
       // send the verification url via email
       const { html } = compileEmail("welcome", {
