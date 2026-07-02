@@ -36,7 +36,7 @@ const loginController = expressAsyncHandler(
           token: crypto.randomBytes(32).toString("hex"),
         });
 
-        const url = `${process.env.BASE_URL}/auth/${foundUser._id}/verify/${verificationToken.token}`;
+        const url = `${process.env.FRONTEND_URL}/auth/${foundUser._id}/verify/${verificationToken.token}`;
 
         // send the verification url via email
         const { html } = compileEmail("welcome", {
