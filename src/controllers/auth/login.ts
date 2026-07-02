@@ -2,7 +2,7 @@ import { Response, Request } from "express";
 import expressAsyncHandler from "express-async-handler";
 import Token from "../../model/token";
 import User from "../../model/user";
-import {v4 as uuid} from "uuid";
+import { v4 as uuid } from "uuid";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
@@ -26,31 +26,36 @@ const loginController = expressAsyncHandler(
       return res.status(403).json({ message: "Incorrect email or password" });
 
     if (!foundUser.verified) {
-      const existingToken = await Token.findOne({
+      let existingToken;
+      existingToken = await Token.findOne({
         userId: foundUser._id,
       }).exec();
 
       if (!existingToken) {
-        const verificationToken = await Token.create({
+        existingToken = await Token.create({
           userId: foundUser._id,
           token: crypto.randomBytes(32).toString("hex"),
         });
+      }
 
-        const url = `${process.env.FRONTEND_URL}/auth/${foundUser._id}/verify/${verificationToken.token}`;
+      const url = `${process.env.FRONTEND_URL}/auth/${foundUser._id}/verify/${existingToken.token}`;
 
-        // send the verification url via email
-        const { html } = compileEmail("welcome", {
-          companyName: "Northbridge Collegiate",
-          verifyUrl: url,
-        });
+      // send the verification url via email
+      const { html } = compileEmail("welcome", {
+        companyName: "Northbridge Collegiate",
+        verifyUrl: url,
+      });
 
-        await emailQueue.add("deliver", {
+      await emailQueue.add(
+        "deliver",
+        {
           to: email,
           html,
           subject: "Verify email address",
-        }, {jobId: uuid()});
-        // await sendMail({ to: email, subject: "Verify Email Address", html });
-      }
+        },
+        { jobId: uuid() },
+      );
+      // await sendMail({ to: email, subject: "Verify Email Address", html });
 
       return res
         .status(400)
