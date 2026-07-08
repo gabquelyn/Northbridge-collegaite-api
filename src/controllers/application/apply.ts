@@ -15,26 +15,6 @@ import moment from "moment";
 
 const requestApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const result = validationResult(req);
-
-    // * validation of required fields and documents
-    if (!result.isEmpty())
-      return res
-        .status(400)
-        .json({ message: "Invalid data received", error: result.array() });
-
-    const fileFields = req.files as {
-      [fieldname: string]: Express.Multer.File[];
-    };
-
-    const requiredFiles = ["passport", "transcripts", "govId"];
-
-    for (const field of requiredFiles) {
-      if (!fileFields?.[field]) {
-        return res.status(400).json({ message: `Missing ${field}` });
-      }
-    }
-
     const {
       mode,
       programs,
@@ -62,7 +42,62 @@ const requestApplication = expressAsyncHandler(
       courses,
       qualification,
       secondaryEntry,
+      fatherFirstName,
+      fatherLastName,
+      fatherPhoneNumber,
+      fatherEmail,
+      fatherDeaceased,
+      motherFirstName,
+      motherLastName,
+      motherEmail,
+      motherPhoneNumber,
+      motherDeaceased,
+      referrer
     }: { [key: string]: string; mode: "on-site" | "off-site" } = req.body;
+
+    const result = validationResult(req);
+
+    if (
+      (!fatherFirstName ||
+        !fatherLastName ||
+        !fatherPhoneNumber ||
+        !fatherEmail) &&
+      fatherDeaceased == "false"
+    ) {
+      return res.status(400).json({
+        message: "Father details required if not deceased",
+      });
+    }
+
+    if (
+      (!motherFirstName ||
+        !motherLastName ||
+        !motherPhoneNumber ||
+        !motherEmail) &&
+      motherDeaceased == "false"
+    ) {
+      return res.status(400).json({
+        message: "Mother details required if not deceased",
+      });
+    }
+
+    // * validation of required fields and documents
+    if (!result.isEmpty())
+      return res
+        .status(400)
+        .json({ message: "Invalid data received", error: result.array() });
+
+    const fileFields = req.files as {
+      [fieldname: string]: Express.Multer.File[];
+    };
+
+    const requiredFiles = ["passport", "transcripts", "govId", "birthCert"];
+
+    for (const field of requiredFiles) {
+      if (!fileFields?.[field]) {
+        return res.status(400).json({ message: `Missing ${field}` });
+      }
+    }
 
     const userId = (req as CustomRequest).id;
     const guardianPromise = userModel.findById(userId).lean().exec();
@@ -208,6 +243,19 @@ const requestApplication = expressAsyncHandler(
               canadianVisa,
               intendToApply,
             },
+            parent: {
+              fatherFirstName,
+              fatherLastName,
+              fatherPhoneNumber,
+              fatherEmail,
+              fatherDeaceased,
+              motherFirstName,
+              motherLastName,
+              motherEmail,
+              motherPhoneNumber,
+              motherDeaceased,
+            },
+            referrer
           },
         ],
         { session },

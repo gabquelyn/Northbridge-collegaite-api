@@ -32,6 +32,19 @@ export interface IProfile extends mongoose.Document {
     canadianVisa: boolean;
     intendToApply: boolean;
   };
+  parent: {
+    fatherFirstName: string;
+    fatherLastName: string;
+    fatherPhoneNumber: string;
+    fatherEmail: string;
+    fatherDeaceased: boolean;
+    motherFirstName: string;
+    motherLastName: string;
+    motherEmail: string;
+    motherPhoneNumber: string;
+    motherDeaceased: boolean;
+  };
+  referrer: string,
   documents: {
     transcripts: { url: string; public_id: string; filename: string }[];
     govId: { url: string; public_id: string; filename: string }[];

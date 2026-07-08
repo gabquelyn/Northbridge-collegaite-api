@@ -25,6 +25,7 @@ applicationRouter.post(
   upload.fields([
     { name: "transcripts", maxCount: 3 },
     { name: "passport", maxCount: 1 },
+    { name: "birthCert", maxCount: 1 },
     { name: "govId", maxCount: 1 },
     { name: "others", maxCount: 3 },
   ]),
@@ -48,6 +49,7 @@ applicationRouter.post(
     body("intendToApply").isBoolean(),
     body("language").notEmpty(),
     body("country").notEmpty(),
+    body("referrer").notEmpty(),
     body("birthCountry").notEmpty(),
     body("mode").custom((value) => ["on-site", "off-site"].includes(value)),
     body("programs")
@@ -82,6 +84,7 @@ applicationRouter.patch(
     { name: "transcripts", maxCount: 1 },
     { name: "passport", maxCount: 1 },
     { name: "govId", maxCount: 1 },
+    { name: "birthCert", maxCount: 1 },
     { name: "others", maxCount: 3 },
   ]),
   [

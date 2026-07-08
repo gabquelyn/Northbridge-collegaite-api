@@ -53,7 +53,41 @@ const editApplication = expressAsyncHandler(
       courses,
       qualification,
       secondaryEntry,
+      fatherFirstName,
+      fatherLastName,
+      fatherPhoneNumber,
+      fatherEmail,
+      fatherDeaceased,
+      motherFirstName,
+      motherLastName,
+      motherEmail,
+      motherPhoneNumber,
+      motherDeaceased,
     }: { [key: string]: string; mode: "on-site" | "off-site" } = req.body;
+
+    if (
+      (!fatherFirstName ||
+        !fatherLastName ||
+        !fatherPhoneNumber ||
+        !fatherEmail) &&
+      fatherDeaceased == "false"
+    ) {
+      return res.status(400).json({
+        message: "Father details required if not deceased",
+      });
+    }
+
+    if (
+      (!motherFirstName ||
+        !motherLastName ||
+        !motherPhoneNumber ||
+        !motherEmail) &&
+      motherDeaceased == "false"
+    ) {
+      return res.status(400).json({
+        message: "Mother details required if not deceased",
+      });
+    }
 
     const moodleCoursesPromise =
       mode === "off-site" ? getCachedMoodleCourses() : [];
@@ -210,6 +244,18 @@ const editApplication = expressAsyncHandler(
               birthCountry,
               canadianVisa,
               intendToApply,
+            },
+            parent: {
+              fatherFirstName,
+              fatherLastName,
+              fatherPhoneNumber,
+              fatherEmail,
+              fatherDeaceased,
+              motherFirstName,
+              motherLastName,
+              motherEmail,
+              motherPhoneNumber,
+              motherDeaceased,
             },
           },
         },

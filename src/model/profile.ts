@@ -83,7 +83,7 @@ const profileSchema = new mongoose.Schema<IProfile>(
       },
       qualification: String,
     },
-    
+
     citizenship: {
       language: { required: true, type: String },
       birthCountry: { required: true, type: String },
@@ -132,6 +132,15 @@ const profileSchema = new mongoose.Schema<IProfile>(
           resource_type: String,
         },
       ],
+      birthCert: [
+        {
+          url: String,
+          public_id: String,
+          filename: String,
+          format: String,
+          resource_type: String,
+        },
+      ],
       others: [
         {
           url: String,
@@ -142,6 +151,19 @@ const profileSchema = new mongoose.Schema<IProfile>(
         },
       ],
     },
+    parent: {
+      fatherFirstName: String,
+      fatherLastName: String,
+      fatherPhoneNumber: String,
+      fatherEmail: String,
+      fatherDeaceased: Boolean,
+      motherFirstName: String,
+      motherLastName: String,
+      motherEmail: String,
+      motherPhoneNumber: String,
+      motherDeaceased: Boolean,
+    },
+    referrer: String,
   },
   { timestamps: true },
 );
