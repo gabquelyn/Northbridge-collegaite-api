@@ -22,7 +22,8 @@ export const compileEmail = (
     | "reminder"
     | "suspension"
     | "restore"
-    | "join",
+    | "join"
+    | "rescind",
 
   data: any,
 ): { html: string; text: string } => {

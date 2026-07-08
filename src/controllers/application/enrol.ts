@@ -25,7 +25,10 @@ const enrol = expressAsyncHandler(
 
     if (!prevApplication?.granted)
       return res.status(404).json({ message: "Admission is still in review" });
-
+    if (prevApplication?.rescinded)
+      return res
+        .status(400)
+        .json({ message: "Application has been rescinded" });
     if (!prevApplication?.paid)
       return res.status(400).json({
         message: `Payment for previous programs (${prevApplication.programs.join(", ")})  not made`,

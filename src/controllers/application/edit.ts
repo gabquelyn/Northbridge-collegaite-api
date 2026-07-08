@@ -100,7 +100,10 @@ const editApplication = expressAsyncHandler(
 
     if (!prevApplication)
       return res.status(404).json({ message: "Application not found" });
-
+    if (prevApplication?.rescinded)
+      return res
+        .status(400)
+        .json({ message: "Application rescinded, cannot make edits" });
     if (!user) return res.status(404).json({ message: "Applicant not found" });
 
     const prevProfile = await Profile.findById(prevApplication.profile).exec();

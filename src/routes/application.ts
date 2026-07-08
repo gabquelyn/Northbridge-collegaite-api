@@ -16,6 +16,7 @@ import reviewApplication from "../controllers/application/review";
 import payOutstanding from "../controllers/application/outsanding";
 import getFile from "../controllers/application/getFile";
 import deleteApplication from "../controllers/application/deleteApplication";
+import rescindApplication from "../controllers/application/rescind";
 
 const applicationRouter = Router();
 
@@ -73,6 +74,13 @@ applicationRouter.post(
   VerifyJWT,
   OnlyAdmin,
   approveApplicationRequest,
+);
+
+applicationRouter.post(
+  "/rescind/:id",
+  VerifyJWT,
+  OnlyAdmin,
+  rescindApplication,
 );
 
 applicationRouter.get("/:id", VerifyJWT, getApplication);

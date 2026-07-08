@@ -12,4 +12,5 @@ export interface IApplication extends mongoose.Document {
   paid: boolean;
   completed: boolean;
   createdAt?: string;
+  rescinded: boolean
 }

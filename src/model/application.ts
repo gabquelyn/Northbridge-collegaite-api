@@ -57,6 +57,11 @@ const applicationSchema = new mongoose.Schema<IApplication>(
       default: false,
     },
 
+    rescinded: {
+      type: Boolean,
+      default: false,
+    },
+
     paid: {
       type: Boolean,
       default: false,

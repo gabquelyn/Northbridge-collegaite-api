@@ -35,7 +35,10 @@ const enrolCourses = expressAsyncHandler(
       return res
         .status(302)
         .json({ message: "Register for online application" });
-
+    if (offSiteApplication?.rescinded)
+      return res
+        .status(400)
+        .json({ message: "Application has been rescinded" });
     const moodleCourseIds = new Set(moodleCourses.map((obj) => obj.id));
     const selectedCourses = new Set(offSiteApplication.courses);
 

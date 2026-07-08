@@ -1,0 +1,91 @@
+<mjml>
+  <mj-body background-color="#f4f4f4">
+    <mj-include path="../partials/header.mjml" />
+
+    <mj-section background-color="#ffffff" padding="30px 20px">
+      <mj-column>
+        <!-- Title -->
+        <mj-text
+          font-size="22px"
+          font-weight="bold"
+          color="#b71c1c"
+          align="center"
+        >
+          Admission Offer Withdrawal Notice
+        </mj-text>
+
+        <!-- Greeting -->
+        <mj-text font-size="16px" color="#555555" padding-top="10px">
+          Dear {{ applicantName }},
+        </mj-text>
+
+        <!-- Introduction -->
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          Thank you for your interest in Northbridge Collegiate and for taking
+          the time to apply for admission.
+        </mj-text>
+
+        <!-- Main Message -->
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          After careful review of your application, we regret to inform you that
+          Northbridge Collegiate has decided to
+          <strong>withdraw your offer of admission</strong>.
+        </mj-text>
+
+        <!-- Highlight Box -->
+        <mj-text
+          background-color="#fff4f4"
+          padding="18px"
+          font-size="15px"
+          color="#333333"
+        >
+          <strong>Reason:</strong><br />
+          Outstanding required documentation and/or failure to satisfy one or
+          more of the conditions of admission within the prescribed timelines.
+        </mj-text>
+
+        <!-- Additional Information -->
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          As the required admission conditions were not fulfilled within the
+          specified timeframe, your admission offer can no longer be maintained.
+        </mj-text>
+
+        <mj-text font-size="15px" color="#555555" line-height="24px">
+          Should you meet the admission requirements in the future, you are
+          welcome to submit a new application for consideration. We would be
+          pleased to review your application at that time.
+        </mj-text>
+
+        <!-- Note -->
+        <mj-text
+          font-size="13px"
+          color="#999999"
+          background-color="#fafafa"
+          padding="15px"
+          line-height="20px"
+        >
+          If you believe this decision has been made in error or you have
+          questions regarding your application, please contact the Admissions
+          Office for further assistance.
+        </mj-text>
+
+        <!-- Closing -->
+        <mj-text
+          font-size="15px"
+          color="#555555"
+          padding-top="20px"
+          line-height="20px"
+        >
+          We sincerely appreciate your interest in Northbridge Collegiate and
+          wish you every success in your future academic pursuits.
+          <br /><br />
+          Warm regards,<br /><br />
+          <strong>Admissions Office</strong><br />
+          Northbridge Collegiate
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-include path="../partials/footer.mjml" />
+  </mj-body>
+</mjml>
