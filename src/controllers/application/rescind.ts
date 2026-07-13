@@ -27,6 +27,7 @@ const rescindApplication = expressAsyncHandler(
       { jobId: uuid() },
     );
     application.rescinded = true;
+    application.granted = false;
     await application.save();
     return res.status(200).json({ message: "Application rescinded" });
   },
