@@ -50,10 +50,12 @@ export default async function initializePayment({
 
     const paymentReference = `PAY-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
+    // +7.5% vat fee
+    const VAT_FEE = 1.075
     const response = await axios.post(
       `${process.env.MONNIFY_BASE_URL}/api/v1/merchant/transactions/init-transaction`,
       {
-        amount,
+        amount: VAT_FEE * amount,
         customerName,
         customerEmail: email,
         paymentReference,
