@@ -269,7 +269,7 @@ async function myWorker() {
             invoices.map(async (invoice) => {
               const application =
                 applicationsMap[invoice.application.toString()];
-              if (!application || application.paid) return;
+              if (!application || application.paid || application.rescinded) return;
 
               const applicant = usersMap[application.applicant.toString()];
               if (!applicant) return;
