@@ -14,7 +14,12 @@ const registerController = expressAsyncHandler(
     const { email, password, name, mode } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty())
-      return res.status(400).json({ error: errors.array() });
+      return res.status(400).json({
+        message: errors
+          .array()
+          .map((e) => (e.type === "field" ? `${e.path}: ${e.msg}` : e.msg))
+          .join(", "),
+      });
 
     const existing = await User.findOne({ email }).lean().exec();
     if (existing)

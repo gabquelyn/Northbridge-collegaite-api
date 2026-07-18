@@ -13,6 +13,7 @@ import { emailQueue, fileUploadQueue } from "../../services/queue";
 import { compileEmail } from "../../emails/compileEmail";
 import moment from "moment";
 
+type fileNames = "passport" | "transcripts" | "govId" | "birthCert";
 const requestApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const {
@@ -52,11 +53,18 @@ const requestApplication = expressAsyncHandler(
       motherEmail,
       motherPhoneNumber,
       motherDeaceased,
-      referrer
+      referrer,
     }: { [key: string]: string; mode: "on-site" | "off-site" } = req.body;
+    const { id } = req.params;
+    const prevProfile = await Profile.findById(id).exec();
 
     const result = validationResult(req);
-
+    if (!prevProfile) {
+      return res.status(404).json({ message: "Profile does not exist" });
+    }
+  
+    const prevApplication = await Application.findOne({ profile: id }).exec();
+    if (prevApplication) return res.status(400).json({ message: "Already applied" });
     if (
       (!fatherFirstName ||
         !fatherLastName ||
@@ -91,10 +99,15 @@ const requestApplication = expressAsyncHandler(
       [fieldname: string]: Express.Multer.File[];
     };
 
-    const requiredFiles = ["passport", "transcripts", "govId", "birthCert"];
+    const requiredFiles: fileNames[] = [
+      "passport",
+      "transcripts",
+      "govId",
+      "birthCert",
+    ];
 
     for (const field of requiredFiles) {
-      if (!fileFields?.[field]) {
+      if (!fileFields?.[field] && prevProfile.documents?.[field]?.length == 0) {
         return res.status(400).json({ message: `Missing ${field}` });
       }
     }
@@ -181,10 +194,6 @@ const requestApplication = expressAsyncHandler(
       } catch {
         return res.status(400).json({ message: "Invalid courses format" });
       }
-      if (selectedCourseIds.length === 0)
-        return res
-          .status(400)
-          .json({ message: "Select at least a course for online programs" });
 
       const moodleCourseIds = new Set(moodleCourses.map((obj) => obj.id));
       for (const id of selectedCourseIds) {
@@ -204,14 +213,14 @@ const requestApplication = expressAsyncHandler(
     );
 
     // Using transactions to monitor db
+    let response;
     const session = await mongoose.startSession();
     session.startTransaction();
-    let profile, application;
+    let application;
     try {
-      profile = await Profile.create(
-        [
-          {
-            guardian: userId,
+      await prevProfile.updateOne(
+        {
+          $set: {
             bio: {
               firstName,
               lastName,
@@ -255,16 +264,16 @@ const requestApplication = expressAsyncHandler(
               motherPhoneNumber,
               motherDeaceased,
             },
-            referrer
+            referrer,
           },
-        ],
+        },
         { session },
       );
 
       application = await Application.create(
         [
           {
-            profile: profile[0]._id,
+            profile: id,
             programs: mode === "on-site" ? programsArray : [],
             courses: mode === "off-site" ? selectedCourseIds : [],
             mode,
@@ -273,6 +282,17 @@ const requestApplication = expressAsyncHandler(
         ],
         { session },
       );
+
+      response = await initializePayment({
+        amount: APPLICATION_FEE,
+        email: guardian.email,
+        metadata: {
+          applicationId: application[0]._id,
+          type: "APPLICATION_FEE",
+        },
+        applicationId: application[0]._id,
+        customerName: guardian.name,
+      });
       await session.commitTransaction();
     } catch (err) {
       await session.abortTransaction();
@@ -285,7 +305,7 @@ const requestApplication = expressAsyncHandler(
       "upload-files",
       {
         files,
-        profileId: profile[0]._id,
+        profileId: id,
       },
       {
         jobId: application[0]._id.toString(),
@@ -296,24 +316,6 @@ const requestApplication = expressAsyncHandler(
         },
       },
     );
-
-    if (mode === "off-site") {
-      const response = await initializePayment({
-        amount: selectedCourseIds.length * UNIT_COURSE + APPLICATION_FEE,
-        email: guardian.email,
-        metadata: {
-          applicationId: application[0]._id,
-        },
-        applicationId: application[0]._id,
-        customerName: guardian.name,
-      });
-
-      if (response.status) {
-        return res.status(201).json({
-          paymentUrl: response.data?.authorization_url,
-        });
-      }
-    }
 
     const { html } = compileEmail("notification", {
       adminName: "Admin",
@@ -329,6 +331,12 @@ const requestApplication = expressAsyncHandler(
       html,
       subject: "New Application Request",
     });
+
+    if (response.status) {
+      return res.status(201).json({
+        paymentUrl: response.data?.authorization_url,
+      });
+    }
 
     return res.status(201).json({ message: "Admission request submitted" });
   },

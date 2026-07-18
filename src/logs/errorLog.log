@@ -108,3 +108,18 @@
 20260605	11:53:15	9d430b62-4c5c-4383-8ba5-32d12b5bf320	Failed to initialize payment	GET	/test	undefined
 20260626	22:58:54	b5dc6ca0-7e8a-4139-bf6b-4153a41adf6f	Cast to ObjectId failed for value "approve" (type string) at path "_id" for model "Application"	GET	/application/approve	undefined
 20260626	23:00:00	09bd96b9-b587-43b1-bdfe-eaef40eb67af	Failed to initialize payment	POST	/application/approve/69fe64c6a481018f96603433	undefined
+20260717	23:45:02	a3f9722e-0634-4175-86d4-2177e1738b5f	connection timed out	GET	/profile/6a5992913f256c8a29f21642	http://localhost:3000
+20260717	23:46:11	88814302-b3a5-4463-b23a-328abb730f3b	connection timed out	GET	/profile/6a5992913f256c8a29f21642	http://localhost:3000
+20260718	11:12:16	fa055a69-4f08-405e-a736-0320c3e4328a	connection <monitor> to 89.193.156.105:27017 timed out	PATCH	/profile/mailing/6a5992913f256c8a29f21642	http://localhost:3000
+20260718	11:32:29	9a8c02b6-369b-41fc-8b18-84d98a4b71d1	getaddrinfo ENOTFOUND ac-wc1gipf-shard-00-00.ju1epyg.mongodb.net	PATCH	/profile/documents/6a5992913f256c8a29f21642	http://localhost:3000
+20260718	12:36:14	d6e369d4-e7a5-45ea-8477-d637f16918a7	Cast to ObjectId failed for value "undefined" (type string) at path "_id" for model "Profile"	PATCH	/profile/courses/undefined	http://localhost:3000
+20260718	13:08:49	55d98cd3-9d9d-4b8c-93fc-a57c8a722e60	Cast to ObjectId failed for value "undefined" (type string) at path "_id" for model "Profile"	PATCH	/profile/courses/undefined	http://localhost:3000
+20260718	13:14:25	503f56e0-2277-45f1-a560-05d9ea90b52c	Cast to ObjectId failed for value "undefined" (type string) at path "_id" for model "Profile"	PATCH	/profile/courses/undefined	http://localhost:3000
+20260718	14:23:27	994c917f-bc7b-4378-8bb2-5b52896cc2f3	Failed to initialize payment	POST	/application/6a5992913f256c8a29f21642	http://localhost:3000
+20260718	14:36:35	b40e28d3-edff-4f7e-b84b-55fc0c596d51	Failed to initialize payment	POST	/application/6a5992913f256c8a29f21642	http://localhost:3000
+20260718	14:39:41	3125de44-05bb-4700-a67c-f7b118d1e92c	Failed to initialize payment	POST	/application/6a5992913f256c8a29f21642	http://localhost:3000
+20260718	16:45:12	d3d809c4-ab34-414c-b10d-99aa9d22e055	Failed to initialize payment	PATCH	/application/6a5b962fee2596635f51f188	http://localhost:3000
+20260718	20:40:16	adf0e634-ae8f-411d-a84f-ce9e4da8dff6	Cast to ObjectId failed for value "incomplete" (type string) at path "_id" for model "Profile"	GET	/profile/incomplete/	http://localhost:3000
+20260718	20:40:19	2f4fe8d2-aac8-421f-9cf7-cc94ed11eb4d	Cast to ObjectId failed for value "incomplete" (type string) at path "_id" for model "Profile"	GET	/profile/incomplete/	http://localhost:3000
+20260718	20:47:49	9d4094e7-68d0-402f-88e7-fc765d814b19	Cast to ObjectId failed for value "incomplete" (type string) at path "_id" for model "Profile"	GET	/profile/incomplete/	http://localhost:3000
+20260718	20:49:43	f09f89be-deac-49b1-b6c2-043f3c314298	Cast to ObjectId failed for value "incomplete" (type string) at path "_id" for model "Profile"	GET	/profile/incomplete	http://localhost:3000

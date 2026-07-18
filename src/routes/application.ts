@@ -17,11 +17,12 @@ import payOutstanding from "../controllers/application/outsanding";
 import getFile from "../controllers/application/getFile";
 import deleteApplication from "../controllers/application/deleteApplication";
 import rescindApplication from "../controllers/application/rescind";
+import payController from "../controllers/application/pay";
 
 const applicationRouter = Router();
 
 applicationRouter.post(
-  "/",
+  "/:id",
   VerifyJWT,
   upload.fields([
     { name: "transcripts", maxCount: 3 },
@@ -81,6 +82,12 @@ applicationRouter.post(
   VerifyJWT,
   OnlyAdmin,
   rescindApplication,
+);
+
+applicationRouter.post(
+  "/fee/:id",
+  VerifyJWT,
+  payController,
 );
 
 applicationRouter.get("/:id", VerifyJWT, getApplication);

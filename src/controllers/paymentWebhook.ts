@@ -42,6 +42,7 @@ const monnifyWebhookHandler = expressAsyncHandler(
         const { currency, amountPaid, paymentStatus, transactionReference } =
           response.eventData;
         const applicationId = response.eventData.metaData?.applicationId;
+        const type = response.eventData.metaData?.type;
 
         await paymentWebhookQueue.add(
           "charged",
@@ -51,6 +52,7 @@ const monnifyWebhookHandler = expressAsyncHandler(
             amount: amountPaid,
             status: paymentStatus,
             reference: transactionReference,
+            type
           },
           { jobId: transactionReference },
         );

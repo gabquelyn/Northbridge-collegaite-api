@@ -4,12 +4,10 @@ import { validationResult } from "express-validator";
 import { CustomRequest } from "../../types/request";
 import Profile from "../../model/profile";
 import Application from "../../model/application";
-import initializePayment from "../../utils/initializePayment";
 import User from "../../model/user";
 import { getCachedMoodleCourses } from "../../utils/getMoodleCached";
 import mongoose from "mongoose";
 import { fileUploadQueue } from "../../services/queue";
-import { UNIT_COURSE } from "../../config/prices";
 import moment from "moment";
 
 const editApplication = expressAsyncHandler(
@@ -132,8 +130,6 @@ const editApplication = expressAsyncHandler(
       [fieldname: string]: Express.Multer.File[];
     };
 
-    const canadianStudent = String(canadian).toLowerCase() === "true";
-
     let programsArray: string[] = [];
 
     // onsite checks
@@ -187,15 +183,10 @@ const editApplication = expressAsyncHandler(
       } catch {
         return res.status(400).json({ message: "Invalid courses format" });
       }
-      if (selectedCourseIds.length === 0)
-        return res
-          .status(400)
-          .json({ message: "Select at least a course for online programs" });
 
       const moodleCourseIds = new Set(moodleCourses.map((obj) => obj.id));
       for (const id of selectedCourseIds) {
-        if (!moodleCourseIds.has(id)) {
-          console.log(id, "br", moodleCourseIds);
+        if (!moodleCourseIds.has(id)) {;
           return res
             .status(400)
             .json({ message: "Selected course doesn't exist in moodle" });
@@ -296,24 +287,6 @@ const editApplication = expressAsyncHandler(
         },
       },
     );
-
-    if (mode === "off-site") {
-      const response = await initializePayment({
-        amount: selectedCourseIds.length * UNIT_COURSE,
-        email: user.email,
-        metadata: {
-          applicationId: prevApplication._id,
-        },
-        applicationId: prevApplication._id,
-        customerName: user?.name || "",
-      });
-
-      if (response.status) {
-        return res.status(201).json({
-          paymentUrl: response.data?.authorization_url,
-        });
-      }
-    }
 
     return res.status(201).json({ message: "Admission details edited" });
   },

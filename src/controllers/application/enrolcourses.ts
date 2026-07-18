@@ -15,7 +15,13 @@ const enrolCourses = expressAsyncHandler(
     const { courses } = req.body;
 
     const error = validationResult(req);
-    if (!error.isEmpty()) return res.status(400).json({ error: error.array() });
+    if (!error.isEmpty())
+      return res.status(400).json({
+        message: error
+          .array()
+          .map((e) => (e.type === "field" ? `${e.path}: ${e.msg}` : e.msg))
+          .join(", "),
+      });
 
     const offSiteApplicationPromise = Application.findOne({
       applicant: userId,
@@ -39,6 +45,11 @@ const enrolCourses = expressAsyncHandler(
       return res
         .status(400)
         .json({ message: "Application has been rescinded" });
+
+    if (!offSiteApplication?.completed)
+      return res.status(400).json({
+        message: `Application fee not paid`,
+      });
     const moodleCourseIds = new Set(moodleCourses.map((obj) => obj.id));
     const selectedCourses = new Set(offSiteApplication.courses);
 

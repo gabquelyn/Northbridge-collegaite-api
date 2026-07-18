@@ -46,8 +46,10 @@ export interface IProfile extends mongoose.Document {
   };
   referrer: string,
   documents: {
+    passport: { url: string; public_id: string; filename: string }[];
     transcripts: { url: string; public_id: string; filename: string }[];
     govId: { url: string; public_id: string; filename: string }[];
     others: { url: string; public_id: string; filename: string }[];
+    birthCert: { url: string; public_id: string; filename: string }[];
   };
 }

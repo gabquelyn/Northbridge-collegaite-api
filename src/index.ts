@@ -16,7 +16,6 @@ import profileRouter from "./routes/profile";
 import courseRouter from "./routes/course";
 import consultationRouter from "./routes/consultation";
 import { paymentCampaignQueue, suspendDebtorQueue } from "./services/queue";
-import { getSignedUrl } from "./config/upload";
 import initializePayment from "./utils/initializePayment";
 
 const limiter = rateLimit({

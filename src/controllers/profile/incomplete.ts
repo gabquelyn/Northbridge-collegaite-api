@@ -1,0 +1,60 @@
+import expressAsyncHandler from "express-async-handler";
+import { Request, Response } from "express";
+import mongoose from "mongoose";
+import { CustomRequest } from "../../types/request";
+import Profile from "../../model/profile";
+import Application from "../../model/application";
+
+const incompleteController = expressAsyncHandler(
+  async (req: Request, res: Response): Promise<any> => {
+    const userId = (req as CustomRequest).id;
+
+    if (!userId || !mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({ message: "Invalid or missing user" });
+    }
+
+    const incompleteProfiles = await Profile.aggregate([
+      {
+        $match: {
+          guardian: new mongoose.Types.ObjectId(userId),
+        },
+      },
+      {
+        $lookup: {
+          from: Application.collection.name,
+          let: { profileId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$profile", "$$profileId"] },
+                    { $eq: ["$applicant", new mongoose.Types.ObjectId(userId)] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "applications",
+        },
+      },
+      {
+        $match: {
+          applications: { $size: 0 },
+        },
+      },
+      {
+        $project: {
+          applications: 0,
+        },
+      },
+    ]);
+
+    return res.status(200).json({
+      incomplete: incompleteProfiles.length > 0,
+      profiles: incompleteProfiles,
+    });
+  },
+);
+
+export default incompleteController;

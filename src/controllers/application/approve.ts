@@ -5,9 +5,7 @@ import Profile from "../../model/profile";
 import Application from "../../model/application";
 import initializePayment from "../../utils/initializePayment";
 import { compileEmail } from "../../emails/compileEmail";
-import { enrolStudentInCourses } from "../../utils/moodle";
-import { prices, APPLICATION_FEE } from "../../config/prices";
-import moodleCredentials from "../../utils/moodleCredentials";
+import { UNIT_COURSE } from "../../config/prices";
 import { emailQueue } from "../../services/queue";
 import { v4 as uuid } from "uuid";
 import cost from "../../utils/programs";
@@ -24,16 +22,24 @@ const approveApplicationRequest = expressAsyncHandler(
       .exec();
 
     if (!application || !profile || !guardian)
-      return res
-        .status(404)
-        .json({
-          message: "Important admission details not found",
-          application,
-          profile,
-          guardian,
-        });
+      return res.status(404).json({
+        message: "Important admission details not found",
+        application,
+        profile,
+        guardian,
+      });
 
-    const { email, firstName, lastName } = profile.bio;
+    if (!application?.completed) {
+      return res.status(400).json({ message: "Application fee not paid" });
+    }
+
+    if (application.mode == "off-site" && installment) {
+      return res.status(400).json({
+        message: "Installmental payment not allowed for off-site scholars",
+      });
+    }
+
+    const { firstName, lastName } = profile.bio;
 
     if (application.granted) {
       return res.status(400).json({ message: "Application already granted" });
@@ -44,25 +50,14 @@ const approveApplicationRequest = expressAsyncHandler(
         .status(400)
         .json({ message: "Admission already granted and payment completed" });
 
-    // ! ACTIONS FOR MATURED STUDENTS (BUYING OF UNIT COURSES)
-    if (application.mode == "off-site") {
-      // TODO: Increase payment srutiny
-      if (!application.paid)
-        return res
-          .status(400)
-          .json({ message: "Payment for courses not completed yet" });
+    const totalPrice =
+      application.mode == "on-site"
+        ? cost(application.programs)
+        : application.courses.length * UNIT_COURSE;
 
-      const userId = await moodleCredentials({ email, firstName, lastName });
-      await enrolStudentInCourses(userId, application.courses);
-    }
+    if (installment) application.installment = true;
 
-    // ! ONSITE STUDENTS GET ADMISSION LETTER AND ARE MEANT TO PAY
-    if (application.mode == "on-site") {
-      //* calculate all the prices for the selected program
-
-      const totalPrice = cost(application.programs);
-      if (installment) application.installment = true;
-
+    if (totalPrice) {
       const response = await initializePayment({
         amount: installment ? totalPrice * 0.6 : totalPrice,
         email: guardian.email,
@@ -99,10 +94,7 @@ const approveApplicationRequest = expressAsyncHandler(
     await application.save();
 
     return res.status(200).json({
-      message:
-        application.mode == "on-site"
-          ? "Admission granted and payment link sent"
-          : "Course purchase approved and user added to moodle",
+      message: "Admission granted and payment link sent",
     });
   },
 );

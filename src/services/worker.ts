@@ -80,9 +80,10 @@ async function myWorker() {
       "webhook",
       async (job) => {
         if (job.name === "charged") {
-          const { applicationId, currency, amount, status, reference } =
+          const { applicationId, currency, amount, status, reference, type } =
             job.data;
           const application = await Application.findById(applicationId).exec();
+
           const profile = await Profile.findById(application?.profile)
             .lean()
             .exec();
@@ -122,6 +123,13 @@ async function myWorker() {
           invoice.application = applicationId;
           await invoice.save();
 
+          if (type == "APPLICATION_FEE") {
+            // Payment of application fee
+            application.completed == true;
+            application.save();
+            return;
+          }
+
           const { email, firstName, lastName } = profile.bio;
           // * For an Enrollment into a previously paid application
 
@@ -131,15 +139,14 @@ async function myWorker() {
             lastName,
           });
 
-          const totalPayed =
-            (
-              await Invoice.find({
-                application: applicationId,
-                status: "success",
-              })
-                .lean()
-                .exec()
-            ).reduce((sum, inv) => sum + inv.amount, 0) / 100;
+          const totalPayed = (
+            await Invoice.find({
+              application: applicationId,
+              status: "success",
+            })
+              .lean()
+              .exec()
+          ).reduce((sum, inv) => sum + inv.amount, 0);
 
           // * Enrollment in a new program/course without an outsanding fee
           if (application.paid && application.outstanding <= 0) {
@@ -183,46 +190,49 @@ async function myWorker() {
             }
           } else {
             const programsSet = new Set(application.programs);
-            if (application?.mode == "on-site") {
-              if (application.paused) {
-                // unsuspending mail
-                await suspendMoodleUserByEmail(profile.bio.email, true);
-                application.paused = false;
-                const { html } = compileEmail("restore", {
-                  studentName: profile.bio.firstName,
-                  loginUrl: "https://study.northbridgec.ca/login",
-                });
-                await emailQueue.add(
-                  "deliver",
-                  {
-                    to: email,
-                    html,
-                    subject: "Account Suspension",
-                  },
-                  { jobId: `mail-${application._id}` },
-                );
-              }
-              // ! GRANTING ACCESS INTO SELECTED PROGRAMS
-              const coursesIds = [
-                ...new Set(
-                  Array.from(programsSet).flatMap(
-                    (program) => PROGRAM_COURSES_MAP[program] ?? [],
-                  ),
-                ),
-              ];
+            // ! GRANTING ACCESS INTO SELECTED PROGRAMS
+            const coursesIds =
+              application?.mode == "on-site"
+                ? [
+                    ...new Set(
+                      Array.from(programsSet).flatMap(
+                        (program) => PROGRAM_COURSES_MAP[program] ?? [],
+                      ),
+                    ),
+                  ]
+                : [...application.courses];
 
-              // ! CHECKING IF IT IS INSTALLMENTAL PAYMENT
+            if (application.paused) {
+              // unsuspending mail
+              await suspendMoodleUserByEmail(profile.bio.email, true);
+              application.paused = false;
+              const { html } = compileEmail("restore", {
+                studentName: profile.bio.firstName,
+                loginUrl: "https://study.northbridgec.ca/login",
+              });
+              await emailQueue.add(
+                "deliver",
+                {
+                  to: email,
+                  html,
+                  subject: "Account Suspension",
+                },
+                { jobId: `mail-${application._id}` },
+              );
+            }
+
+            if (application?.mode == "on-site") {
+              // ! CHECKING IF IT IS INSTALLMENTAL PAYMENT FOR ONSITE ONLY
               const totalPrice = cost(application.programs);
               // cummulate all invoices for the application and convert from units
               application.outstanding = totalPrice - totalPayed;
-
-              // * Enrol into moodle programs
-              await enrolStudentInCourses(studentId, coursesIds);
             }
+
+            // * Enrol into moodle programs
+            await enrolStudentInCourses(studentId, coursesIds);
           }
           application.paid = true;
           await application.save();
-         
         }
 
         return { success: true };
@@ -269,7 +279,8 @@ async function myWorker() {
             invoices.map(async (invoice) => {
               const application =
                 applicationsMap[invoice.application.toString()];
-              if (!application || application.paid || application.rescinded) return;
+              if (!application || application.paid || application.rescinded)
+                return;
 
               const applicant = usersMap[application.applicant.toString()];
               if (!applicant) return;
