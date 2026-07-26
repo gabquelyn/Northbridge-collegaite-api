@@ -125,7 +125,7 @@ async function myWorker() {
 
           if (type == "APPLICATION_FEE") {
             // Payment of application fee
-            application.completed == true;
+            application.completed = true;
             application.save();
             return;
           }
