@@ -63,42 +63,24 @@ const enrolCourses = expressAsyncHandler(
     }
 
     // add to selected not paid and trigger the payment
-    let paymentUrl;
-    if (!offSiteApplication.paid) {
-      const newCourseSelection = [...offSiteApplication.courses, ...courses];
-      offSiteApplication.courses = newCourseSelection;
-      await offSiteApplication.save();
 
-      const response = await initializePayment({
-        amount: newCourseSelection.length * UNIT_COURSE + APPLICATION_FEE,
-        email: user?.email || "",
-        metadata: {
-          applicationId: offSiteApplication._id,
-        },
+    const response = await initializePayment({
+      amount: courses.length * UNIT_COURSE,
+      email: user?.email || "",
+      metadata: {
         applicationId: offSiteApplication._id,
-        customerName: user?.name || "",
-      });
+      },
+      applicationId: offSiteApplication._id,
+      customerName: user?.name || "",
+    });
 
-      paymentUrl = response.data?.authorization_url;
-    } else {
-      const response = await initializePayment({
-        amount: courses.length * UNIT_COURSE,
-        email: user?.email || "",
-        metadata: {
-          applicationId: offSiteApplication._id,
-        },
-        applicationId: offSiteApplication._id,
-        customerName: user?.name || "",
-      });
+    const paymentUrl = response.data?.authorization_url;
 
-      paymentUrl = response.data?.authorization_url;
-
-      await temp.create({
-        application: offSiteApplication._id,
-        courses,
-        reference: response.data.reference,
-      });
-    }
+    await temp.create({
+      application: offSiteApplication._id,
+      courses,
+      reference: response.data.reference,
+    });
 
     // send payment link for everything
     return res.status(201).json({
