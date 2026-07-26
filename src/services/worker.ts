@@ -217,7 +217,7 @@ async function myWorker() {
                   html,
                   subject: "Account Suspension",
                 },
-                { jobId: `mail-${application._id}` },
+                // { jobId: `mail-${application._id}` },
               );
             }
 
