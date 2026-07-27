@@ -258,6 +258,7 @@ async function myWorker() {
           const applicationIds = invoices.map((i) => i.application);
           const applications = await Application.find({
             _id: { $in: applicationIds },
+            completed: false
           })
             .lean()
             .exec();
