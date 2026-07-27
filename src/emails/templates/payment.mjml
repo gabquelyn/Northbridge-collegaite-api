@@ -14,14 +14,6 @@
           Welcome & Admission Letter
         </mj-text>
 
-
-
-        <!-- Student Info -->
-        <!-- <mj-text font-size="14px" color="#555555">
-          <strong>Student Name:</strong> {{ studentName }} <br />
-          <strong>Student ID:</strong> {{ studentId }}
-        </mj-text> -->
-
         <!-- Greeting -->
         <mj-text font-size="16px" color="#555555" padding-top="10px">
           Dear {{ studentName }} and Family,
@@ -47,7 +39,10 @@
           font-size="15px"
           color="#333333"
         >
+          {{#if program}}
           <strong>Program:</strong> {{ program }} <br /><br />
+          {{/if}}
+
           <strong>Campus:</strong> Northbridge Collegiate - Lagos <br /><br />
         </mj-text>
 
@@ -65,11 +60,11 @@
 
         <!-- Requirements -->
         <mj-text font-size="15px" color="#555555" line-height="27px">
-          • Payment of applicable tuition and enrollment fees <br />
           • Completion of any remaining admissions documentation required by the
           Registrar
         </mj-text>
 
+        {{#if paymentUrl}}
         <!-- Payment CTA -->
         <mj-button
           background-color="#1e88e5"
@@ -86,8 +81,9 @@
 
         <!-- Small note -->
         <mj-text font-size="12px" color="#999999" align="center">
-          Click the button above to complete your enrollment payment securely.
+          Click the button above to complete your program/courses payment securely.
         </mj-text>
+        {{/if}}
 
         <mj-text font-size="15px" color="#555555" line-height="24px">
           Additional information regarding orientation, course selection, and
@@ -122,40 +118,38 @@
     </mj-section>
 
     <!-- Footer Info -->
-<mj-section background-color="#ffffff" padding="10px 20px">
-  <mj-column>
+    <mj-section background-color="#ffffff" padding="10px 20px">
+      <mj-column>
 
-      <mj-text font-size="13px" color="#777777" align="right" padding="0">
-      <strong href = "northbridgec.ca">Northbridge Collegiate</strong><br />
-    </mj-text>
+        <mj-text font-size="13px" color="#777777" align="right" padding="0">
+          <strong href = "northbridgec.ca">Northbridge Collegiate</strong><br />
+        </mj-text>
 
-    <mj-text font-size="13px" color="#777777" align="right" padding="5px 0 0 0">
-      +234-704-700-2406 | +1-416-644-1114
-    </mj-text>
-    <mj-text font-size="13px" color="#777777" align="right" padding="5px 0 0 0">
-       Date: {{ date }}
-    </mj-text>
+        <mj-text font-size="13px" color="#777777" align="right" padding="5px 0 0 0">
+          +234-704-700-2406 | +1-416-644-1114
+        </mj-text>
+        <mj-text font-size="13px" color="#777777" align="right" padding="5px 0 0 0">
+           Date: {{ date }}
+        </mj-text>
 
-    <mj-text
-      font-size="12px"
-      color="#999999"
-      align="justify"
-      line-height="22px"
-      padding="10px 0 0 0"
-    >
-      Northbridge Collegiate is a private secondary school authorized by the
-      Ontario Ministry of Education and operated under BSID 886341. The school
-      follows Ontario curriculum requirements for secondary education and
-      maintains academic records in accordance with Ontario Ministry of
-      Education guidelines.
-      </br>
+        <mj-text
+          font-size="12px"
+          color="#999999"
+          align="justify"
+          line-height="22px"
+          padding="10px 0 0 0"
+        >
+          Northbridge Collegiate is a private secondary school authorized by the
+          Ontario Ministry of Education and operated under BSID 886341. The school
+          follows Ontario curriculum requirements for secondary education and
+          maintains academic records in accordance with Ontario Ministry of
+          Education guidelines.
+          </br>
 
-    </mj-text>
-  
+        </mj-text>
 
-  </mj-column>
-</mj-section>
-</mj-section>
+      </mj-column>
+    </mj-section>
 
     <mj-include path="../partials/footer.mjml" />
   </mj-body>

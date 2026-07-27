@@ -57,6 +57,7 @@ const approveApplicationRequest = expressAsyncHandler(
 
     if (installment) application.installment = true;
 
+    let url;
     if (totalPrice) {
       const response = await initializePayment({
         amount: installment ? totalPrice * 0.6 : totalPrice,
@@ -69,26 +70,28 @@ const approveApplicationRequest = expressAsyncHandler(
       });
 
       if (response.status && response.data?.authorization_url) {
-        const { html } = compileEmail("payment", {
-          date: new Date().getDate(),
-          studentName: `${firstName} ${lastName}`,
-          program: application.programs.join(", "),
-          academicYear: new Date().getFullYear(),
-          paymentUrl: response.data.authorization_url,
-        });
-
-        await emailQueue.add(
-          "deliver",
-          {
-            to: guardian.email,
-            html,
-            subject: "Complete Payment For Programs",
-          },
-          { jobId: uuid() },
-        );
-        await application.save();
+        url = response.data.authorization_url;
       }
     }
+
+    const { html } = compileEmail("payment", {
+      date: new Date().getDate(),
+      studentName: `${firstName} ${lastName}`,
+      program: application.programs.join(", "),
+      academicYear: new Date().getFullYear(),
+      paymentUrl: url,
+    });
+
+    await emailQueue.add(
+      "deliver",
+      {
+        to: guardian.email,
+        html,
+        subject: "Complete Payment For Programs",
+      },
+      { jobId: uuid() },
+    );
+    await application.save();
 
     application.granted = true;
     await application.save();
