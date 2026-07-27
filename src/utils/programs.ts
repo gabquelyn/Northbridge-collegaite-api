@@ -4,7 +4,7 @@ export default function cost(
   programs: APPLICATION_PROGRAMS[],
   enrol?: boolean,
 ) {
-  let totalPrice = enrol ? 0 : APPLICATION_FEE;
+  let totalPrice = 0;
   for (const program of programs) {
     for (const price of prices) {
       if (program === price.name) {
