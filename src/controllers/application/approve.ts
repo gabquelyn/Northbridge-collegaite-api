@@ -80,6 +80,10 @@ const approveApplicationRequest = expressAsyncHandler(
       program: application.programs.join(", "),
       academicYear: new Date().getFullYear(),
       paymentUrl: url,
+      campus:
+        application.mode == "off-site"
+          ? "Northbridge Collegiate Online"
+          : "Northbridge Collegiate, Lagos.",
     });
 
     await emailQueue.add(

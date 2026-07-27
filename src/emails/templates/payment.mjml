@@ -43,7 +43,7 @@
           <strong>Program:</strong> {{ program }} <br /><br />
           {{/if}}
 
-          <strong>Campus:</strong> Northbridge Collegiate - Lagos <br /><br />
+          <strong>Campus:</strong> {{campus}} <br /><br />
         </mj-text>
 
         <mj-text font-size="15px" color="#555555" line-height="24px">
