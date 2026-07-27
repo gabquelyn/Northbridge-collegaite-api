@@ -83,7 +83,7 @@ const approveApplicationRequest = expressAsyncHandler(
       campus:
         application.mode == "off-site"
           ? "Northbridge Collegiate Online"
-          : "Northbridge Collegiate, Lagos.",
+          : "Northbridge Collegiate Onsite",
     });
 
     await emailQueue.add(
