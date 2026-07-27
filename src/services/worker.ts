@@ -20,6 +20,7 @@ import moment from "moment";
 import cost from "../utils/programs";
 import initializePayment from "../utils/initializePayment";
 import { formatCurrency } from "../utils/formatCurrency";
+import { APPLICATION_FEE } from "../config/prices";
 
 const connection = new IORedis({
   host: process.env.REDIS_HOST || "redis",
@@ -173,7 +174,7 @@ async function myWorker() {
                   ...additional.programs,
                 ]);
                 application.programs = [...programs];
-                const totalPrice = cost([...programs]);
+                const totalPrice = cost([...programs]) + APPLICATION_FEE;
                 application.outstanding = totalPrice - totalPayed;
 
                 // enrol in the new programs
@@ -223,7 +224,7 @@ async function myWorker() {
 
             if (application?.mode == "on-site") {
               // ! CHECKING IF IT IS INSTALLMENTAL PAYMENT FOR ONSITE ONLY
-              const totalPrice = cost(application.programs);
+              const totalPrice = cost(application.programs) + APPLICATION_FEE;
               // cummulate all invoices for the application and convert from units
               application.outstanding = totalPrice - totalPayed;
             }
