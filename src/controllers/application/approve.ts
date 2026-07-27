@@ -87,7 +87,7 @@ const approveApplicationRequest = expressAsyncHandler(
       {
         to: guardian.email,
         html,
-        subject: "Complete Payment For Programs",
+        subject: "Official Admission Notice — Northbridge Collegiate",
       },
       { jobId: uuid() },
     );
