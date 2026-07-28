@@ -29,7 +29,7 @@ const connection = new IORedis({
 });
 
 // max days for payment expectancy
-const MAX_DAYS_WITHOUTPAYMENT = 56;
+const  MAX_DAYS_WITHOUTPAYMENT = 56;
 async function myWorker() {
   try {
     await connectDB();
