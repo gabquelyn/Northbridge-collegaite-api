@@ -119,7 +119,6 @@ async function myWorker() {
           }
 
           invoice.currency = currency;
-          invoice.amount = amount;
           invoice.status = "success";
           invoice.application = applicationId;
           await invoice.save();
