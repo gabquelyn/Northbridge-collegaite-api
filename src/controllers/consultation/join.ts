@@ -30,8 +30,8 @@ export const joinApplication = expressAsyncHandler(
     const { html } = compileEmail("join", {
       name,
       email,
-      resumeUrl: uploadedFiles["resume"][0].url,
-      coverLetterUrl: uploadedFiles["coverLetter"][0].url,
+      resumeUrl: `${process.env.FRONTEND_URL}/view?public_id=${uploadedFiles["resume"][0].public_id}&resource_type=${uploadedFiles["resume"][0].resource_type}`,
+      coverLetterUrl: `${process.env.FRONTEND_URL}/view?public_id=${uploadedFiles["coverLetter"][0].public_id}&resource_type=${uploadedFiles["coverLetter"][0].resource_type}`,
     });
 
     await emailQueue.add("deliver", {
