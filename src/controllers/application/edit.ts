@@ -117,14 +117,16 @@ const editApplication = expressAsyncHandler(
         .status(400)
         .json({ message: "Not permitted to edit application" });
 
-    if (
-      ((prevApplication.paid && prevApplication.mode == "on-site") ||
-        (prevApplication.granted && prevApplication.mode == "off-site")) &&
-      user?.role !== "admin"
-    )
+    if (prevApplication.granted && user?.role !== "admin")
       return res.status(400).json({
         message: "Applcation cannot be edited after being granted or paid for",
       });
+
+    if (prevApplication.mode !== mode && prevApplication.granted) {
+      return res.status(400).json({
+        message: "Applcation mode cannot be altered",
+      });
+    }
 
     const fileFields = req.files as {
       [fieldname: string]: Express.Multer.File[];
@@ -186,7 +188,7 @@ const editApplication = expressAsyncHandler(
 
       const moodleCourseIds = new Set(moodleCourses.map((obj) => obj.id));
       for (const id of selectedCourseIds) {
-        if (!moodleCourseIds.has(id)) {;
+        if (!moodleCourseIds.has(id)) {
           return res
             .status(400)
             .json({ message: "Selected course doesn't exist in moodle" });
