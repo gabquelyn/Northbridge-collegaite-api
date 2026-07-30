@@ -15,7 +15,11 @@ import { rateLimit } from "express-rate-limit";
 import profileRouter from "./routes/profile";
 import courseRouter from "./routes/course";
 import consultationRouter from "./routes/consultation";
-import { paymentCampaignQueue, suspendDebtorQueue } from "./services/queue";
+import {
+  discountExpiryQueue,
+  paymentCampaignQueue,
+  suspendDebtorQueue,
+} from "./services/queue";
 import initializePayment from "./utils/initializePayment";
 
 const limiter = rateLimit({
@@ -84,7 +88,7 @@ app.get(
       },
       applicationId: "a3f29c8b1e6d4072f8b3c1a9",
     });
-    return res.status(200).json({ url,  });
+    return res.status(200).json({ url });
   }),
 );
 
@@ -101,6 +105,17 @@ mongoose.connection.on("open", async () => {
     {
       repeat: { every: 48 * 60 * 60 * 1000 },
       jobId: "record-checker",
+    },
+  );
+
+  await discountExpiryQueue.add(
+    "expire-discounts",
+    {},
+    {
+      repeat: {
+        pattern: "0 0 * * *", // once a day, at midnight
+        jobId: "expire-discounts-checker",
+      },
     },
   );
 

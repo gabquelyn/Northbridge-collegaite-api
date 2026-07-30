@@ -23,7 +23,7 @@ export const compileEmail = (
     | "suspension"
     | "restore"
     | "join"
-    | "rescind",
+    | "rescind" | "discount",
 
   data: any,
 ): { html: string; text: string } => {

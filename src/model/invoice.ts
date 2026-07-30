@@ -26,6 +26,7 @@ const invoiveSchema = new mongoose.Schema<IInvoice>(
       required: true,
       type: Number,
     },
+    amount_paid: Number,
     currency: {
       required: true,
       type: String,

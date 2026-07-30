@@ -29,7 +29,7 @@ const connection = new IORedis({
 });
 
 // max days for payment expectancy
-const  MAX_DAYS_WITHOUTPAYMENT = 56;
+const MAX_DAYS_WITHOUTPAYMENT = 56;
 async function myWorker() {
   try {
     await connectDB();
@@ -119,6 +119,7 @@ async function myWorker() {
           }
 
           invoice.currency = currency;
+          invoice.amount_paid = amount;
           invoice.status = "success";
           invoice.application = applicationId;
           await invoice.save();
@@ -258,7 +259,8 @@ async function myWorker() {
           const applicationIds = invoices.map((i) => i.application);
           const applications = await Application.find({
             _id: { $in: applicationIds },
-            completed: false
+            completed: false,
+            rescinded: false,
           })
             .lean()
             .exec();
@@ -294,7 +296,7 @@ async function myWorker() {
                 applicationDate: moment(application.createdAt).format(
                   "YYYY MMM D, h:mm A",
                 ),
-                paymentUrl: invoice.url,
+                paymentUrl: `${process.env.FRONTEND_URL}/dashboard`,
               });
 
               await emailQueue.add(
@@ -358,6 +360,7 @@ async function myWorker() {
             // Create payment
             const response = await initializePayment({
               amount: application.outstanding,
+              discount: application?.discount,
               email: user?.email || "",
               applicationId: application._id,
               metadata: {
@@ -397,7 +400,36 @@ async function myWorker() {
       },
     );
 
+    const discountExpiryWorker = new Worker(
+      "discount-expiry",
+      async (job) => {
+        const result = await Application.updateMany(
+          {
+            discount: { $gt: 0 },
+            discountExpires: { $lte: new Date() },
+          },
+          {
+            $set: { discount: 0 },
+            $unset: { discountExpires: "" }, // optional cleanup
+          },
+        );
+
+        if (result.modifiedCount > 0) {
+          console.log(
+            `[discount-expiry] Reset discount for ${result.modifiedCount} application(s)`,
+          );
+        }
+
+        return { modifiedCount: result.modifiedCount };
+      },
+      { connection },
+    );
+
     // Events listeners
+    discountExpiryWorker.on("failed", (job, err) => {
+      console.error(`[discount-expiry] Job ${job?.id} failed:`, err);
+    });
+
     fileUploadWorker.on("failed", (job, err) => {
       console.error(`Job ${job?.id} failed`, err);
     });

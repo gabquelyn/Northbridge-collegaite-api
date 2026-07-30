@@ -12,13 +12,18 @@ import moment from "moment";
 
 const editApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
-    const result = validationResult(req);
+    const errors = validationResult(req);
 
     // * validation of required fields and documents
-    if (!result.isEmpty())
-      return res
-        .status(400)
-        .json({ message: "Invalid data received", error: result.array() });
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        message: errors
+          .array()
+          .map((e) => (e.type === "field" ? `${e.path}: ${e.msg}` : e.msg))
+          .join(", "),
+      });
+      return;
+    }
 
     const userId = (req as CustomRequest).id;
     const { id } = req.params;

@@ -34,6 +34,13 @@ const applicationSchema = new mongoose.Schema<IApplication>(
       default: 0,
     },
 
+    discount: {
+      type: Number,
+      default: 0,
+    },
+
+    discountExpires: Date,
+
     //   for off-site students
     courses: [
       {

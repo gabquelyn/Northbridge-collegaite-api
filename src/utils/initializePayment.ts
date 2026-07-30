@@ -27,6 +27,7 @@ export default async function initializePayment({
   metadata,
   currency = "NGN",
   applicationId,
+  discount = 0,
 }: {
   amount: number;
   email: string;
@@ -36,6 +37,7 @@ export default async function initializePayment({
   };
   currency?: string;
   applicationId: string;
+  discount?: number;
 }): Promise<{
   status: boolean;
   message: string;
@@ -50,12 +52,19 @@ export default async function initializePayment({
 
     const paymentReference = `PAY-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
+    // calculating discount
+    const val = (discount * amount) / 100;
+
     // +7.5% vat fee
-    const VAT_FEE = 1.075
+    const VAT_FEE = 1.075;
+
+    // calculated price
+    const price = (amount - val) * VAT_FEE;
+
     const response = await axios.post(
       `${process.env.MONNIFY_BASE_URL}/api/v1/merchant/transactions/init-transaction`,
       {
-        amount: VAT_FEE * amount,
+        amount: price,
         customerName,
         customerEmail: email,
         paymentReference,

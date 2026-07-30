@@ -61,6 +61,7 @@ const approveApplicationRequest = expressAsyncHandler(
     if (totalPrice) {
       const response = await initializePayment({
         amount: installment ? totalPrice * 0.6 : totalPrice,
+        discount: application?.discount ,
         email: guardian.email,
         metadata: {
           applicationId: application._id,

@@ -18,6 +18,7 @@ import getFile from "../controllers/application/getFile";
 import deleteApplication from "../controllers/application/deleteApplication";
 import rescindApplication from "../controllers/application/rescind";
 import payController from "../controllers/application/pay";
+import discountHandler from "../controllers/application/discount";
 
 const applicationRouter = Router();
 
@@ -77,6 +78,26 @@ applicationRouter.post(
   approveApplicationRequest,
 );
 
+applicationRouter.patch(
+  "/discount/:id",
+  [
+    body("discount")
+      .notEmpty()
+      .isNumeric()
+      .custom((val, { req }) => {
+        return val <= 50;
+      }),
+    body("discountExpires")
+      .isDate()
+      .withMessage("Discount expires date must be a valid date")
+      .isAfter()
+      .withMessage("Discount expires date must be after today"),
+  ],
+  VerifyJWT,
+  OnlyAdmin,
+  discountHandler,
+);
+
 applicationRouter.post(
   "/rescind/:id",
   VerifyJWT,
@@ -84,11 +105,7 @@ applicationRouter.post(
   rescindApplication,
 );
 
-applicationRouter.post(
-  "/fee/:id",
-  VerifyJWT,
-  payController,
-);
+applicationRouter.post("/fee/:id", VerifyJWT, payController);
 
 applicationRouter.get("/:id", VerifyJWT, getApplication);
 

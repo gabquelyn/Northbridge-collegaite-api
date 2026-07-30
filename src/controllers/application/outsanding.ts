@@ -18,19 +18,13 @@ const payOutstanding = expressAsyncHandler(
 
     const response = await initializePayment({
       amount: prev.outstanding,
+      discount: prev?.discount,
       email: guardian?.email || "",
       metadata: {
         applicationId: prev._id,
-        custom_fields: [
-          {
-            display_name: "Outstandig payment for application",
-            variable_name: "AEF",
-            value: prev.outstanding * 100,
-          },
-        ],
       },
       applicationId: prev._id,
-      customerName: guardian?.name || ""
+      customerName: guardian?.name || "",
     });
 
     return res

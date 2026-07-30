@@ -27,6 +27,22 @@ export const suspendDebtorEvent = new QueueEvents("suspend", {
   connection,
 });
 
+export const discountExpiryEvent = new QueueEvents("discount-expiry", {
+  connection,
+});
+
+discountExpiryEvent.on("completed", ({ jobId, returnvalue }) => {
+  console.log(`Job ${jobId} completed ${returnvalue}`);
+});
+
+discountExpiryEvent.on("failed", ({ jobId, failedReason }) => {
+  console.error(`Job ${jobId} failed: ${failedReason} `);
+});
+
+discountExpiryEvent.on("active", ({ jobId }) => {
+  console.log(`Discount reset 🚀 Job ${jobId} started`);
+});
+
 uploadEvents.on("completed", ({ jobId, returnvalue }) => {
   console.log(`Job ${jobId} completed ${returnvalue}`);
 });

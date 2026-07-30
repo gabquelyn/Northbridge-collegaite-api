@@ -26,3 +26,7 @@ export const paymentCampaignQueue = new Queue("campaign", {
 export const suspendDebtorQueue = new Queue("suspend", {
   connection,
 });
+
+export const discountExpiryQueue = new Queue("discount-expiry", {
+  connection,
+});

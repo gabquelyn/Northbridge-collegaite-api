@@ -15,7 +15,7 @@
           font-weight="bold"
           padding-bottom="10px"
         >
-        Payment Reminder
+          Application Fee Payment Reminder
         </mj-text>
 
         <!-- Intro -->
@@ -27,6 +27,8 @@
         >
           Hello {{ applicantName }},<br /><br />
           This is a reminder to complete your payment for your application.
+          <br /><br />
+          Applcations are not considered if application fee are not paid
         </mj-text>
 
         <!-- Details -->
@@ -69,7 +71,8 @@
           align="center"
           padding-top="10px"
         >
-          If you have already completed your payment, please ignore this message.
+          If you have already completed your payment, please ignore this
+          message.
         </mj-text>
       </mj-column>
     </mj-section>

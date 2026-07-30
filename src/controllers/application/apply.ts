@@ -58,13 +58,14 @@ const requestApplication = expressAsyncHandler(
     const { id } = req.params;
     const prevProfile = await Profile.findById(id).exec();
 
-    const result = validationResult(req);
+    const error = validationResult(req);
     if (!prevProfile) {
       return res.status(404).json({ message: "Profile does not exist" });
     }
-  
+
     const prevApplication = await Application.findOne({ profile: id }).exec();
-    if (prevApplication) return res.status(400).json({ message: "Already applied" });
+    if (prevApplication)
+      return res.status(400).json({ message: "Already applied" });
     if (
       (!fatherFirstName ||
         !fatherLastName ||
@@ -90,10 +91,14 @@ const requestApplication = expressAsyncHandler(
     }
 
     // * validation of required fields and documents
-    if (!result.isEmpty())
-      return res
-        .status(400)
-        .json({ message: "Invalid data received", error: result.array() });
+    if (!error.isEmpty()) {
+      return res.status(400).json({
+        message: error
+          .array()
+          .map((e) => (e.type === "field" ? `${e.path}: ${e.msg}` : e.msg))
+          .join(", "),
+      });
+    }
 
     const fileFields = req.files as {
       [fieldname: string]: Express.Multer.File[];
