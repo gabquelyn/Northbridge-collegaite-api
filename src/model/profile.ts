@@ -30,7 +30,7 @@ const profileSchema = new mongoose.Schema<IProfile>(
         enum: ["M", "F"],
       },
     },
-
+    
     address: {
       street: {
         type: String,

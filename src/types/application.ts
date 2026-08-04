@@ -15,4 +15,5 @@ export interface IApplication extends mongoose.Document {
   createdAt?: string;
   discountExpires?: string;
   rescinded: boolean;
+  requestedInstallment: boolean;
 }

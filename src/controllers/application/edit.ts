@@ -65,8 +65,11 @@ const editApplication = expressAsyncHandler(
       motherLastName,
       motherEmail,
       motherPhoneNumber,
+      requestedInstallment,
       motherDeaceased,
+      referrer
     }: { [key: string]: string; mode: "on-site" | "off-site" } = req.body;
+
 
     if (
       (!fatherFirstName ||
@@ -258,6 +261,7 @@ const editApplication = expressAsyncHandler(
               motherPhoneNumber,
               motherDeaceased,
             },
+            referrer
           },
         },
         { session },
@@ -267,6 +271,7 @@ const editApplication = expressAsyncHandler(
           $set: {
             programs: mode === "on-site" ? programsArray : [],
             courses: mode === "off-site" ? selectedCourseIds : [],
+            requestedInstallment,
           },
         },
         { session },

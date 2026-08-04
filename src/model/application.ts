@@ -77,6 +77,11 @@ const applicationSchema = new mongoose.Schema<IApplication>(
       type: Boolean,
       default: false,
     },
+    
+    requestedInstallment: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

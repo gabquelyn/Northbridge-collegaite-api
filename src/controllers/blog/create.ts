@@ -30,7 +30,7 @@ const createBlogHandler = expressAsyncHandler(
       },
       {} as Record<string, string[]>,
     );
-    
+
     const uploadedFiles = await uploadFilesFromPaths(files, "blogs");
     await blog.create({
       title,
@@ -38,7 +38,7 @@ const createBlogHandler = expressAsyncHandler(
       content,
       images: uploadedFiles.images,
     });
-
+    
     return res.status(201).json({ message: "Blog post created" });
   },
 );

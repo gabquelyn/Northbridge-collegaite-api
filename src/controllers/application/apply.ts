@@ -53,6 +53,7 @@ const requestApplication = expressAsyncHandler(
       motherEmail,
       motherPhoneNumber,
       motherDeaceased,
+      requestedInstallment,
       referrer,
     }: { [key: string]: string; mode: "on-site" | "off-site" } = req.body;
     const { id } = req.params;
@@ -270,6 +271,7 @@ const requestApplication = expressAsyncHandler(
               motherDeaceased,
             },
             referrer,
+            requestedInstallment
           },
         },
         { session },

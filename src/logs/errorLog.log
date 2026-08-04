@@ -127,3 +127,11 @@
 20260804	00:17:25	c586eafa-be67-469c-b3ea-7d4e9586f951	Cast to ObjectId failed for value "null" (type string) at path "_id" for model "Blog"	GET	/blog/null	http://localhost:3000
 20260804	00:20:59	7ad6d8aa-0658-45ca-a420-c758d888807a	Cast to ObjectId failed for value "null" (type string) at path "_id" for model "Blog"	GET	/blog/null	http://localhost:3000
 20260804	01:58:33	804c9f06-fdf8-4b83-9b62-a4e760e34324	Cast to ObjectId failed for value "null" (type string) at path "_id" for model "Blog"	GET	/blog/null	http://localhost:3000
+20260804	08:07:01	50b27cc3-51f3-4eb7-ae62-b9ac1ee5bd1e	Cast to ObjectId failed for value "null" (type string) at path "_id" for model "Profile"	GET	/profile/null	http://localhost:3000
+20260804	08:07:12	e7482f52-46ab-4cd8-9ef2-d587514ff866	Cast to ObjectId failed for value "null" (type string) at path "_id" for model "Profile"	GET	/profile/null	http://localhost:3000
+20260804	08:10:18	9c5c4da3-3a8d-437d-8c15-d22622130e48	Cast to ObjectId failed for value "null" (type string) at path "_id" for model "Profile"	GET	/profile/null	http://localhost:3000
+20260804	08:10:20	c24dbb5e-7eaa-4a31-959c-4d46510fb2a5	Cast to ObjectId failed for value "null" (type string) at path "_id" for model "Profile"	GET	/profile/null	http://localhost:3000
+20260804	10:09:08	dcce3807-761c-4947-ac54-8cce24cfd5dd	Cast to Boolean failed for value "undefined" (type string) at path "parent.motherDeaceased" because of "CastError"	PATCH	/application/69fe64c6a481018f96603433	http://localhost:3000
+20260804	10:13:55	eaf2b2f0-3467-4d92-996e-6e8ff4d524c6	Cast to Boolean failed for value "undefined" (type string) at path "parent.motherDeaceased" because of "CastError"	PATCH	/application/69fe64c6a481018f96603433	http://localhost:3000
+20260804	10:15:28	50e7fd8f-d89e-42a9-bc11-d87eb0645b8c	Cast to Boolean failed for value "undefined" (type string) at path "parent.motherDeaceased" because of "CastError"	PATCH	/application/69fe64c6a481018f96603433	http://localhost:3000
+20260804	10:19:15	d1ff64eb-0ee0-4e67-9df5-62a96ed86745	Cast to Boolean failed for value "undefined" (type string) at path "parent.motherDeaceased" because of "CastError"	PATCH	/application/69fe64c6a481018f96603433	http://localhost:3000
