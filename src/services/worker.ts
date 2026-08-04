@@ -368,7 +368,7 @@ async function myWorker() {
               },
               customerName: user?.name || "",
             });
-
+            
             // Email
             const { html } = compileEmail("suspension", {
               studentName: profile.bio.firstName,

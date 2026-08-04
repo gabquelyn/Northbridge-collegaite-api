@@ -88,7 +88,7 @@ export async function getSignedUrl({
   format: string;
   expiresIn?: number;
   type?: "authenticated" | "upload";
-}) {
+}): Promise<string> {
   const expiresAt = Math.floor(Date.now() / 1000) + expiresIn;
 
   return cloudinary.utils.private_download_url(publicId, format, {

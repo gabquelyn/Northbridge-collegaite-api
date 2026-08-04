@@ -21,6 +21,7 @@ import {
   suspendDebtorQueue,
 } from "./services/queue";
 import initializePayment from "./utils/initializePayment";
+import blogRoutes from "./routes/blog";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -63,7 +64,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/", express.static(path.join(__dirname, "public")));
 app.use(cookierParser());
 
+
 app.use("/auth", authRouter);
+app.use("/blog", blogRoutes);
 app.use("/consultation", consultationRouter);
 app.use("/application", applicationRouter);
 app.use("/courses", courseRouter);
