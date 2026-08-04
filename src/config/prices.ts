@@ -11,5 +11,5 @@ export const prices: {
   { name: "AY12", amount: 3_700_000, detail: "AY 12" },
 ];
 
-export const UNIT_COURSE = 665000;
-export const APPLICATION_FEE = 195000;
+export const UNIT_COURSE = 665_000;
+export const APPLICATION_FEE = 195_000;
