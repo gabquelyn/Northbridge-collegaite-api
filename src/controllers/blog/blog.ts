@@ -18,7 +18,7 @@ const getBlogHandler = expressAsyncHandler(
         return { ...i, url };
       }),
     );
-    return res.status(201).json({ blog: { ...blog, images } });
+    return res.status(201).json({ blog });
   },
 );
 
