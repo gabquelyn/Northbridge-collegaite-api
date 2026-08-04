@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { uploadFilesFromPaths } from "../../utils/application";
 import { emailQueue } from "../../services/queue";
 import { compileEmail } from "../../emails/compileEmail";
+import personnel from "../../model/personnel";
 export const joinApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const fileFields = req.files as {
@@ -15,7 +16,7 @@ export const joinApplication = expressAsyncHandler(
       if (!fileFields?.[field]) {
         return res.status(400).json({ message: `Missing ${field}` });
       }
-    }
+    } 
 
     const files = Object.keys(fileFields).reduce(
       (acc, key) => {
@@ -26,6 +27,13 @@ export const joinApplication = expressAsyncHandler(
     );
 
     const uploadedFiles = await uploadFilesFromPaths(files, "team-application");
+
+    await personnel.create({
+      name,
+      email,
+      resume: uploadedFiles["resume"],
+      coverLetter: uploadedFiles["coverLetter"],
+    });
 
     const { html } = compileEmail("join", {
       name,
@@ -39,6 +47,7 @@ export const joinApplication = expressAsyncHandler(
       html,
       subject: "New Job Application",
     });
+
     return res.status(200).json({ message: "" });
   },
 );

@@ -4103,3 +4103,5 @@
 20260804	11:18:43	967ea6d7-4132-48db-9ddb-3aa8aaeec6d6	GET	/application/69fe64c6a481018f96603433	http://localhost:3000	::ffff:172.18.0.1
 20260804	11:18:51	063f3b1b-740f-4a31-bb6c-15fbccf226dd	OPTIONS	/application	http://localhost:3000	::ffff:172.18.0.1
 20260804	11:18:51	6380d850-ebf7-455c-a7f1-479e57f04779	GET	/application	http://localhost:3000	::ffff:172.18.0.1
+20260804	12:21:20	68adf551-7a21-47e7-8bde-5f0481b7add0	POST	/consultation/join	http://localhost:3000	::ffff:172.18.0.1
+20260804	13:33:13	3affe122-49c9-42ee-8b29-7e23111bf704	GET	/test	undefined	::ffff:172.18.0.1

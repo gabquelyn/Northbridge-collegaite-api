@@ -22,6 +22,7 @@ import {
 } from "./services/queue";
 import initializePayment from "./utils/initializePayment";
 import blogRoutes from "./routes/blog";
+import personnelRouter from "./routes/personnel";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -34,6 +35,7 @@ const allowedOrigins = [
   "https://northbridgec.ca",
   "https://www.northbridgec.ca",
 ];
+
 
 dotenv.config();
 connectDB();
@@ -72,6 +74,7 @@ app.use("/application", applicationRouter);
 app.use("/courses", courseRouter);
 app.post("/webhook", paymentWebhook);
 app.use("/profile", profileRouter);
+app.use("/personnel", personnelRouter);
 app.get(
   "/test",
   expressAsyncHandler(async (req: Request, res: Response): Promise<any> => {
