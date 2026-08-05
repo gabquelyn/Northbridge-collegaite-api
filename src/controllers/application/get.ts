@@ -4,6 +4,7 @@ import userModel from "../../model/user";
 import { CustomRequest } from "../../types/request";
 import Application from "../../model/application";
 import invoice from "../../model/invoice";
+import reviews from "../../model/reviews";
 
 export const getApplications = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -47,6 +48,13 @@ export const getApplication = expressAsyncHandler(
         .lean()
         .exec();
     }
-    return res.status(200).json({ data: application, lastInvoice, user });
+    const messages = await reviews
+      .find({ application: id })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+    return res
+      .status(200)
+      .json({ data: application, lastInvoice, user, messages });
   },
 );

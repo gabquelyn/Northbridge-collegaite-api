@@ -5,6 +5,7 @@ import Application from "../../model/application";
 import { v4 as uuid } from "uuid";
 import User from "../../model/user";
 import { compileEmail } from "../../emails/compileEmail";
+import reviews from "../../model/reviews";
 const reviewApplication = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
     const { reason } = req.body;
@@ -30,6 +31,11 @@ const reviewApplication = expressAsyncHandler(
       applicationPortalUrl: `${process.env.FRONTEND_URL}/application/${applicationDetails._id}`,
     });
 
+      await reviews.create({
+      application: id,
+      message: reason
+    })
+
     await emailQueue.add(
       "deliver",
       {
@@ -39,6 +45,9 @@ const reviewApplication = expressAsyncHandler(
       },
       { jobId: uuid() },
     );
+
+  
+
     return res.status(200).json({ message: "Review message sent" });
   },
 );
