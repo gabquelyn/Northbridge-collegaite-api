@@ -56,6 +56,27 @@ const incompleteController = expressAsyncHandler(
           applications: 0,
         },
       },
+       {
+        $lookup: {
+          from: User.collection.name,
+          localField: "guardian",
+          foreignField: "_id",
+          as: "guardian",
+        },
+      },
+      {
+        $unwind: {
+          path: "$guardian",
+          preserveNullAndEmptyArrays: true, // keep profile even if guardian was deleted
+        },
+      },
+      {
+        $project: {
+          applications: 0,
+          "guardian.password": 0, // strip sensitive fields, adjust to your schema
+          "guardian.__v": 0,
+        },
+      }
     ]);
 
     return res.status(200).json({
