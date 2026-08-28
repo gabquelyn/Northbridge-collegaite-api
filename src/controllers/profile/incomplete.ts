@@ -15,11 +15,11 @@ const incompleteController = expressAsyncHandler(
     }
 
     const user = await User.findById(userId).lean().exec();
+    const isAdmin = user?.role === "admin";
 
-    const matchStage: Record<string, any> =
-      user?.role == "admin"
-        ? {}
-        : { guardian: new mongoose.Types.ObjectId(userId) };
+    const matchStage: Record<string, any> = isAdmin
+      ? {}
+      : { guardian: new mongoose.Types.ObjectId(userId) };
 
     const incompleteProfiles = await Profile.aggregate([
       {
@@ -32,14 +32,14 @@ const incompleteController = expressAsyncHandler(
           pipeline: [
             {
               $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$profile", "$$profileId"] },
-                    {
-                      $eq: ["$applicant", new mongoose.Types.ObjectId(userId)],
+                $expr: isAdmin
+                  ? { $eq: ["$profile", "$$profileId"] }
+                  : {
+                      $and: [
+                        { $eq: ["$profile", "$$profileId"] },
+                        { $eq: ["$applicant", new mongoose.Types.ObjectId(userId)] },
+                      ],
                     },
-                  ],
-                },
               },
             },
           ],
@@ -52,11 +52,6 @@ const incompleteController = expressAsyncHandler(
         },
       },
       {
-        $project: {
-          applications: 0,
-        },
-      },
-       {
         $lookup: {
           from: User.collection.name,
           localField: "guardian",
@@ -67,16 +62,19 @@ const incompleteController = expressAsyncHandler(
       {
         $unwind: {
           path: "$guardian",
-          preserveNullAndEmptyArrays: true, // keep profile even if guardian was deleted
+          preserveNullAndEmptyArrays: true,
         },
+      },
+      {
+        $sort: { createdAt: -1 },
       },
       {
         $project: {
           applications: 0,
-          "guardian.password": 0, // strip sensitive fields, adjust to your schema
+          "guardian.password": 0,
           "guardian.__v": 0,
         },
-      }
+      },
     ]);
 
     return res.status(200).json({
