@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { CustomRequest } from "../../types/request";
 import Profile from "../../model/profile";
 import Application from "../../model/application";
+import User from "../../model/user";
 
 const incompleteController = expressAsyncHandler(
   async (req: Request, res: Response): Promise<any> => {
@@ -13,11 +14,16 @@ const incompleteController = expressAsyncHandler(
       return res.status(400).json({ message: "Invalid or missing user" });
     }
 
+    const user = await User.findById(userId).lean().exec();
+
+    const matchStage: Record<string, any> =
+      user?.role == "admin"
+        ? {}
+        : { guardian: new mongoose.Types.ObjectId(userId) };
+
     const incompleteProfiles = await Profile.aggregate([
       {
-        $match: {
-          guardian: new mongoose.Types.ObjectId(userId),
-        },
+        $match: matchStage,
       },
       {
         $lookup: {
@@ -29,7 +35,9 @@ const incompleteController = expressAsyncHandler(
                 $expr: {
                   $and: [
                     { $eq: ["$profile", "$$profileId"] },
-                    { $eq: ["$applicant", new mongoose.Types.ObjectId(userId)] },
+                    {
+                      $eq: ["$applicant", new mongoose.Types.ObjectId(userId)],
+                    },
                   ],
                 },
               },
