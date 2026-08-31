@@ -15,7 +15,9 @@ export const getApplications = expressAsyncHandler(
       .exec();
 
     const application = await Application.find(
-      user?.role == "admin" ? {} : { applicant: (req as CustomRequest).id },
+      user?.role == "admin" || user?.role == "moderator"
+        ? {}
+        : { applicant: (req as CustomRequest).id },
     )
       .populate("profile")
       .sort({ updatedAt: -1 })

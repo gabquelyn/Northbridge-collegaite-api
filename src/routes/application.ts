@@ -19,6 +19,7 @@ import deleteApplication from "../controllers/application/deleteApplication";
 import rescindApplication from "../controllers/application/rescind";
 import payController from "../controllers/application/pay";
 import discountHandler from "../controllers/application/discount";
+import OnlyUser from "../middlewares/OnlyUser";
 
 const applicationRouter = Router();
 
@@ -105,7 +106,7 @@ applicationRouter.post(
   rescindApplication,
 );
 
-applicationRouter.post("/fee/:id", VerifyJWT, payController);
+applicationRouter.post("/fee/:id", VerifyJWT, OnlyUser, payController);
 
 applicationRouter.get("/:id", VerifyJWT, getApplication);
 

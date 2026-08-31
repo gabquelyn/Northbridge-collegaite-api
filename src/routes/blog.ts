@@ -8,12 +8,13 @@ import getBlogsHandler from "../controllers/blog/blogs";
 import getBlogHandler from "../controllers/blog/blog";
 import editBlogHandler from "../controllers/blog/edit";
 import deleteBlogHandler from "../controllers/blog/delete";
+import OnlyAdminMod from "../middlewares/OnlyAdminMod";
 const blogRoutes = Router();
 
 blogRoutes.post(
   "/",
   VerifyJWT,
-  OnlyAdmin,
+  OnlyAdminMod,
   upload.fields([{ name: "images", maxCount: 5 }]),
   [
     body("title").notEmpty().withMessage("Missing blog title"),
@@ -29,7 +30,7 @@ blogRoutes.get("/:id", getBlogHandler);
 blogRoutes.patch(
   "/:id",
   VerifyJWT,
-  OnlyAdmin,
+  OnlyAdminMod,
   upload.fields([{ name: "images", maxCount: 5 }]),
   [
     body("title").notEmpty().withMessage("Missing blog title"),

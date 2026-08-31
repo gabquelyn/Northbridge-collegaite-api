@@ -18,6 +18,7 @@ import modeHandler from "../controllers/profile/mode";
 import programController from "../controllers/profile/programs";
 import coursesController from "../controllers/profile/courses";
 import incompleteController from "../controllers/profile/incomplete";
+import OnlyAdminMod from "../middlewares/OnlyAdminMod";
 
 const profileRouter = Router();
 profileRouter.get(
@@ -29,7 +30,8 @@ profileRouter.get(
     return res.status(200).json({ data: user });
   }),
 );
-profileRouter.get("/incomplete", VerifyJWT, incompleteController);
+
+profileRouter.get("/incomplete", VerifyJWT, OnlyAdminMod, incompleteController);
 
 profileRouter.get(
   "/:id",
@@ -169,8 +171,5 @@ profileRouter.patch(
 );
 
 profileRouter.patch("/parent/:id", VerifyJWT, adminPriviledge, parentHandler);
-
-
-
 
 export default profileRouter;

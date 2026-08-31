@@ -1,9 +1,9 @@
 import { Router } from "express";
 import getPersonnelHandler from "../controllers/personnel/get";
 import VerifyJWT from "../middlewares/VerifyJwt";
-import OnlyAdmin from "../middlewares/onlyAdmin";
+import OnlyAdminMod from "../middlewares/OnlyAdminMod";
 
 const personnelRouter = Router();
 
-personnelRouter.get("/", VerifyJWT, OnlyAdmin, getPersonnelHandler);
+personnelRouter.get("/", VerifyJWT, OnlyAdminMod, getPersonnelHandler);
 export default personnelRouter
