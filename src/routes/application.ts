@@ -184,6 +184,12 @@ applicationRouter.get(
 
 applicationRouter.delete("/:id", VerifyJWT, OnlyAdmin, deleteApplication);
 
-applicationRouter.post("/review/:id", VerifyJWT, OnlyAdmin, reviewApplication);
+applicationRouter.post(
+  "/review/:id",
+  upload.array("attachement"),
+  VerifyJWT,
+  OnlyAdmin,
+  reviewApplication,
+);
 
 export default applicationRouter;

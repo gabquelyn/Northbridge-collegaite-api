@@ -10,6 +10,7 @@ const reviewSchema = new Schema(
       type: String,
       required: true,
     },
+    attachments: [{ type: String }],
   },
   { timestamps: true },
 );

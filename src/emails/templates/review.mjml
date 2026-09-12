@@ -35,7 +35,8 @@
           line-height="22px"
           padding-bottom="15px"
         >
-          Your application has been reviewed. Please see the message from our admissions team below:
+          Your application has been reviewed. Please see the message from our
+          admissions team below:
         </mj-text>
 
         <!-- Review Message Box -->
@@ -60,6 +61,26 @@
           <!-- <strong>Program:</strong> {{ programName }} -->
         </mj-text>
 
+        <!-- Attachments -->
+        {{#if attachments.length}}
+        <mj-text
+          font-size="14px"
+          color="#555555"
+          line-height="20px"
+          padding-top="10px"
+        >
+          <strong>Attachments:</strong><br />
+          {{#each attachments}}
+          <a
+            href="{{ this }}"
+            style="color: #1e88e5; text-decoration: underline"
+          >
+            {{ view file}} </a
+          ><br />
+          {{/each}}
+        </mj-text>
+        {{/if}}
+
         <!-- CTA -->
         <mj-button
           background-color="#1e88e5"
@@ -81,7 +102,8 @@
           align="center"
           padding-top="15px"
         >
-          If you have any questions regarding this update, please contact support.
+          If you have any questions regarding this update, please contact
+          support.
         </mj-text>
       </mj-column>
     </mj-section>
