@@ -28,27 +28,14 @@ const incompleteController = expressAsyncHandler(
       {
         $lookup: {
           from: Application.collection.name,
-          let: { profileId: "$_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: isAdmin
-                  ? { $eq: ["$profile", "$$profileId"] }
-                  : {
-                      $and: [
-                        { $eq: ["$profile", "$$profileId"] },
-                        { $eq: ["$applicant", new mongoose.Types.ObjectId(userId)] },
-                      ],
-                    },
-              },
-            },
-          ],
-          as: "applications",
+          localField: "_id",
+          foreignField: "profile",
+          as: "application",
         },
       },
       {
         $match: {
-          applications: { $size: 0 },
+          application: { $size: 0 },
         },
       },
       {
@@ -66,11 +53,13 @@ const incompleteController = expressAsyncHandler(
         },
       },
       {
-        $sort: { createdAt: -1 },
+        $sort: {
+          createdAt: -1,
+        },
       },
       {
         $project: {
-          applications: 0,
+          application: 0,
           "guardian.password": 0,
           "guardian.__v": 0,
         },

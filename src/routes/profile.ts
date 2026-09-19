@@ -31,7 +31,7 @@ profileRouter.get(
   }),
 );
 
-profileRouter.get("/incomplete", VerifyJWT, OnlyAdminMod, incompleteController);
+profileRouter.get("/incomplete", VerifyJWT, incompleteController);
 
 profileRouter.get(
   "/:id",
