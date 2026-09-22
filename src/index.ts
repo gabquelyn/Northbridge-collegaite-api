@@ -41,7 +41,7 @@ dotenv.config();
 connectDB();
 const app: Express = express();
 const port = process.env.PORT || 8080;
-
+app.set("trust proxy", 1)
 app.use(limiter);
 app.use(logger);
 
