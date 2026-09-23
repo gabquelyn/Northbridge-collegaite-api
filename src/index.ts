@@ -31,7 +31,7 @@ const limiter = rateLimit({
 });
 
 const allowedOrigins = [
-  "http://localhost:3000",
+  // "http://localhost:3000",
   "https://northbridgec.ca",
   "https://www.northbridgec.ca",
 ];
@@ -49,7 +49,7 @@ app.use(
   cors({
     origin: function (origin, callback) {
       // allow Postman or server-to-server requests without origin
-      if (!origin) return callback(null, true);
+      // if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
         callback(null, true); // echo the origin
       } else {
